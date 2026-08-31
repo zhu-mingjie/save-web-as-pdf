@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF Preview — Save Web as PDF</title>
+    <link rel="stylesheet" href="preview.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Save Web as PDF</h1>
+        <p id="source"></p>
+      </div>
+      <label>
+        <span>Filename</span>
+        <input id="filename" type="text" autocomplete="off" />
+      </label>
+      <button id="download" type="button" disabled>Download PDF</button>
+    </header>
+    <main>
+      <p id="status" role="status">Loading preview…</p>
+      <embed id="preview" type="application/pdf" />
+    </main>
+    <script type="module" src="preview.js"></script>
+  </body>
+</html>

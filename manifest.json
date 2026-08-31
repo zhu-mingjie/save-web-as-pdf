@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Save Web as PDF",
+  "version": "0.1.0",
+  "minimum_chrome_version": "120",
+  "description": "Save the current webpage as one continuous, searchable PDF page.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "debugger",
+    "downloads",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Save Web as PDF",
+    "default_popup": "popup/popup.html"
+  }
+}
