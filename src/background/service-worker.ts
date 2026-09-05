@@ -1,7 +1,7 @@
 import type { MessageResponse, PrepareResponse, RuntimeRequest } from "../shared/messages";
-import { sanitizePdfFilename } from "../shared/filename";
+import { createSourcePageMetadata } from "../shared/filename";
 import { deleteExpiredPdfs, putPdf } from "../shared/pdf-store";
-import type { ExportMode, PrepareResult } from "../shared/types";
+import type { ExportMode, PrepareResult, SourcePageMetadata } from "../shared/types";
 import { generatePdf } from "./pdf-generator";
 
 const activeExports = new Set<number>();
@@ -48,13 +48,17 @@ async function finishEditor(tabId: number): Promise<void> {
   }
 }
 
-async function exportTab(tabId: number, mode: ExportMode): Promise<void> {
+async function exportTab(tabId: number, mode: ExportMode, capturedMetadata: SourcePageMetadata): Promise<void> {
   if (activeExports.has(tabId)) throw new Error("An export is already running for this tab.");
   activeExports.add(tabId);
   let prepared = false;
   try {
     const page = await prepareTab(tabId);
     prepared = true;
+    const metadata = createSourcePageMetadata(
+      capturedMetadata.title || page.title,
+      capturedMetadata.url || page.url
+    );
     const { pdf } = await generatePdf(tabId);
     const id = crypto.randomUUID();
     await putPdf({
@@ -63,8 +67,7 @@ async function exportTab(tabId: number, mode: ExportMode): Promise<void> {
         [pdf.buffer.slice(pdf.byteOffset, pdf.byteOffset + pdf.byteLength) as ArrayBuffer],
         { type: "application/pdf" }
       ),
-      filename: sanitizePdfFilename(page.title),
-      sourceUrl: page.url,
+      metadata,
       createdAt: Date.now()
     });
     await chrome.tabs.create({ url: chrome.runtime.getURL(`preview/preview.html?id=${encodeURIComponent(id)}`) });
@@ -76,9 +79,9 @@ async function exportTab(tabId: number, mode: ExportMode): Promise<void> {
   }
 }
 
-async function startEditor(tabId: number): Promise<void> {
+async function startEditor(tabId: number, metadata: SourcePageMetadata): Promise<void> {
   await injectFile(tabId, "editor/editor.js");
-  const response = await sendToTab<MessageResponse>(tabId, { type: "EDITOR_START" });
+  const response = await sendToTab<MessageResponse>(tabId, { type: "EDITOR_START", metadata });
   if (!response.ok) throw new Error(response.error);
 }
 
@@ -88,17 +91,17 @@ chrome.runtime.onMessage.addListener((message: RuntimeRequest, sender, sendRespo
   const run = async (): Promise<MessageResponse> => {
     try {
       if (message.type === "START_EXPORT") {
-        await exportTab(message.tabId, "full");
+        await exportTab(message.tabId, "full", message.metadata);
         return { ok: true };
       }
       if (message.type === "START_EDITOR") {
-        await startEditor(message.tabId);
+        await startEditor(message.tabId, message.metadata);
         return { ok: true };
       }
       if (message.type === "EDIT_SAVE_REQUEST") {
         const tabId = sender.tab?.id;
         if (tabId === undefined) throw new Error("The source tab is no longer available.");
-        await exportTab(tabId, "edit");
+        await exportTab(tabId, "edit", message.metadata);
         return { ok: true };
       }
       return { ok: false, error: "Unknown request." };

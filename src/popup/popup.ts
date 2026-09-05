@@ -1,13 +1,14 @@
 import type { MessageResponse, RuntimeRequest } from "../shared/messages";
+import { createSourcePageMetadata } from "../shared/filename";
 
 const saveButton = document.querySelector<HTMLButtonElement>("#save")!;
 const editButton = document.querySelector<HTMLButtonElement>("#edit")!;
 const status = document.querySelector<HTMLParagraphElement>("#status")!;
 
-async function activeTabId(): Promise<number> {
+async function activeTab(): Promise<chrome.tabs.Tab> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab?.id === undefined) throw new Error("No active tab is available.");
-  return tab.id;
+  return tab;
 }
 
 async function request(message: RuntimeRequest, busyText: string): Promise<void> {
@@ -29,7 +30,15 @@ async function request(message: RuntimeRequest, busyText: string): Promise<void>
 
 saveButton.addEventListener("click", async () => {
   try {
-    await request({ type: "START_EXPORT", tabId: await activeTabId() }, "Preparing the page…");
+    const tab = await activeTab();
+    await request(
+      {
+        type: "START_EXPORT",
+        tabId: tab.id!,
+        metadata: createSourcePageMetadata(tab.title, tab.url)
+      },
+      "Preparing the page…"
+    );
   } catch (error) {
     status.textContent = error instanceof Error ? error.message : String(error);
   }
@@ -37,7 +46,15 @@ saveButton.addEventListener("click", async () => {
 
 editButton.addEventListener("click", async () => {
   try {
-    await request({ type: "START_EDITOR", tabId: await activeTabId() }, "Opening editor…");
+    const tab = await activeTab();
+    await request(
+      {
+        type: "START_EDITOR",
+        tabId: tab.id!,
+        metadata: createSourcePageMetadata(tab.title, tab.url)
+      },
+      "Opening editor…"
+    );
   } catch (error) {
     status.textContent = error instanceof Error ? error.message : String(error);
   }

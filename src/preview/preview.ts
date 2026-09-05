@@ -1,4 +1,3 @@
-import { sanitizePdfFilename } from "../shared/filename";
 import { getPdf } from "../shared/pdf-store";
 
 const filenameInput = document.querySelector<HTMLInputElement>("#filename")!;
@@ -7,15 +6,17 @@ const preview = document.querySelector<HTMLEmbedElement>("#preview")!;
 const status = document.querySelector<HTMLParagraphElement>("#status")!;
 const source = document.querySelector<HTMLParagraphElement>("#source")!;
 let objectUrl: string | null = null;
+let downloadFilename = "webpage.pdf";
 
 async function load(): Promise<void> {
   const id = new URLSearchParams(location.search).get("id");
   if (!id) throw new Error("The PDF identifier is missing.");
   const record = await getPdf(id);
   if (!record) throw new Error("This PDF preview has expired. Generate it again from the webpage.");
-  filenameInput.value = record.filename;
-  source.textContent = record.sourceUrl;
-  source.title = record.sourceUrl;
+  downloadFilename = record.metadata.filename;
+  filenameInput.value = downloadFilename;
+  source.textContent = record.metadata.url;
+  source.title = record.metadata.url;
   objectUrl = URL.createObjectURL(record.blob);
   preview.src = objectUrl;
   preview.style.display = "block";
@@ -29,7 +30,7 @@ downloadButton.addEventListener("click", async () => {
   try {
     await chrome.downloads.download({
       url: objectUrl,
-      filename: sanitizePdfFilename(filenameInput.value.replace(/\.pdf$/i, "")),
+      filename: downloadFilename,
       saveAs: true
     });
   } catch (error) {

@@ -1,66 +1,95 @@
 # Save Web as PDF
 
-A local-first Chrome Manifest V3 extension that saves the current webpage as one continuous PDF page while preserving real, selectable and searchable text. It uses Chrome DevTools Protocol (`Page.printToPDF`) rather than screenshots.
+Save a complete webpage as one continuous, searchable PDF page while preserving the page's visual layout.
 
 ## Features
 
-- **Save Full Page** pre-scrolls the page to trigger lazy content, waits for fonts and images, emulates screen media, and prints one continuous PDF page.
-- **Edit Before Saving** provides a red hover overlay, click-to-hide reflow, Undo, Redo, Restore, Save PDF, and Exit.
-- The generated PDF is held locally in IndexedDB and opened in an extension preview before download.
-- No page content, HTML, screenshot, or PDF is uploaded anywhere.
-- The debugger is attached only around layout measurement and PDF generation and is detached in a `finally` block.
+- Save a complete webpage as one continuous PDF page
+- Keep text selectable, copyable, and searchable
+- Preserve the webpage's screen layout, images, colors, tables, and links where Chromium supports them
+- Remove unwanted elements before saving, with Undo, Redo, and Restore
+- Preview the generated PDF before downloading
+- Process and store PDF data locally in the browser
+- Use the same Chrome extension package on Windows, macOS, and Linux
 
-## Install dependencies and build
+Save Web as PDF uses the Chrome DevTools Protocol (`Page.printToPDF`) rather than a screenshot pipeline. It does not silently fall back to screenshots or automatic pagination.
 
-Requirements: Node.js 20 or newer and npm.
+## Development installation
+
+1. Install [Node.js](https://nodejs.org/) 20 or newer and npm.
+2. Install dependencies and build the extension:
+
+   ```bash
+   npm ci
+   npm run build
+   ```
+
+3. Open `chrome://extensions` in Chrome.
+4. Enable **Developer mode**.
+5. Select **Load unpacked**.
+6. Select the generated `dist` directory—the directory that directly contains `manifest.json`.
+
+The debugger permission is required for Chromium's PDF-generation protocol. The extension attaches the debugger only while measuring and printing the page, then detaches it during cleanup.
+
+## Development
+
+Requirements:
+
+- Node.js 20 or newer
+- npm
+- Chrome or another compatible Chromium-based desktop browser
+
+Commands:
 
 ```bash
-npm install
+npm ci
 npm run check
+npm run build
 ```
 
-The unpacked extension is generated in `dist/`.
+`npm run check` runs TypeScript validation, cross-platform filename tests, and a production build. `npm run build` removes the previous `dist` directory, compiles the TypeScript entry points, and copies only the Manifest V3 runtime files required by Chrome.
 
-## Load unpacked
+The runtime uses Chrome Extension APIs, the Chrome DevTools Protocol, IndexedDB, and standard Web APIs. It does not use operating-system-specific shell commands, native applications, fixed filesystem paths, or Native Messaging.
 
-1. Open `chrome://extensions`.
-2. Enable **Developer mode**.
-3. Click **Load unpacked**.
-4. Select this project's `dist` directory.
-5. Pin **Save Web as PDF** to the toolbar.
+## Create a release package
 
-The warning that the extension can access the debugger appears because searchable, vector-preserving PDF output requires `chrome.debugger` and CDP `Page.printToPDF`. The extension attaches only during export.
+```bash
+npm run package
+```
 
-## Wikipedia acceptance test
+This command cleans old build and release output, runs filename tests, creates a fresh production build, validates `dist`, creates a versioned ZIP, and validates the ZIP contents. The version comes from `manifest.json`.
 
-Use a long article with an infobox, multiple images and captions, tables, code or formulas, and references—for example the English Wikipedia article **Apollo 11**.
+Output format:
 
-1. Scroll to a mid-page position, choose **Save Full Page**, and confirm the original scroll position is restored.
-2. In preview, verify that the PDF has one page; search for a phrase with Ctrl/Cmd+F and copy text.
-3. Check the infobox, captions, tables, colors, spacing, and links.
-4. Reload the article, choose **Edit Before Saving**, remove the infobox or another block, then test Undo, Redo, and Restore.
-5. Remove an unwanted block again, choose **Save PDF**, and verify the block is absent, nearby content reflows, and no red overlay or toolbar appears in the PDF.
-6. Choose **Exit** in a separate edit session and verify every hidden element is restored.
+```text
+release/save-web-as-pdf-vX.X.X.zip
+```
 
-## Architecture
+You can validate an existing build and package again with:
 
-- `src/background/`: export orchestration, short-lived debugger session, CDP stream reading.
-- `src/page/`: lazy-load pre-scroll, resource waits, temporary export styles, state cleanup.
-- `src/editor/`: Shadow DOM toolbar, independent selection overlay, removal history.
-- `src/preview/`: IndexedDB-backed PDF preview and download.
-- `src/shared/`: messages, constants, filenames, and local PDF storage.
+```bash
+npm run verify:release
+```
 
-## Known limits
+## Test a release package
 
-- Chrome blocks extension injection on `chrome://` pages, the Chrome Web Store, and certain other protected pages.
-- Chrome cannot attach this extension's debugger while DevTools or another debugger owns the tab.
-- The extension rejects content larger than the conservative Chromium single-paper limit of 200 inches in either dimension. It does not silently paginate or fall back to a screenshot.
-- Infinite-scroll pages are bounded by iteration, height-growth, and maximum-height guards, so content that appears only after those guards may not be included.
-- Lazy resources that do not finish within the resource timeout are skipped so export cannot hang forever.
-- Some websites use canvas, WebGL, video, cross-origin frames, or print-hostile CSS that Chromium cannot preserve as selectable/vector PDF content.
-- The built-in Chrome PDF viewer may be slow or decline to render extremely tall pages even when Chrome generated them successfully.
-- The page-count check reads Chrome's PDF page dictionaries. If a future Chrome version encodes them in an unrecognizable way, the code accepts the generated file rather than inventing a screenshot fallback.
+1. Run `npm run package`.
+2. Copy the single generated ZIP to a Windows, macOS, or Linux computer.
+3. Extract the ZIP.
+4. Open `chrome://extensions` in Chrome and enable **Developer mode**.
+5. Select **Load unpacked**.
+6. Select the extracted `save-web-as-pdf-vX.X.X` directory that directly contains `manifest.json`.
+
+The same release package is used across supported desktop Chrome platforms; there are no separate macOS, Windows, or Linux builds.
 
 ## Privacy
 
-All processing and storage are local to Chrome. Generated preview records expire and are deleted opportunistically after 24 hours.
+PDF generation and temporary storage happen locally in Chrome. The extension does not upload page content, HTML, screenshots, or generated PDFs, and it has no account, analytics, subscription, or backend service.
+
+## Known limitations
+
+- Chrome blocks extension access to internal pages, the Chrome Web Store, and some other protected pages.
+- DevTools or another debugger cannot own the source tab while an export is running.
+- Very long or wide pages can exceed Chromium or PDF viewer single-page limits. The extension reports an error instead of silently paginating or creating a screenshot.
+- Infinite-scroll and slow-loading pages are bounded by time, iteration, and height guards so an export cannot run forever.
+- Canvas, WebGL, video, cross-origin frames, and site-specific CSS may not be preserved as selectable or vector PDF content.

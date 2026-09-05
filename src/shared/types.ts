@@ -1,8 +1,14 @@
+export interface SourcePageMetadata {
+  title: string;
+  url: string;
+  hostname: string;
+  filename: string;
+}
+
 export interface PdfRecord {
   id: string;
   blob: Blob;
-  filename: string;
-  sourceUrl: string;
+  metadata: SourcePageMetadata;
   createdAt: number;
 }
 

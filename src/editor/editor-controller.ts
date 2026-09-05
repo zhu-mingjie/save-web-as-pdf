@@ -1,4 +1,6 @@
 import type { MessageResponse, RuntimeRequest } from "../shared/messages";
+import { createSourcePageMetadata } from "../shared/filename";
+import type { SourcePageMetadata } from "../shared/types";
 import { ElementSelector } from "./element-selector";
 import { RemovalHistory } from "./removal-history";
 
@@ -22,9 +24,14 @@ class EditorController {
   private saveButton: HTMLButtonElement | null = null;
   private status: HTMLSpanElement | null = null;
   private saving = false;
+  private metadata: SourcePageMetadata | null = null;
 
-  start(): void {
+  start(metadata: SourcePageMetadata): void {
     if (this.host) return;
+    this.metadata = createSourcePageMetadata(
+      metadata.title || document.title,
+      metadata.url || location.href
+    );
     this.ensureRemovalStyle();
     const host = document.createElement("div");
     host.id = HOST_ID;
@@ -129,13 +136,16 @@ class EditorController {
   }
 
   private async save(): Promise<void> {
-    if (this.saving || !this.host) return;
+    if (this.saving || !this.host || !this.metadata) return;
     this.saving = true;
     this.selector?.stop();
     this.host.style.visibility = "hidden";
     this.updateControls();
     try {
-      const response = (await chrome.runtime.sendMessage({ type: "EDIT_SAVE_REQUEST" } satisfies RuntimeRequest)) as MessageResponse;
+      const response = (await chrome.runtime.sendMessage({
+        type: "EDIT_SAVE_REQUEST",
+        metadata: this.metadata
+      } satisfies RuntimeRequest)) as MessageResponse;
       if (!response.ok) throw new Error(response.error);
     } catch (error) {
       alert(`Save Web as PDF: ${error instanceof Error ? error.message : String(error)}`);
@@ -150,6 +160,7 @@ class EditorController {
     document.getElementById(REMOVAL_STYLE_ID)?.remove();
     this.host?.remove();
     this.host = null;
+    this.metadata = null;
     this.saving = false;
   }
 }
@@ -160,7 +171,7 @@ if (!window.__swpEditorInstalled) {
   chrome.runtime.onMessage.addListener((message: RuntimeRequest, _sender, sendResponse) => {
     if (message.type === "EDITOR_START") {
       try {
-        controller.start();
+        controller.start(message.metadata);
         sendResponse({ ok: true });
       } catch (error) {
         sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) });

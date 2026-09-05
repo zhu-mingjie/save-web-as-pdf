@@ -1,5 +1,7 @@
 node_modules/
 dist/
+release/
 .pnpm-store/
+coverage/
 .DS_Store
 npm-debug.log*

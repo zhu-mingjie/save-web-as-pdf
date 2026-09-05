@@ -6,8 +6,6 @@ const root = process.cwd();
 const outdir = path.join(root, "dist");
 
 await rm(outdir, { recursive: true, force: true });
-if (process.argv.includes("--clean")) process.exit(0);
-
 await mkdir(outdir, { recursive: true });
 
 await build({
@@ -22,7 +20,7 @@ await build({
   format: "esm",
   target: "chrome120",
   outdir,
-  sourcemap: true,
+  sourcemap: false,
   logLevel: "info"
 });
 

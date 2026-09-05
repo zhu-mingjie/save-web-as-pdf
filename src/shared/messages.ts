@@ -1,12 +1,12 @@
-import type { PrepareResult } from "./types";
+import type { PrepareResult, SourcePageMetadata } from "./types";
 
 export type RuntimeRequest =
-  | { type: "START_EXPORT"; tabId: number }
-  | { type: "START_EDITOR"; tabId: number }
-  | { type: "EDIT_SAVE_REQUEST" }
+  | { type: "START_EXPORT"; tabId: number; metadata: SourcePageMetadata }
+  | { type: "START_EDITOR"; tabId: number; metadata: SourcePageMetadata }
+  | { type: "EDIT_SAVE_REQUEST"; metadata: SourcePageMetadata }
   | { type: "PREPARE_PAGE" }
   | { type: "CLEANUP_PAGE" }
-  | { type: "EDITOR_START" }
+  | { type: "EDITOR_START"; metadata: SourcePageMetadata }
   | { type: "EDITOR_FINISH" };
 
 export interface SuccessResponse<T = undefined> {
