@@ -129,7 +129,10 @@ export async function generatePdf(tabId: number): Promise<{ pdf: Uint8Array; met
       if (!result.stream) throw new Error("Chrome did not return a PDF stream.");
       const pdf = await readPdfStream(session, result.stream);
       lastPageCount = countPdfPages(pdf);
-      if (lastPageCount === undefined || lastPageCount === 1) return { pdf, metrics };
+      if (lastPageCount === 1) return { pdf, metrics };
+      if (lastPageCount === undefined) {
+        throw new Error("Chrome returned a PDF whose page count could not be verified. No unverified file was saved.");
+      }
     }
 
     throw new Error(

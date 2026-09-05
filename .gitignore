@@ -5,3 +5,5 @@ release/
 coverage/
 .DS_Store
 npm-debug.log*
+.agents/
+skills-lock.json

@@ -77,14 +77,18 @@ npm run verify:release
 2. Copy the single generated ZIP to a Windows, macOS, or Linux computer.
 3. Extract the ZIP.
 4. Open `chrome://extensions` in Chrome and enable **Developer mode**.
-5. Select **Load unpacked**.
-6. Select the extracted `save-web-as-pdf-vX.X.X` directory that directly contains `manifest.json`.
+5. Create an empty folder and extract the ZIP into it.
+6. Select **Load unpacked**, then select that extracted folder—the folder directly contains `manifest.json`.
+
+The ZIP is also ready for direct upload to the Chrome Web Store because `manifest.json` is at the archive root.
 
 The same release package is used across supported desktop Chrome platforms; there are no separate macOS, Windows, or Linux builds.
 
 ## Privacy
 
-PDF generation and temporary storage happen locally in Chrome. The extension does not upload page content, HTML, screenshots, or generated PDFs, and it has no account, analytics, subscription, or backend service.
+PDF generation and temporary storage happen locally in Chrome. The extension does not upload page content, HTML, screenshots, or generated PDFs, and it has no account, analytics, subscription, or backend service. The temporary IndexedDB record is deleted as soon as the preview reads it; records left by an interrupted operation are removed opportunistically after 24 hours. Query parameters and fragments are removed before a source URL is stored.
+
+See [PRIVACY.md](PRIVACY.md) for the complete privacy policy.
 
 ## Known limitations
 

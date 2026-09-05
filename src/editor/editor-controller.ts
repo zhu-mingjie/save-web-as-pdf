@@ -25,6 +25,16 @@ class EditorController {
   private status: HTMLSpanElement | null = null;
   private saving = false;
   private metadata: SourcePageMetadata | null = null;
+  private keepalivePort: chrome.runtime.Port | null = null;
+  private keepaliveTimer: number | null = null;
+  private instructionsOpen = false;
+
+  private readonly onKeyDown = (event: KeyboardEvent): void => {
+    if (event.key !== "Escape" || this.instructionsOpen) return;
+    event.preventDefault();
+    if (this.saving) void this.cancelSave();
+    else this.destroy();
+  };
 
   start(metadata: SourcePageMetadata): void {
     if (this.host) return;
@@ -48,11 +58,13 @@ class EditorController {
         button.danger { color: #b3261e; }
         button:disabled { opacity: .45; cursor: default; }
         #status { min-width: 72px; margin: 0 4px; color: #5f6368; white-space: nowrap; }
-        #tip { position: fixed; z-index: 2147483647; inset: 0; display: grid; place-items: center; background: rgba(32,33,36,.36); font: 14px/1.5 system-ui, sans-serif; }
-        #tip-card { width: min(340px, calc(100vw - 40px)); padding: 22px; border-radius: 14px; background: #fff; color: #202124; box-shadow: 0 12px 42px rgba(0,0,0,.28); }
+        #tip { width: min(340px, calc(100vw - 40px)); padding: 0; border: 0; border-radius: 14px; background: #fff; color: #202124; box-shadow: 0 12px 42px rgba(0,0,0,.28); font: 14px/1.5 system-ui, sans-serif; }
+        #tip::backdrop { background: rgba(32,33,36,.36); }
+        #tip-card { padding: 22px; }
         #tip h2 { margin: 0 0 8px; font-size: 18px; }
         #tip p { margin: 0 0 16px; color: #5f6368; }
         [hidden] { display: none !important; }
+        button:focus-visible { outline: 3px solid #8ab4f8; outline-offset: 2px; }
       </style>
       <div id="overlay" hidden></div>
       <div id="toolbar">
@@ -63,13 +75,13 @@ class EditorController {
         <button id="save" class="primary" type="button">Save PDF</button>
         <button id="exit" class="danger" type="button">Exit</button>
       </div>
-      <div id="tip">
+      <dialog id="tip" aria-labelledby="tip-title">
         <div id="tip-card">
-          <h2>Remove unwanted elements</h2>
+          <h2 id="tip-title">Remove unwanted elements</h2>
           <p>Hover over any section and click to remove it. You can undo your changes before saving.</p>
           <button id="got-it" class="primary" type="button">Got it</button>
         </div>
-      </div>
+      </dialog>
     `;
     (document.documentElement ?? document.body).append(host);
     this.host = host;
@@ -84,6 +96,13 @@ class EditorController {
       this.updateControls();
     });
     this.selector.start();
+    document.addEventListener("keydown", this.onKeyDown, true);
+    const tip = shadow.querySelector<HTMLDialogElement>("#tip")!;
+    this.instructionsOpen = true;
+    tip.addEventListener("close", () => {
+      this.instructionsOpen = false;
+    });
+    tip.showModal();
 
     shadow.querySelector("#undo")?.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -106,17 +125,22 @@ class EditorController {
     });
     shadow.querySelector("#got-it")?.addEventListener("click", (event) => {
       event.stopPropagation();
-      shadow.querySelector<HTMLElement>("#tip")!.hidden = true;
+      tip.close();
     });
     shadow.querySelector("#save")?.addEventListener("click", (event) => {
       event.stopPropagation();
-      void this.save();
+      if (this.saving) void this.cancelSave();
+      else void this.save();
     });
     this.updateControls();
   }
 
   finish(): void {
     this.destroy();
+  }
+
+  hideForExport(): void {
+    if (this.host) this.host.style.visibility = "hidden";
   }
 
   private ensureRemovalStyle(): void {
@@ -131,7 +155,7 @@ class EditorController {
     if (this.undoButton) this.undoButton.disabled = !this.history.canUndo || this.saving;
     if (this.redoButton) this.redoButton.disabled = !this.history.canRedo || this.saving;
     if (this.restoreButton) this.restoreButton.disabled = this.history.count === 0 || this.saving;
-    if (this.saveButton) this.saveButton.disabled = this.saving;
+    if (this.saveButton) this.saveButton.textContent = this.saving ? "Cancel Export" : "Save PDF";
     if (this.status) this.status.textContent = this.saving ? "Preparing…" : `${this.history.count} removed`;
   }
 
@@ -139,8 +163,9 @@ class EditorController {
     if (this.saving || !this.host || !this.metadata) return;
     this.saving = true;
     this.selector?.stop();
-    this.host.style.visibility = "hidden";
+    document.removeEventListener("keydown", this.onKeyDown, true);
     this.updateControls();
+    this.startKeepalive();
     try {
       const response = (await chrome.runtime.sendMessage({
         type: "EDIT_SAVE_REQUEST",
@@ -150,11 +175,38 @@ class EditorController {
     } catch (error) {
       alert(`Save Web as PDF: ${error instanceof Error ? error.message : String(error)}`);
       this.destroy();
+    } finally {
+      this.stopKeepalive();
     }
+  }
+
+  private async cancelSave(): Promise<void> {
+    if (!this.saving) return;
+    if (this.status) this.status.textContent = "Canceling…";
+    try {
+      const response = (await chrome.runtime.sendMessage({ type: "CANCEL_EXPORT" } satisfies RuntimeRequest)) as MessageResponse;
+      if (!response.ok) throw new Error(response.error);
+    } catch (error) {
+      alert(`Save Web as PDF: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private startKeepalive(): void {
+    this.keepalivePort = chrome.runtime.connect({ name: "export-keepalive" });
+    this.keepalivePort.postMessage({ type: "PING" });
+    this.keepaliveTimer = window.setInterval(() => this.keepalivePort?.postMessage({ type: "PING" }), 20_000);
+  }
+
+  private stopKeepalive(): void {
+    if (this.keepaliveTimer !== null) window.clearInterval(this.keepaliveTimer);
+    this.keepaliveTimer = null;
+    this.keepalivePort?.disconnect();
+    this.keepalivePort = null;
   }
 
   private destroy(): void {
     this.selector?.stop();
+    this.stopKeepalive();
     this.selector = null;
     this.history.restoreAll();
     document.getElementById(REMOVAL_STYLE_ID)?.remove();
@@ -162,6 +214,7 @@ class EditorController {
     this.host = null;
     this.metadata = null;
     this.saving = false;
+    this.instructionsOpen = false;
   }
 }
 
@@ -178,6 +231,9 @@ if (!window.__swpEditorInstalled) {
       }
     } else if (message.type === "EDITOR_FINISH") {
       controller.finish();
+      sendResponse({ ok: true });
+    } else if (message.type === "EDITOR_HIDE_FOR_EXPORT") {
+      controller.hideForExport();
       sendResponse({ ok: true });
     }
   });

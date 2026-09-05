@@ -13,11 +13,10 @@ runNode(path.join("scripts", "build.mjs"));
 
 const distDirectory = path.join(root, "dist");
 const { manifest } = await validateDist(distDirectory);
-const rootFolder = `save-web-as-pdf-v${manifest.version}`;
 const releaseDirectory = path.join(root, "release");
-const releasePath = path.join(releaseDirectory, `${rootFolder}.zip`);
+const releasePath = path.join(releaseDirectory, `save-web-as-pdf-v${manifest.version}.zip`);
 await mkdir(releaseDirectory, { recursive: true });
-const archive = await createZip(distDirectory, rootFolder);
+const archive = await createZip(distDirectory);
 await writeFile(releasePath, archive);
-validateZip(await readFile(releasePath), rootFolder, manifest.version);
+validateZip(await readFile(releasePath), manifest.version);
 console.log(`Release package: ${path.relative(root, releasePath)}`);

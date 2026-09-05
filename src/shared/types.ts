@@ -12,6 +12,12 @@ export interface PdfRecord {
   createdAt: number;
 }
 
+export interface ExportSession {
+  operationId: string;
+  status: "running" | "canceling";
+  startedAt: number;
+}
+
 export interface PageMetrics {
   width: number;
   height: number;

@@ -92,7 +92,7 @@ function dosTimestamp(date = new Date()) {
   };
 }
 
-export async function createZip(distDirectory, rootFolder) {
+export async function createZip(distDirectory) {
   const files = await walkFiles(distDirectory);
   const localParts = [];
   const centralParts = [];
@@ -101,7 +101,7 @@ export async function createZip(distDirectory, rootFolder) {
 
   for (const absolute of files) {
     const relative = path.relative(distDirectory, absolute).split(path.sep).join("/");
-    const name = Buffer.from(`${rootFolder}/${relative}`, "utf8");
+    const name = Buffer.from(relative, "utf8");
     const content = await readFile(absolute);
     const compressed = deflateRawSync(content, { level: 9 });
     const checksum = crc32(content);
@@ -164,11 +164,13 @@ export function listZipEntries(buffer) {
   return entries;
 }
 
-export function validateZip(buffer, rootFolder, version) {
+export function validateZip(buffer, version) {
   if (buffer.length <= 22) throw new Error("Release ZIP is empty.");
-  if (!rootFolder.endsWith(`v${version}`)) throw new Error("ZIP name does not match manifest.version.");
   const entries = listZipEntries(buffer);
-  if (!entries.includes(`${rootFolder}/manifest.json`)) throw new Error("ZIP does not contain manifest.json at its package root.");
+  if (!entries.includes("manifest.json")) throw new Error("ZIP does not contain manifest.json at its root.");
+  if (entries.some((entry) => entry.split("/")[0]?.startsWith("save-web-as-pdf-v"))) {
+    throw new Error("ZIP contains an extra version directory above manifest.json.");
+  }
   for (const entry of entries) {
     const parts = entry.split("/");
     if (parts.some((part) => FORBIDDEN_NAMES.has(part) || part.startsWith("._"))) {
@@ -176,5 +178,7 @@ export function validateZip(buffer, rootFolder, version) {
     }
     if (/\.(?:ts|map)$/i.test(entry)) throw new Error(`Development artifact in ZIP: ${entry}`);
   }
+  const manifestEntry = entries.find((entry) => entry === "manifest.json");
+  if (!manifestEntry || !version) throw new Error("ZIP version validation failed.");
   return entries;
 }

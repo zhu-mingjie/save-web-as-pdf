@@ -12,15 +12,15 @@
         <h1>Save Web as PDF</h1>
         <p id="source"></p>
       </div>
-      <label>
+      <label for="filename">
         <span>Filename</span>
         <input id="filename" type="text" readonly />
       </label>
       <button id="download" type="button" disabled>Download PDF</button>
     </header>
     <main>
-      <p id="status" role="status">Loading preview…</p>
-      <embed id="preview" type="application/pdf" />
+      <p id="status" role="status" aria-live="polite" aria-atomic="true">Loading preview…</p>
+      <embed id="preview" type="application/pdf" title="Generated PDF preview" />
     </main>
     <script type="module" src="preview.js"></script>
   </body>

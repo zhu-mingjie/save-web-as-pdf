@@ -7,6 +7,9 @@ button { min-height: 42px; border: 1px solid color-mix(in srgb, CanvasText 18%, 
 button:hover:not(:disabled) { background: color-mix(in srgb, Canvas 88%, CanvasText 12%); }
 button.primary { border-color: #0b57d0; background: #0b57d0; color: white; }
 button.primary:hover:not(:disabled) { background: #0842a0; }
+button.danger { border-color: #b3261e; background: transparent; color: #b3261e; }
+button:focus-visible { outline: 3px solid #8ab4f8; outline-offset: 2px; }
 button:disabled { cursor: wait; opacity: .58; }
+[hidden] { display: none !important; }
 #status { min-height: 16px; margin: 0; color: #b3261e; font-size: 12px; line-height: 1.35; }
 #status.busy { color: color-mix(in srgb, CanvasText 70%, transparent); }

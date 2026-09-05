@@ -10,7 +10,7 @@ const result = await build({
   write: false
 });
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString("base64")}`;
-const { createPdfFilename } = await import(moduleUrl);
+const { createPdfFilename, createSourcePageMetadata } = await import(moduleUrl);
 
 assert.equal(
   createPdfFilename("监督学习 - 维基百科，自由的百科全书"),
@@ -29,5 +29,15 @@ const longFilename = createPdfFilename("🚀".repeat(200));
 assert.ok(new TextEncoder().encode(longFilename).byteLength <= 180);
 assert.ok(longFilename.endsWith(".pdf"));
 assert.ok(!longFilename.includes("�"));
+
+assert.deepEqual(
+  createSourcePageMetadata("Private page", "https://example.com/account?token=secret#section"),
+  {
+    title: "Private page",
+    url: "https://example.com/account",
+    hostname: "example.com",
+    filename: "Private page.pdf"
+  }
+);
 
 console.log("Filename tests: OK");

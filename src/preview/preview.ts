@@ -1,4 +1,4 @@
-import { getPdf } from "../shared/pdf-store";
+import { takePdf } from "../shared/pdf-store";
 
 const filenameInput = document.querySelector<HTMLInputElement>("#filename")!;
 const downloadButton = document.querySelector<HTMLButtonElement>("#download")!;
@@ -11,7 +11,7 @@ let downloadFilename = "webpage.pdf";
 async function load(): Promise<void> {
   const id = new URLSearchParams(location.search).get("id");
   if (!id) throw new Error("The PDF identifier is missing.");
-  const record = await getPdf(id);
+  const record = await takePdf(id);
   if (!record) throw new Error("This PDF preview has expired. Generate it again from the webpage.");
   downloadFilename = record.metadata.filename;
   filenameInput.value = downloadFilename;

@@ -13,6 +13,18 @@ function hostnameFromUrl(pageUrl?: string): string {
   }
 }
 
+function privacySafeUrl(pageUrl?: string): string {
+  if (!pageUrl) return "";
+  try {
+    const url = new URL(pageUrl);
+    url.search = "";
+    url.hash = "";
+    return url.href;
+  } catch {
+    return "";
+  }
+}
+
 function truncateUtf8(value: string, maxBytes: number): string {
   const encoder = new TextEncoder();
   let result = "";
@@ -44,7 +56,7 @@ export function createSourcePageMetadata(
   pageTitle: string | undefined,
   pageUrl?: string
 ): SourcePageMetadata {
-  const url = pageUrl ?? "";
+  const url = privacySafeUrl(pageUrl);
   return {
     title: pageTitle?.trim() ?? "",
     url,

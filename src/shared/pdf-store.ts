@@ -51,10 +51,19 @@ export async function getPdf(id: string): Promise<PdfRecord | undefined> {
   }
 }
 
-export async function deletePdf(id: string): Promise<void> {
+export async function takePdf(id: string): Promise<PdfRecord | undefined> {
   const db = await openDb();
   try {
-    await requestResult(db.transaction(PDF_STORE_NAME, "readwrite").objectStore(PDF_STORE_NAME).delete(id));
+    const transaction = db.transaction(PDF_STORE_NAME, "readwrite");
+    const store = transaction.objectStore(PDF_STORE_NAME);
+    const record = await requestResult(store.get(id));
+    if (record) store.delete(id);
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error ?? new Error("Unable to remove the PDF preview."));
+      transaction.onabort = () => reject(transaction.error ?? new Error("PDF preview cleanup was aborted."));
+    });
+    return record;
   } finally {
     db.close();
   }

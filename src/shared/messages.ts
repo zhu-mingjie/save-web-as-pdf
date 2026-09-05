@@ -4,9 +4,12 @@ export type RuntimeRequest =
   | { type: "START_EXPORT"; tabId: number; metadata: SourcePageMetadata }
   | { type: "START_EDITOR"; tabId: number; metadata: SourcePageMetadata }
   | { type: "EDIT_SAVE_REQUEST"; metadata: SourcePageMetadata }
+  | { type: "CANCEL_EXPORT"; tabId?: number }
   | { type: "PREPARE_PAGE" }
+  | { type: "CANCEL_PAGE_PREPARATION" }
   | { type: "CLEANUP_PAGE" }
   | { type: "EDITOR_START"; metadata: SourcePageMetadata }
+  | { type: "EDITOR_HIDE_FOR_EXPORT" }
   | { type: "EDITOR_FINISH" };
 
 export interface SuccessResponse<T = undefined> {
