@@ -1,6 +1,6 @@
-# Save Web as PDF 0.3.0 — Final Acceptance Test
+# Save Web as PDF 0.3.1 — Final Acceptance Test
 
-Use the exact `release/save-web-as-pdf-v0.3.0.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
+Use the exact `release/save-web-as-pdf-v0.3.1.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
 
 ## Clean-device installation
 
@@ -10,7 +10,7 @@ Run once on a Windows computer and once on a macOS computer that does not have N
 2. Create a new empty folder and extract the ZIP into it.
 3. Open `chrome://extensions`, enable Developer mode, and choose Load unpacked.
 4. Select the extracted folder.
-5. Confirm the extension loads with its blue document icon and reports no manifest or service-worker errors.
+5. Confirm the extension loads with its charcoal document-and-download icon and reports no manifest or service-worker errors.
 
 ## Core export
 

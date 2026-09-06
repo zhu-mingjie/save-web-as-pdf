@@ -84,6 +84,10 @@ The ZIP is also ready for direct upload to the Chrome Web Store because `manifes
 
 The same release package is used across supported desktop Chrome platforms; there are no separate macOS, Windows, or Linux builds.
 
+## Release policy
+
+Every version update must be published as a GitHub Release tagged `vX.X.X`. Attach the matching `release/save-web-as-pdf-vX.X.X.zip` package and include a short, user-facing summary of what changed. Follow [RELEASING.md](RELEASING.md) for the required checks and publishing steps.
+
 ## Privacy
 
 PDF generation and temporary storage happen locally in Chrome. The extension does not upload page content, HTML, screenshots, or generated PDFs, and it has no account, analytics, subscription, or backend service. The temporary IndexedDB record is deleted as soon as the preview reads it; records left by an interrupted operation are removed opportunistically after 24 hours. Query parameters and fragments are removed before a source URL is stored.

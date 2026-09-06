@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Save Web as PDF
 
-> Last Updated: 2026-09-05
+> Last Updated: 2026-09-06
 
 ## Store Listing
 
@@ -36,7 +36,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.3.0 — Added release-compliant packaging, cancellation, stronger cleanup, verified single-page output, session-safe export coordination, and store icons.
+Version 0.3.1 — Updated the extension and store artwork with the new Save Web as PDF icon.
 
 **Category**
 
@@ -116,6 +116,12 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [ ] Decide whether the private source repository will remain private; if it will become public, select and add an appropriate source-code license
 
 ## Version History
+
+### 0.3.1 — 2026-09-06
+
+- Replaced the extension icon at every required Chrome size
+- Updated the Chrome Web Store promotional image to use the new icon
+- Rebuilt and verified the cross-platform release package
 
 ### 0.3.0 — 2026-09-05
 
