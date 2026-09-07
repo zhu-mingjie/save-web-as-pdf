@@ -94,6 +94,10 @@ PDF generation and temporary storage happen locally in Chrome. The extension doe
 
 See [PRIVACY.md](PRIVACY.md) for the complete privacy policy.
 
+## License
+
+The source code, original extension icon, and repository-owned promotional assets are available under the [MIT License](LICENSE).
+
 ## Known limitations
 
 - Chrome blocks extension access to internal pages, the Chrome Web Store, and some other protected pages.

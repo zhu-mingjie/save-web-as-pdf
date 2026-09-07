@@ -113,7 +113,7 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [ ] Complete the Developer Dashboard privacy disclosures and Limited Use certification
 - [ ] Optionally capture a second screenshot showing the completed PDF preview
 - [ ] Complete the Windows and macOS acceptance tests in `PRE_RELEASE_TEST_PLAN.md`
-- [ ] Decide whether the private source repository will remain private; if it will become public, select and add an appropriate source-code license
+- [x] MIT License added for the source code and original project assets
 
 ## Version History
 
