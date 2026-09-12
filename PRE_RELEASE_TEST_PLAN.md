@@ -1,6 +1,6 @@
-# Save Web as PDF 0.3.3 — Final Acceptance Test
+# Save Web as PDF 0.3.4 — Final Acceptance Test
 
-Use the exact `release/save-web-as-pdf-v0.3.3.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
+Use the exact `release/save-web-as-pdf-v0.3.4.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
 
 ## Clean-device installation
 
@@ -27,6 +27,7 @@ Run once on a Windows computer and once on a macOS computer that does not have N
 
 - Open a direct Zhihu `/question/.../answer/...` URL and confirm the status says that the question and selected answer are being prepared.
 - Confirm the PDF includes the complete top question section (title, description, topics, and visible metadata), correct author, full target answer, images, code blocks, and links.
+- Confirm the compact duplicate question title in Zhihu's top navigation is excluded when it appears alongside the main question section.
 - Confirm unrelated answers, “更多回答”, recommendations, sidebars, fixed navigation, floating buttons, and answer action bars are excluded.
 - Test a direct-answer page whose answer cannot be accessed or matched; confirm no other answer is exported.
 - Export the Zhihu home feed and confirm preparation uses a finite snapshot rather than scrolling indefinitely.

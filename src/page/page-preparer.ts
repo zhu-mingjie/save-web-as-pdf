@@ -313,13 +313,18 @@ function hideFixedInterface(state: PagePreparationState, root: ParentNode, prese
   return hidden;
 }
 
-function findZhihuQuestionSection(title: Element, answer: Element): Element {
-  const candidates = [
-    title.closest(".QuestionHeader"),
-    document.querySelector(".QuestionHeader"),
-    title.closest("header")
-  ];
-  return candidates.find((candidate) => candidate?.contains(title) && !candidate.contains(answer)) ?? title;
+function findZhihuQuestionSection(answer: Element): Element {
+  const candidates = Array.from(document.querySelectorAll(".QuestionHeader")).filter(
+    (section) => !section.contains(answer) && Boolean(section.querySelector(".QuestionHeader-title, h1"))
+  );
+  if (candidates.length !== 1) {
+    throw new Error(
+      candidates.length === 0
+        ? "The Zhihu question section could not be identified, so no PDF was saved."
+        : "More than one Zhihu question section was found, so no PDF was saved."
+    );
+  }
+  return candidates[0]!;
 }
 
 function createCapturePlan(state: PagePreparationState): CapturePlan {
@@ -349,9 +354,7 @@ function createCapturePlan(state: PagePreparationState): CapturePlan {
   if (answer.querySelector(".RichContent--collapsed")) {
     throw new Error("This Zhihu answer is collapsed. Expand the full answer before saving it.");
   }
-  const title = document.querySelector(".QuestionHeader-title") ?? document.querySelector("h1");
-  if (!title) throw new Error("The Zhihu question title could not be identified, so no PDF was saved.");
-  const questionSection = findZhihuQuestionSection(title, answer);
+  const questionSection = findZhihuQuestionSection(answer);
 
   let hiddenBranches = hideOutsideSelection(state, [questionSection, answer]);
   hiddenBranches += hideFixedInterface(state, document.body, [questionSection, answer]);

@@ -38,7 +38,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.3.3 — Preserved the complete question section when saving a selected Zhihu answer.
+Version 0.3.4 — Correctly preserved the main Zhihu question section when a duplicate title also appeared in the top navigation.
 
 **Category**
 
@@ -118,6 +118,10 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.3.4 — 2026-09-12
+
+- Corrected focused Zhihu exports to keep the main question section instead of the duplicate title shown in the top navigation
 
 ### 0.3.3 — 2026-09-12
 
