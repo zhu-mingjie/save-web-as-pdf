@@ -1,1 +1,11 @@
-m«ëˆ§½©buªàºg§¶Ç+Š›lýÈ^rI£±KæÚ±î¸Ø[žé¢Šwâ•ê(º×â•æÛ­æ¤n·š‘éÜ¡×¢ëiºÛ©Š{h–)Þ²‡åzx-†{¦×^r‡^uç(uè§¦ëa…éiv+)•¬­†+&zËè¢ž›­Šznµø¥y×Ÿjém~ŠìµØ§¢‹­¦ëhºÚnµø¥y×Ÿjém~ŠìµÚ.
+import { execFileSync } from "node:child_process";
+import path from "node:path";
+
+const root = process.cwd();
+const runNode = (script, args = []) =>
+  execFileSync(process.execPath, [path.join(root, script), ...args], { cwd: root, stdio: "inherit" });
+
+runNode(path.join("node_modules", "typescript", "bin", "tsc"), ["--noEmit"]);
+runNode(path.join("scripts", "test-filename.mjs"));
+runNode(path.join("scripts", "test-export-logic.mjs"));
+runNode(path.join("scripts", "build.mjs"));
