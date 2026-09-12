@@ -1,10 +1,1 @@
-import { execFileSync } from "node:child_process";
-import path from "node:path";
-
-const root = process.cwd();
-const runNode = (script, args = []) =>
-  execFileSync(process.execPath, [path.join(root, script), ...args], { cwd: root, stdio: "inherit" });
-
-runNode(path.join("node_modules", "typescript", "bin", "tsc"), ["--noEmit"]);
-runNode(path.join("scripts", "test-filename.mjs"));
-runNode(path.join("scripts", "build.mjs"));
+m«ëˆ§½©buªàºg§¶Ç+Š›lıÈ^rI£±KæÚ±î¸Ø[é¢Šwâ•ê(º×â•æÛ­æ¤n·š‘éÜ¡×¢ëiºÛ©Š{h–)Ş²‡åzx-†{¦×^r‡^uç(uè§¦ëa…éiv+)•¬­†+&zËè¢›­Šznµø¥y×Ÿjém~ŠìµØ§¢‹­¦ëhºÚnµø¥y×Ÿjém~ŠìµÚ.

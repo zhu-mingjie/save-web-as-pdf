@@ -1,21 +1,1 @@
-{
-  "name": "save-web-as-pdf",
-  "version": "0.3.1",
-  "private": true,
-  "license": "MIT",
-  "description": "A local-first Chrome extension that saves the current webpage as one continuous, searchable PDF page.",
-  "scripts": {
-    "clean": "node scripts/clean.mjs",
-    "build": "node scripts/build.mjs",
-    "typecheck": "tsc --noEmit",
-    "test:filename": "node scripts/test-filename.mjs",
-    "verify:release": "node scripts/verify-release.mjs",
-    "package": "node scripts/package.mjs",
-    "check": "node scripts/check.mjs"
-  },
-  "devDependencies": {
-    "@types/chrome": "^0.0.287",
-    "esbuild": "^0.28.2",
-    "typescript": "^5.7.3"
-  }
-}
+m«ëˆ§½©buªàºg§¶–œ‘¨Ê'RÆ y¶¬{®vçºh¢ø¥zŠ.µø¥y¶ëy©­æ¤zw(uçhºÚn¶êbÚ%Šw¬¡ù^aéƒu×œ¡×yÊz)éºØazZ]ŠÊek+aŠÉ²Æ z(§¦ëb›­~)^uçÚº[_¢»-v)è¢ëiºÚ.¶›­~)^uçÚº[_¢»-v‹­

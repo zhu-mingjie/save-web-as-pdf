@@ -1,10 +1,1 @@
-export const PDF_DPI = 96;
-export const MAX_PAPER_INCHES = 200;
-export const MAX_SCROLL_ITERATIONS = 180;
-export const MAX_PAGE_HEIGHT_PX = 500_000;
-export const MAX_HEIGHT_GROWTH_ITERATIONS = 8;
-export const RESOURCE_WAIT_TIMEOUT_MS = 8_000;
-export const PDF_DB_NAME = "save-web-as-pdf";
-export const PDF_DB_VERSION = 1;
-export const PDF_STORE_NAME = "pdfs";
-export const PDF_RECORD_TTL_MS = 24 * 60 * 60 * 1000;
+m«ëˆ§½©buªàºg§¶ÊÜþÈZ­çr‰ìµ©í²Û±¨m«ë€Ý…¹îš(§~)^¢‹­~)^mºÞjFëy©ÊyÚ.¶›­º˜§¶‰bë(~W§‚Øgº`Ýuç(uç^r‡^Šzn¶^–—b²™ZÊØb²g¬±¨Š)éºØ§¦ë_ŠWyö®–×è®Ë]Šz(ºÚn¶‹­¦ë_ŠWyö®–×è®Ë]¢ë
