@@ -1,5 +1,6 @@
 import type { MessageResponse, PrepareResponse, RuntimeRequest } from "../shared/messages";
 import { createSourcePageMetadata } from "../shared/filename";
+import { t, userError, UserFacingError, visibleError } from "../shared/i18n";
 import { deleteExpiredPdfs, putPdf } from "../shared/pdf-store";
 import type { ExportMode, ExportSession, PrepareResult, SourcePageMetadata } from "../shared/types";
 import { generatePdf } from "./pdf-generator";
@@ -9,14 +10,15 @@ const EXPORT_SESSION_MAX_AGE_MS = 10 * 60 * 1000;
 const POPUP_URL = chrome.runtime.getURL("popup/popup.html");
 
 function friendlyError(error: unknown): string {
+  if (error instanceof UserFacingError) return error.message;
   const message = error instanceof Error ? error.message : String(error);
   if (/Cannot access|Missing host permission|chrome:\/\/|Chrome Web Store/i.test(message)) {
-    return "This page cannot be saved because Chrome does not allow extensions to access it.";
+    return t("errorRestrictedPage");
   }
   if (/Another debugger|target is already attached/i.test(message)) {
-    return "Chrome's debugger is already being used for this tab. Close DevTools or the other debugger and try again.";
+    return t("errorDebuggerBusy");
   }
-  return message || "The PDF could not be generated.";
+  return visibleError(error);
 }
 
 function exportSessionKey(tabId: number): string {
@@ -33,7 +35,7 @@ async function beginExportSession(tabId: number): Promise<string> {
   const key = exportSessionKey(tabId);
   const current = await getExportSession(tabId);
   if (current && Date.now() - current.startedAt < EXPORT_SESSION_MAX_AGE_MS) {
-    throw new Error("An export is already running for this tab.");
+    throw userError("errorExportAlreadyRunning");
   }
 
   const operationId = crypto.randomUUID();
@@ -42,7 +44,7 @@ async function beginExportSession(tabId: number): Promise<string> {
 
   // Confirm ownership so near-simultaneous requests cannot both enter the critical section.
   if ((await getExportSession(tabId))?.operationId !== operationId) {
-    throw new Error("Another export started first for this tab.");
+    throw userError("errorExportRace");
   }
   return operationId;
 }
@@ -53,7 +55,7 @@ async function exportWasCanceled(tabId: number, operationId: string): Promise<bo
 }
 
 async function assertExportActive(tabId: number, operationId: string): Promise<void> {
-  if (await exportWasCanceled(tabId, operationId)) throw new Error("Export canceled.");
+  if (await exportWasCanceled(tabId, operationId)) throw userError("errorExportCanceled");
 }
 
 async function endExportSession(tabId: number, operationId: string): Promise<void> {
@@ -74,7 +76,9 @@ async function sendToTab<T>(tabId: number, message: RuntimeRequest): Promise<T> 
 async function prepareTab(tabId: number): Promise<PrepareResult> {
   await injectFile(tabId, "page/page-agent.js");
   const response = await sendToTab<PrepareResponse>(tabId, { type: "PREPARE_PAGE" });
-  if (!response.ok || !response.data) throw new Error(response.ok ? "The page did not return its dimensions." : response.error);
+  if (!response.ok || !response.data) {
+    throw response.ok ? userError("errorMissingDimensions") : new UserFacingError(response.error);
+  }
   return response.data;
 }
 
@@ -96,7 +100,7 @@ async function finishEditor(tabId: number): Promise<void> {
 
 async function hideEditorForExport(tabId: number): Promise<void> {
   const response = await sendToTab<MessageResponse>(tabId, { type: "EDITOR_HIDE_FOR_EXPORT" });
-  if (!response.ok) throw new Error(response.error);
+  if (!response.ok) throw new UserFacingError(response.error);
 }
 
 async function cancelExport(tabId: number): Promise<boolean> {
@@ -140,7 +144,7 @@ async function exportTab(tabId: number, mode: ExportMode, capturedMetadata: Sour
     await chrome.tabs.create({ url: chrome.runtime.getURL(`preview/preview.html?id=${encodeURIComponent(id)}`) });
     void deleteExpiredPdfs().catch(() => undefined);
   } catch (error) {
-    if (await exportWasCanceled(tabId, operationId)) throw new Error("Export canceled.");
+    if (await exportWasCanceled(tabId, operationId)) throw userError("errorExportCanceled");
     throw error;
   } finally {
     try {
@@ -155,7 +159,7 @@ async function exportTab(tabId: number, mode: ExportMode, capturedMetadata: Sour
 async function startEditor(tabId: number, metadata: SourcePageMetadata): Promise<void> {
   await injectFile(tabId, "editor/editor.js");
   const response = await sendToTab<MessageResponse>(tabId, { type: "EDITOR_START", metadata });
-  if (!response.ok) throw new Error(response.error);
+  if (!response.ok) throw new UserFacingError(response.error);
 }
 
 function isPopupSender(sender: chrome.runtime.MessageSender): boolean {
@@ -199,7 +203,7 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, sendResponse) =>
       }
       if (message.type === "CANCEL_EXPORT") {
         const tabId = isContentScriptSender(sender) ? sender.tab!.id : isPopupSender(sender) ? message.tabId : undefined;
-        if (tabId === undefined) throw new Error("The export to cancel is no longer available.");
+        if (tabId === undefined) throw userError("errorCancelUnavailable");
         await cancelExport(tabId);
         return { ok: true };
       }

@@ -1,6 +1,6 @@
 # Privacy Policy for Save Web as PDF
 
-Last updated: September 5, 2026
+Last updated: September 12, 2026
 
 Save Web as PDF converts a webpage selected by the user into a PDF. The extension is designed to perform this work locally in Chrome and does not operate a developer-controlled server.
 
@@ -46,4 +46,4 @@ If the extension's data practices change, this policy and the Chrome Web Store d
 
 ## Contact
 
-Before publication, the publisher must add a monitored privacy contact email or public support URL here and provide the public URL of this policy in the Chrome Web Store Developer Dashboard.
+For privacy questions or support, contact [support@miengieh.com](mailto:support@miengieh.com). Sending an email is a separate action initiated by the user; the extension does not automatically send support messages or their contents.

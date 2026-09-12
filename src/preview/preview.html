@@ -3,24 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PDF Preview — Save Web as PDF</title>
+    <title data-i18n="previewTitle"></title>
     <link rel="stylesheet" href="preview.css" />
   </head>
   <body>
     <header>
       <div>
-        <h1>Save Web as PDF</h1>
+        <h1 data-i18n="extensionName"></h1>
         <p id="source"></p>
       </div>
       <label for="filename">
-        <span>Filename</span>
+        <span data-i18n="filenameLabel"></span>
         <input id="filename" type="text" readonly />
       </label>
-      <button id="download" type="button" disabled>Download PDF</button>
+      <button id="download" type="button" data-i18n="downloadPdf" disabled></button>
     </header>
     <main>
-      <p id="status" role="status" aria-live="polite" aria-atomic="true">Loading preview…</p>
-      <embed id="preview" type="application/pdf" title="Generated PDF preview" />
+      <p id="status" role="status" aria-live="polite" aria-atomic="true" data-i18n="loadingPreview"></p>
+      <embed id="preview" type="application/pdf" data-i18n-title="generatedPdfPreview" />
     </main>
     <script type="module" src="preview.js"></script>
   </body>

@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Save Web as PDF</title>
+    <title data-i18n="extensionName"></title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <main>
-      <h1>Save Web as PDF</h1>
-      <p class="subtitle">One continuous, searchable PDF page.</p>
-      <button id="save" class="primary" type="button">Save Full Page</button>
-      <button id="edit" type="button">Edit Before Saving</button>
-      <button id="cancel" class="danger" type="button" hidden>Cancel Export</button>
+      <h1 data-i18n="extensionName"></h1>
+      <p class="subtitle" data-i18n="popupSubtitle"></p>
+      <button id="save" class="primary" type="button" data-i18n="saveFullPage"></button>
+      <button id="edit" type="button" data-i18n="editBeforeSaving"></button>
+      <button id="cancel" class="danger" type="button" data-i18n="cancelExport" hidden></button>
       <p id="status" role="status" aria-live="polite" aria-atomic="true"></p>
     </main>
     <script type="module" src="popup.js"></script>

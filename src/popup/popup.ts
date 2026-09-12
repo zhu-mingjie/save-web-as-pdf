@@ -1,5 +1,8 @@
 import type { MessageResponse, RuntimeRequest } from "../shared/messages";
 import { createSourcePageMetadata } from "../shared/filename";
+import { localizeDocument, t, userError, UserFacingError, visibleError } from "../shared/i18n";
+
+localizeDocument();
 
 const saveButton = document.querySelector<HTMLButtonElement>("#save")!;
 const editButton = document.querySelector<HTMLButtonElement>("#edit")!;
@@ -13,15 +16,15 @@ let keepaliveTimer: number | null = null;
 
 function preparationStatus(url?: string): string {
   return /^https:\/\/(?:www\.)?zhihu\.com\/question\/\d+\/answer\/\d+(?:[/?#]|$)/i.test(url ?? "")
-    ? "Preparing this Zhihu question and selected answer…"
+    ? t("preparingZhihuAnswer")
     : /^(?:https:\/\/)?(?:www\.)?zhihu\.com\//i.test(url ?? "")
-      ? "Preparing a snapshot of currently loaded Zhihu content…"
-      : "Preparing the full page…";
+      ? t("preparingZhihuSnapshot")
+      : t("preparingFullPage");
 }
 
 async function activeTab(): Promise<chrome.tabs.Tab> {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab?.id === undefined) throw new Error("No active tab is available.");
+  if (tab?.id === undefined) throw userError("errorNoActiveTab");
   return tab;
 }
 
@@ -55,11 +58,11 @@ async function request(message: RuntimeRequest, busyText: string, tabId: number)
   startKeepalive();
   try {
     const response = (await chrome.runtime.sendMessage(message)) as MessageResponse;
-    if (!response.ok) throw new Error(response.error);
+    if (!response.ok) throw new UserFacingError(response.error);
     completed = true;
     window.close();
   } catch (error) {
-    status.textContent = error instanceof Error ? error.message : String(error);
+    status.textContent = visibleError(error);
     setBusy(false);
   } finally {
     stopKeepalive();
@@ -80,7 +83,7 @@ saveButton.addEventListener("click", async () => {
       tab.id!
     );
   } catch (error) {
-    status.textContent = error instanceof Error ? error.message : String(error);
+    status.textContent = visibleError(error);
   }
 });
 
@@ -93,26 +96,26 @@ editButton.addEventListener("click", async () => {
         tabId: tab.id!,
         metadata: createSourcePageMetadata(tab.title, tab.url)
       },
-      "Opening editor…",
+      t("openingEditor"),
       tab.id!
     );
   } catch (error) {
-    status.textContent = error instanceof Error ? error.message : String(error);
+    status.textContent = visibleError(error);
   }
 });
 
 cancelButton.addEventListener("click", async () => {
   if (!exporting || currentTabId === null) return;
   cancelButton.disabled = true;
-  status.textContent = "Canceling export…";
+  status.textContent = t("cancelingExport");
   try {
     const response = (await chrome.runtime.sendMessage({
       type: "CANCEL_EXPORT",
       tabId: currentTabId
     } satisfies RuntimeRequest)) as MessageResponse;
-    if (!response.ok) throw new Error(response.error);
+    if (!response.ok) throw new UserFacingError(response.error);
   } catch (error) {
-    status.textContent = error instanceof Error ? error.message : String(error);
+    status.textContent = visibleError(error);
     cancelButton.disabled = false;
   }
 });

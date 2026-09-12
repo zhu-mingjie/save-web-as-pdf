@@ -25,6 +25,7 @@ FEATURES
 • Undo, redo, or restore edits before export
 • Preview the generated PDF before downloading
 • Keep page processing and temporary PDF data on your device
+• Automatically match the interface to Chrome in 10 supported languages, with English fallback
 
 HOW TO USE
 1. Open the webpage you want to save.
@@ -38,7 +39,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.3.4 — Correctly preserved the main Zhihu question section when a duplicate title also appeared in the top navigation.
+Version 0.4.0 — Added automatic interface localization in 10 languages and updated support information.
 
 **Category**
 
@@ -88,7 +89,7 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 
 **Privacy Policy URL**
 
-[REQUIRED BEFORE SUBMISSION] Publish `PRIVACY.md` at a stable public URL, add a monitored privacy contact, paste that URL here, and verify it without signing in.
+[REQUIRED BEFORE SUBMISSION] Publish `PRIVACY.md` at a stable public URL, paste that URL here, and verify it without signing in. Support contact: [support@miengieh.com](mailto:support@miengieh.com).
 
 ## Graphic Assets
 
@@ -110,7 +111,8 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] 440×280 small promotional image prepared
 - [x] Current 640×400 popup screenshot prepared
 - [x] Chrome Web Store ZIP places `manifest.json` at the archive root
-- [ ] Add privacy contact and host the privacy policy at a public URL
+- [x] Support and privacy contact set to `support@miengieh.com`
+- [ ] Host the privacy policy at a public URL
 - [ ] Add the final privacy policy URL above and in the Developer Dashboard
 - [ ] Complete the Developer Dashboard privacy disclosures and Limited Use certification
 - [ ] Optionally capture a second screenshot showing the completed PDF preview
@@ -118,6 +120,12 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.4.0 — 2026-09-12
+
+- Added automatic UI localization for English, Simplified Chinese, Traditional Chinese, German, Italian, Spanish, Portuguese, French, Japanese, and Korean
+- Added localized progress, cancellation, preview, editor, accessibility, and user-facing error messages
+- Updated the privacy contact and compatibility guidance
 
 ### 0.3.4 — 2026-09-12
 

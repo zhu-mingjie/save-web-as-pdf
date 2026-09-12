@@ -13,6 +13,9 @@ Save a complete webpage as one continuous, searchable PDF page while preserving 
 - Preview the generated PDF before downloading
 - Process and store PDF data locally in the browser
 - Use the same Chrome extension package on Windows, macOS, and Linux
+- Use the interface in English, Simplified Chinese, Traditional Chinese, German, Italian, Spanish, Brazilian or European Portuguese, French, Japanese, or Korean
+
+The interface automatically follows Chrome's display language, including when Chrome follows the operating system language. Regional variants use Chrome's native locale matching, and unsupported languages fall back to English. No webpage-language detection, location lookup, or network translation service is used.
 
 Save Web as PDF uses the Chrome DevTools Protocol (`Page.printToPDF`) rather than a screenshot pipeline. It does not silently fall back to screenshots or automatic pagination.
 
@@ -106,6 +109,8 @@ The source code, original extension icon, and repository-owned promotional asset
 - DevTools or another debugger cannot own the source tab while an export is running.
 - Very long or wide pages can exceed Chromium or PDF viewer single-page limits. The extension reports an error instead of silently paginating or creating a screenshot.
 - Infinite-scroll and slow-loading pages are bounded by time, iteration, and height guards so an export cannot run forever.
-- Zhihu feeds use a snapshot of the content already loaded when export starts. Supported direct answer URLs use a focused answer-only capture; if the requested answer cannot be identified safely, the extension stops instead of exporting a different answer.
+- Zhihu feeds use a snapshot of the content already loaded when export starts. Supported direct answer URLs preserve the main question section and the requested answer; if either cannot be identified safely, the extension stops instead of exporting different content.
 - Viewport-dependent layout can be stabilized only when the responsible page styles are inspectable. Cross-origin or script-generated styles may still prevent a one-page result, in which case the extension reports the limitation without saving an incomplete PDF.
 - Canvas, WebGL, video, cross-origin frames, and site-specific CSS may not be preserved as selectable or vector PDF content.
+
+Not every website can currently be saved completely. Page structure, dynamic loading, and other compatibility differences may cause missing content, layout problems, or export failure. If you encounter a reproducible problem, email [support@miengieh.com](mailto:support@miengieh.com) with a publicly shareable page URL, your Chrome and extension versions, and the error message. Do not send passwords, cookies, or other sensitive credentials. Compatibility issues that can be addressed safely may receive targeted fixes, but support for every website cannot be guaranteed.

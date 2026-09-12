@@ -1,6 +1,6 @@
-# Save Web as PDF 0.3.4 — Final Acceptance Test
+# Save Web as PDF 0.4.0 — Final Acceptance Test
 
-Use the exact `release/save-web-as-pdf-v0.3.4.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
+Use the exact `release/save-web-as-pdf-v0.4.0.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
 
 ## Clean-device installation
 
@@ -64,6 +64,15 @@ Run once on a Windows computer and once on a macOS computer that does not have N
 - Confirm status and error text is announced by a screen reader.
 - Confirm the edit instructions behave as a modal dialog and Escape dismisses it.
 - Document the pointer-based element selector as a known limitation if a keyboard-equivalent selection workflow is not added before release.
+
+## Localization
+
+- Test the popup, edit toolbar, instructions dialog, progress, cancellation, errors, and PDF preview in all supported languages.
+- Confirm `en-US`, `de-AT`, `it-CH`, `es-MX`, `fr-CA`, `ja-JP`, and `ko-KR` select their base-language translations.
+- Confirm `pt-BR` uses Brazilian Portuguese and `pt-PT` uses European Portuguese.
+- Confirm `zh-CN` and `zh-SG` use Simplified Chinese, while `zh-TW` and `zh-HK` use Traditional Chinese.
+- Confirm an unsupported Chrome language and a deliberately missing translated message fall back to English.
+- Check that longer German and French controls wrap without clipping and that Chinese, Japanese, and Korean text renders correctly.
 
 ## Store submission
 

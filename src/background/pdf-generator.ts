@@ -1,4 +1,5 @@
 import { MAX_PAPER_INCHES, PDF_DPI } from "../shared/constants";
+import { userError } from "../shared/i18n";
 import type { PageMetrics, PrepareResult } from "../shared/types";
 import { DebuggerSession } from "./debugger-session";
 
@@ -81,7 +82,7 @@ export function countPdfPages(pdf: Uint8Array): number | undefined {
 function normalizeMetrics(metrics: LayoutMetricsResponse): PageMetrics {
   const size = metrics.cssContentSize ?? metrics.contentSize;
   if (!size || !Number.isFinite(size.width) || !Number.isFinite(size.height)) {
-    throw new Error("Chrome could not measure this webpage.");
+    throw userError("errorMeasureWebpage");
   }
   return { width: Math.ceil(size.width * 100) / 100, height: Math.ceil(size.height * 100) / 100 };
 }
@@ -90,9 +91,7 @@ function validateSize({ width, height }: PageMetrics): void {
   const widthInches = width / PDF_DPI;
   const heightInches = height / PDF_DPI;
   if (widthInches > MAX_PAPER_INCHES || heightInches > MAX_PAPER_INCHES) {
-    throw new Error(
-      `This webpage is too long or wide to export as one continuous PDF page (${Math.round(width)} × ${Math.round(height)} CSS px). Chrome's safe single-page limit is ${MAX_PAPER_INCHES} inches.`
-    );
+    throw userError("errorWebpageTooLarge", [String(Math.round(width)), String(Math.round(height)), String(MAX_PAPER_INCHES)]);
   }
 }
 
@@ -103,9 +102,7 @@ function validatePreparedMetrics(measured: PageMetrics, prepared: PrepareResult)
     Math.abs(measured.height - prepared.height) > heightTolerance ||
     Math.abs(measured.width - prepared.width) > widthTolerance
   ) {
-    throw new Error(
-      "The page layout changed again immediately before printing. Wait for the page to finish loading and try again."
-    );
+    throw userError("errorLayoutChanged");
   }
 }
 
@@ -145,7 +142,7 @@ export async function generatePdf(
         scale: 1,
         transferMode: "ReturnAsStream"
       });
-      if (!result.stream) throw new Error("Chrome did not return a PDF stream.");
+      if (!result.stream) throw userError("errorMissingPdfStream");
       const pdf = await readPdfStream(session, result.stream);
       lastPageCount = countPdfPages(pdf);
       attempts.push({
@@ -156,7 +153,7 @@ export async function generatePdf(
       });
       if (lastPageCount === 1) return { pdf, metrics };
       if (lastPageCount === undefined) {
-        throw new Error("Chrome returned a PDF whose page count could not be verified. No unverified file was saved.");
+        throw userError("errorUnverifiedPageCount");
       }
     }
 
@@ -167,11 +164,8 @@ export async function generatePdf(
       attempts
     });
     const inaccessibleStyles = prepared.diagnostics.inaccessibleStyleSheets;
-    throw new Error(
-      inaccessibleStyles > 0
-        ? `Chrome generated ${lastPageCount ?? "multiple"} PDF pages. Some cross-origin page styles could not be stabilized, so no incomplete PDF was saved.`
-        : `Chrome generated ${lastPageCount ?? "multiple"} PDF pages, which does not meet the one-page export requirement. No incomplete PDF was saved.`
-    );
+    const pageCount = lastPageCount === undefined ? "?" : String(lastPageCount);
+    throw userError(inaccessibleStyles > 0 ? "errorMultiplePagesCrossOrigin" : "errorMultiplePages", pageCount);
   } finally {
     try {
       await session.send("Emulation.setEmulatedMedia", { media: "" });

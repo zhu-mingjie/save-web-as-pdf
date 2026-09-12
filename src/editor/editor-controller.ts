@@ -1,5 +1,6 @@
 import type { MessageResponse, RuntimeRequest } from "../shared/messages";
 import { createSourcePageMetadata } from "../shared/filename";
+import { localizeDocument, t, UserFacingError, visibleError } from "../shared/i18n";
 import type { SourcePageMetadata } from "../shared/types";
 import { ElementSelector } from "./element-selector";
 import { RemovalHistory } from "./removal-history";
@@ -51,13 +52,13 @@ class EditorController {
       <style>
         :host { all: initial; }
         #overlay { position: fixed; z-index: 2147483645; pointer-events: none; box-sizing: border-box; border: 2px solid #d93025; background: rgba(217, 48, 37, .09); }
-        #toolbar { position: fixed; z-index: 2147483647; top: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; padding: 8px; border: 1px solid rgba(0,0,0,.14); border-radius: 12px; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,.22); font: 13px/1.2 system-ui, sans-serif; color: #202124; }
-        button { min-height: 32px; padding: 0 12px; border: 1px solid #dadce0; border-radius: 7px; background: #fff; color: #202124; font: 600 13px system-ui, sans-serif; cursor: pointer; }
+        #toolbar { position: fixed; z-index: 2147483647; top: 16px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; max-width: calc(100vw - 32px); padding: 8px; border: 1px solid rgba(0,0,0,.14); border-radius: 12px; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,.22); font: 13px/1.2 system-ui, sans-serif; color: #202124; }
+        button { min-height: 32px; padding: 6px 12px; border: 1px solid #dadce0; border-radius: 7px; background: #fff; color: #202124; font: 600 13px/1.2 system-ui, sans-serif; white-space: nowrap; cursor: pointer; }
         button:hover:not(:disabled) { background: #f1f3f4; }
         button.primary { border-color: #0b57d0; background: #0b57d0; color: #fff; }
         button.danger { color: #b3261e; }
         button:disabled { opacity: .45; cursor: default; }
-        #status { min-width: 72px; margin: 0 4px; color: #5f6368; white-space: nowrap; }
+        #status { min-width: 72px; margin: 0 4px; color: #5f6368; text-align: center; }
         #tip { width: min(340px, calc(100vw - 40px)); padding: 0; border: 0; border-radius: 14px; background: #fff; color: #202124; box-shadow: 0 12px 42px rgba(0,0,0,.28); font: 14px/1.5 system-ui, sans-serif; }
         #tip::backdrop { background: rgba(32,33,36,.36); }
         #tip-card { padding: 22px; }
@@ -68,21 +69,22 @@ class EditorController {
       </style>
       <div id="overlay" hidden></div>
       <div id="toolbar">
-        <button id="undo" type="button">Undo</button>
-        <button id="redo" type="button">Redo</button>
-        <button id="restore" type="button">Restore</button>
-        <span id="status">0 removed</span>
-        <button id="save" class="primary" type="button">Save PDF</button>
-        <button id="exit" class="danger" type="button">Exit</button>
+        <button id="undo" type="button" data-i18n="editorUndo"></button>
+        <button id="redo" type="button" data-i18n="editorRedo"></button>
+        <button id="restore" type="button" data-i18n="editorRestore"></button>
+        <span id="status"></span>
+        <button id="save" class="primary" type="button" data-i18n="editorSavePdf"></button>
+        <button id="exit" class="danger" type="button" data-i18n="editorExit"></button>
       </div>
       <dialog id="tip" aria-labelledby="tip-title">
         <div id="tip-card">
-          <h2 id="tip-title">Remove unwanted elements</h2>
-          <p>Hover over any section and click to remove it. You can undo your changes before saving.</p>
-          <button id="got-it" class="primary" type="button">Got it</button>
+          <h2 id="tip-title" data-i18n="editorRemoveTitle"></h2>
+          <p data-i18n="editorRemoveBody"></p>
+          <button id="got-it" class="primary" type="button" data-i18n="gotIt"></button>
         </div>
       </dialog>
     `;
+    localizeDocument(shadow);
     (document.documentElement ?? document.body).append(host);
     this.host = host;
     this.undoButton = shadow.querySelector("#undo");
@@ -155,8 +157,8 @@ class EditorController {
     if (this.undoButton) this.undoButton.disabled = !this.history.canUndo || this.saving;
     if (this.redoButton) this.redoButton.disabled = !this.history.canRedo || this.saving;
     if (this.restoreButton) this.restoreButton.disabled = this.history.count === 0 || this.saving;
-    if (this.saveButton) this.saveButton.textContent = this.saving ? "Cancel Export" : "Save PDF";
-    if (this.status) this.status.textContent = this.saving ? "Preparing…" : `${this.history.count} removed`;
+    if (this.saveButton) this.saveButton.textContent = this.saving ? t("cancelExport") : t("editorSavePdf");
+    if (this.status) this.status.textContent = this.saving ? t("preparing") : t("editorRemovedCount", String(this.history.count));
   }
 
   private async save(): Promise<void> {
@@ -171,9 +173,9 @@ class EditorController {
         type: "EDIT_SAVE_REQUEST",
         metadata: this.metadata
       } satisfies RuntimeRequest)) as MessageResponse;
-      if (!response.ok) throw new Error(response.error);
+      if (!response.ok) throw new UserFacingError(response.error);
     } catch (error) {
-      alert(`Save Web as PDF: ${error instanceof Error ? error.message : String(error)}`);
+      alert(`${t("extensionName")}: ${visibleError(error)}`);
       this.destroy();
     } finally {
       this.stopKeepalive();
@@ -182,12 +184,12 @@ class EditorController {
 
   private async cancelSave(): Promise<void> {
     if (!this.saving) return;
-    if (this.status) this.status.textContent = "Canceling…";
+    if (this.status) this.status.textContent = t("canceling");
     try {
       const response = (await chrome.runtime.sendMessage({ type: "CANCEL_EXPORT" } satisfies RuntimeRequest)) as MessageResponse;
-      if (!response.ok) throw new Error(response.error);
+      if (!response.ok) throw new UserFacingError(response.error);
     } catch (error) {
-      alert(`Save Web as PDF: ${error instanceof Error ? error.message : String(error)}`);
+      alert(`${t("extensionName")}: ${visibleError(error)}`);
     }
   }
 
@@ -227,7 +229,7 @@ if (!window.__swpEditorInstalled) {
         controller.start(message.metadata);
         sendResponse({ ok: true });
       } catch (error) {
-        sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) });
+        sendResponse({ ok: false, error: visibleError(error) });
       }
     } else if (message.type === "EDITOR_FINISH") {
       controller.finish();

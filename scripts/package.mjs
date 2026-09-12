@@ -9,6 +9,7 @@ const runNode = (script) =>
 
 runNode(path.join("scripts", "clean.mjs"));
 runNode(path.join("scripts", "test-filename.mjs"));
+runNode(path.join("scripts", "test-i18n.mjs"));
 runNode(path.join("scripts", "build.mjs"));
 
 const distDirectory = path.join(root, "dist");

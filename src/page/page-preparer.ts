@@ -18,6 +18,7 @@ import type {
   PrepareResult
 } from "../shared/types";
 import type { PagePreparationState } from "./page-state";
+import { t, userError } from "../shared/i18n";
 import { hasPageState, setPageState, takePageState } from "./page-state";
 import { defaultCaptureMode, extractZhihuAnswerId, hasViewportUnitToken } from "./capture-rules";
 
@@ -69,7 +70,7 @@ interface FreezeResult {
 }
 
 function throwIfCanceled(signal: AbortSignal): void {
-  if (signal.aborted) throw new Error("Export canceled.");
+  if (signal.aborted) throw userError("errorExportCanceled");
 }
 
 function sleep(ms: number, signal: AbortSignal): Promise<void> {
@@ -80,7 +81,7 @@ function sleep(ms: number, signal: AbortSignal): Promise<void> {
     }, ms);
     const onAbort = () => {
       clearTimeout(timer);
-      reject(new Error("Export canceled."));
+      reject(userError("errorExportCanceled"));
     };
     signal.addEventListener("abort", onAbort, { once: true });
   });
@@ -106,7 +107,7 @@ function remainingPreparationTime(startedAt: number): number {
 
 function throwIfPreparationTimedOut(startedAt: number): void {
   if (remainingPreparationTime(startedAt) <= 0) {
-    throw new Error("This page could not be prepared within the safe export time limit. No incomplete PDF was saved.");
+    throw userError("errorPreparationTimeout");
   }
 }
 
@@ -318,11 +319,7 @@ function findZhihuQuestionSection(answer: Element): Element {
     (section) => !section.contains(answer) && Boolean(section.querySelector(".QuestionHeader-title, h1"))
   );
   if (candidates.length !== 1) {
-    throw new Error(
-      candidates.length === 0
-        ? "The Zhihu question section could not be identified, so no PDF was saved."
-        : "More than one Zhihu question section was found, so no PDF was saved."
-    );
+    throw userError(candidates.length === 0 ? "errorZhihuQuestionMissing" : "errorZhihuQuestionMultiple");
   }
   return candidates[0]!;
 }
@@ -333,7 +330,7 @@ function createCapturePlan(state: PagePreparationState): CapturePlan {
     const mode = defaultCaptureMode(location.href);
     return {
       mode,
-      label: mode === "loaded-snapshot" ? "Loaded-content snapshot" : "Full page",
+      label: mode === "loaded-snapshot" ? t("captureLoadedSnapshot") : t("captureFullPage"),
       resourceRoots: [document],
       scrollTarget: null,
       hiddenBranches: 0
@@ -343,16 +340,12 @@ function createCapturePlan(state: PagePreparationState): CapturePlan {
   const answerItems = Array.from(document.querySelectorAll(".AnswerItem"));
   const matches = answerItems.filter((item) => containsAnswerId(item, answerId));
   if (matches.length !== 1) {
-    throw new Error(
-      matches.length === 0
-        ? "The requested Zhihu answer could not be identified. Open the full answer and try again."
-        : "The requested Zhihu answer matched more than one page section, so no PDF was saved."
-    );
+    throw userError(matches.length === 0 ? "errorZhihuAnswerMissing" : "errorZhihuAnswerMultiple");
   }
 
   const answer = matches[0]!;
   if (answer.querySelector(".RichContent--collapsed")) {
-    throw new Error("This Zhihu answer is collapsed. Expand the full answer before saving it.");
+    throw userError("errorZhihuAnswerCollapsed");
   }
   const questionSection = findZhihuQuestionSection(answer);
 
@@ -360,7 +353,7 @@ function createCapturePlan(state: PagePreparationState): CapturePlan {
   hiddenBranches += hideFixedInterface(state, document.body, [questionSection, answer]);
   return {
     mode: "zhihu-answer",
-    label: "Zhihu question and selected answer",
+    label: t("captureZhihuQuestionAnswer"),
     resourceRoots: [questionSection, answer],
     scrollTarget: answer,
     hiddenBranches
@@ -517,13 +510,13 @@ export async function preparePage(signal: AbortSignal): Promise<PrepareResult> {
     const stability = await waitForStableLayout(signal, stabilityTimeout);
 
     if (!stability.stable) {
-      throw new Error("This page kept changing during preparation. Wait for it to finish loading and try again.");
+      throw userError("errorPageChanging");
     }
     if (scroll.stopReason === "height-limit") {
-      throw new Error("This page exceeds the safe size limit for one continuous PDF page.");
+      throw userError("errorPageSizeLimit");
     }
     if (scroll.stopReason === "time-limit" || scroll.stopReason === "scroll-limit") {
-      throw new Error("This page could not be prepared within the safe export limit. No incomplete PDF was saved.");
+      throw userError("errorPreparationLimit");
     }
 
     const prepared = pageMetrics();
@@ -550,7 +543,7 @@ export async function preparePage(signal: AbortSignal): Promise<PrepareResult> {
       title: document.title,
       url: location.href,
       captureMode,
-      captureLabel: captureMode === plan.mode ? plan.label : "Loaded-content snapshot",
+      captureLabel: captureMode === plan.mode ? plan.label : t("captureLoadedSnapshot"),
       diagnostics
     };
   } catch (error) {

@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Save Web as PDF",
-  "version": "0.3.4",
+  "name": "__MSG_extensionName__",
+  "version": "0.4.0",
+  "default_locale": "en",
   "minimum_chrome_version": "120",
-  "description": "Save the current webpage as one continuous, searchable PDF page.",
+  "description": "__MSG_extensionDescription__",
   "permissions": [
     "activeTab",
     "scripting",
@@ -22,7 +23,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Save Web as PDF",
+    "default_title": "__MSG_extensionName__",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",

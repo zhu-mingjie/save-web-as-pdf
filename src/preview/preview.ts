@@ -1,4 +1,7 @@
 import { takePdf } from "../shared/pdf-store";
+import { localizeDocument, userError, visibleError } from "../shared/i18n";
+
+localizeDocument();
 
 const filenameInput = document.querySelector<HTMLInputElement>("#filename")!;
 const downloadButton = document.querySelector<HTMLButtonElement>("#download")!;
@@ -10,9 +13,9 @@ let downloadFilename = "webpage.pdf";
 
 async function load(): Promise<void> {
   const id = new URLSearchParams(location.search).get("id");
-  if (!id) throw new Error("The PDF identifier is missing.");
+  if (!id) throw userError("errorPdfIdentifierMissing");
   const record = await takePdf(id);
-  if (!record) throw new Error("This PDF preview has expired. Generate it again from the webpage.");
+  if (!record) throw userError("errorPreviewExpired");
   downloadFilename = record.metadata.filename;
   filenameInput.value = downloadFilename;
   source.textContent = record.metadata.url;
@@ -35,7 +38,7 @@ downloadButton.addEventListener("click", async () => {
     });
   } catch (error) {
     status.hidden = false;
-    status.textContent = error instanceof Error ? error.message : String(error);
+    status.textContent = visibleError(error, "errorDownloadFailed");
   } finally {
     downloadButton.disabled = false;
   }
@@ -47,5 +50,5 @@ window.addEventListener("beforeunload", () => {
 
 void load().catch((error: unknown) => {
   status.hidden = false;
-  status.textContent = error instanceof Error ? error.message : String(error);
+  status.textContent = visibleError(error);
 });

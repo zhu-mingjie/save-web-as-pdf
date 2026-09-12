@@ -8,4 +8,5 @@ const runNode = (script, args = []) =>
 runNode(path.join("node_modules", "typescript", "bin", "tsc"), ["--noEmit"]);
 runNode(path.join("scripts", "test-filename.mjs"));
 runNode(path.join("scripts", "test-export-logic.mjs"));
+runNode(path.join("scripts", "test-i18n.mjs"));
 runNode(path.join("scripts", "build.mjs"));

@@ -1,4 +1,5 @@
 import type { RuntimeRequest } from "../shared/messages";
+import { visibleError } from "../shared/i18n";
 import { cleanupPage, preparePage } from "./page-preparer";
 
 declare global {
@@ -18,7 +19,7 @@ if (!window.__swpPageAgentInstalled) {
       preparePage(preparationController.signal)
         .then((data) => sendResponse({ ok: true, data }))
         .catch((error: unknown) =>
-          sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) })
+          sendResponse({ ok: false, error: visibleError(error) })
         );
       return true;
     }
@@ -28,7 +29,7 @@ if (!window.__swpPageAgentInstalled) {
       cleanupPage()
         .then(() => sendResponse({ ok: true }))
         .catch((error: unknown) =>
-          sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) })
+          sendResponse({ ok: false, error: visibleError(error) })
         );
       return true;
     }
@@ -38,7 +39,7 @@ if (!window.__swpPageAgentInstalled) {
       cleanupPage()
         .then(() => sendResponse({ ok: true }))
         .catch((error: unknown) =>
-          sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) })
+          sendResponse({ ok: false, error: visibleError(error) })
         );
       return true;
     }

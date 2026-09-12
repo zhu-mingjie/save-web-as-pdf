@@ -26,6 +26,7 @@ await build({
 
 await Promise.all([
   cp("manifest.json", path.join(outdir, "manifest.json")),
+  cp("_locales", path.join(outdir, "_locales"), { recursive: true }),
   cp("icons", path.join(outdir, "icons"), { recursive: true }),
   cp("src/popup/popup.html", path.join(outdir, "popup/popup.html")),
   cp("src/popup/popup.css", path.join(outdir, "popup/popup.css")),
