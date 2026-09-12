@@ -102,4 +102,9 @@ for (const filename of ["README.md", "PRIVACY.md"]) {
   assert.match(content, /support@miengieh\.com/);
 }
 
+const popupCss = await readFile(path.join(root, "src/popup/popup.css"), "utf8");
+assert.match(popupCss, /html, body\s*\{[^}]*width:\s*340px;[^}]*min-width:\s*340px;/s);
+assert.doesNotMatch(popupCss, /max-width:\s*100vw/);
+assert.match(popupCss, /button\s*\{[^}]*white-space:\s*nowrap;[^}]*text-wrap:\s*nowrap;/s);
+
 console.log(`i18n tests: OK (${expectedLocales.length} locale catalogs, ${englishKeys.length} messages)`);

@@ -1,6 +1,6 @@
-# Save Web as PDF 0.4.0 — Final Acceptance Test
+# Save Web as PDF 0.4.1 — Final Acceptance Test
 
-Use the exact `release/save-web-as-pdf-v0.4.0.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
+Use the exact `release/save-web-as-pdf-v0.4.1.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
 
 ## Clean-device installation
 

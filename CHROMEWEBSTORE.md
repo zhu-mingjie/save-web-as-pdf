@@ -39,7 +39,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.4.0 — Added automatic interface localization in 10 languages and updated support information.
+Version 0.4.1 — Corrected the extension popup width so localized text remains readable.
 
 **Category**
 
@@ -120,6 +120,10 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.4.1 — 2026-09-12
+
+- Corrected a popup sizing issue that caused localized headings and buttons to wrap vertically
 
 ### 0.4.0 — 2026-09-12
 
