@@ -1,6 +1,6 @@
-# Save Web as PDF 0.4.1 — Final Acceptance Test
+# Save Web as PDF 0.4.2 — Final Acceptance Test
 
-Use the exact `release/save-web-as-pdf-v0.4.1.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
+Use the exact `release/save-web-as-pdf-v0.4.2.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
 
 ## Clean-device installation
 
@@ -18,6 +18,8 @@ Run once on a Windows computer and once on a macOS computer that does not have N
 - Export a long article with images, tables, links, and lazy-loaded content.
 - Start from the middle of a page and confirm the original scroll position is restored.
 - Confirm the preview opens and the PDF contains exactly one page.
+- Confirm the suggested filename uses the webpage's current title rather than an earlier cached tab title.
+- Confirm Chinese, Japanese, Korean, accented Latin, emoji, and percent-encoded titles remain readable in the suggested filename.
 - Search and copy text from the PDF.
 - Download using a title containing Chinese, Japanese, Korean, emoji, accents, reserved Windows characters, and a very long title.
 - Confirm the saved filename is valid and the PDF opens normally.

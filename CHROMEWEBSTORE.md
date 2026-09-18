@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Save Web as PDF
 
-> Last Updated: 2026-09-12
+> Last Updated: 2026-09-18
 
 ## Store Listing
 
@@ -39,7 +39,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.4.1 — Corrected the extension popup width so localized text remains readable.
+Version 0.4.2 — Restored reliable webpage-title filenames and repaired common title encoding errors.
 
 **Category**
 
@@ -120,6 +120,12 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.4.2 — 2026-09-18
+
+- Restored automatic PDF naming from the webpage's current title
+- Repaired common percent-encoded and UTF-8-misdecoded title text before suggesting the filename
+- Preserved readable Unicode filenames across supported desktop platforms
 
 ### 0.4.1 — 2026-09-12
 
