@@ -33,10 +33,41 @@ for (const value of ["100vw", "900px", "var(--height)", "auto", "url(/image-vh.p
   assert.equal(rules.hasViewportUnitToken(value), false, value);
 }
 
-const pdf = await loadSourceModule(`export { countPdfPages } from "./src/background/pdf-generator.ts";`);
+const pdf = await loadSourceModule(`
+  export { countPdfPages, createPrintPlan, isAcceptablePageCount } from "./src/background/pdf-generator.ts";
+`);
 const bytes = (value) => new TextEncoder().encode(value);
 assert.equal(pdf.countPdfPages(bytes("%PDF-1.7\n1 0 obj << /Type /Pages /Count 1 >> endobj\n2 0 obj << /Type /Page >> endobj")), 1);
 assert.equal(pdf.countPdfPages(bytes("%PDF-1.7\n1 0 obj << /Type/Page >> endobj\n2 0 obj << /Type /Page /Parent 3 0 R >> endobj")), 2);
 assert.equal(pdf.countPdfPages(bytes("%PDF-1.7\n1 0 obj << /Type /Pages /Count 0 >> endobj")), undefined);
+
+const normalPlan = pdf.createPrintPlan({ width: 1440, height: 12000 });
+assert.equal(normalPlan.mode, "single-page");
+assert.equal(normalPlan.scale, 1);
+assert.equal(normalPlan.paperWidth, 15.01);
+assert.deepEqual(normalPlan.paperHeights, [125.01, 125.04, 125.1]);
+assert.equal(normalPlan.estimatedPageCount, 1);
+assert.equal(pdf.isAcceptablePageCount(normalPlan, 1), true);
+assert.equal(pdf.isAcceptablePageCount(normalPlan, 2), false);
+
+const wikipediaPlan = pdf.createPrintPlan({ width: 2180, height: 31934 });
+assert.equal(wikipediaPlan.mode, "paginated");
+assert.equal(wikipediaPlan.scale, 1);
+assert.ok(wikipediaPlan.paperWidth > 22 && wikipediaPlan.paperWidth < 23);
+assert.deepEqual(wikipediaPlan.paperHeights, [200]);
+assert.equal(wikipediaPlan.estimatedPageCount, 2);
+assert.equal(pdf.isAcceptablePageCount(wikipediaPlan, 2), true);
+assert.equal(pdf.isAcceptablePageCount(wikipediaPlan, 3), true);
+
+const tallPlan = pdf.createPrintPlan({ width: 1440, height: 200000 });
+assert.equal(tallPlan.mode, "paginated");
+assert.equal(tallPlan.estimatedPageCount, 11);
+
+const widePlan = pdf.createPrintPlan({ width: 30000, height: 12000 });
+assert.equal(widePlan.mode, "single-page");
+assert.ok(widePlan.scale > 0.63 && widePlan.scale < 0.65);
+assert.ok(Math.abs(widePlan.paperWidth - 200) < 0.000001);
+
+assert.equal(pdf.createPrintPlan({ width: 200000, height: 12000 }), undefined);
 
 console.log("Export logic tests: OK");

@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Save Web as PDF
 
-> Last Updated: 2026-09-18
+> Last Updated: 2026-09-21
 
 ## Store Listing
 
@@ -10,14 +10,15 @@ Save Web as PDF
 
 **Short Description**
 
-Save the current webpage as one continuous, searchable PDF page, with an optional cleanup step before export.
+Save the current webpage as a searchable PDF with the fewest practical pages, with an optional cleanup step before export.
 
 **Detailed Description**
 
-Save the current webpage as one continuous PDF page while preserving searchable and selectable text wherever Chrome supports it.
+Save the current webpage as a PDF while preserving searchable and selectable text wherever Chrome supports it. Shorter webpages remain one continuous page; longer webpages use the longest safe page size to keep the page count low.
 
 FEATURES
-• Save a complete webpage as one continuous PDF page
+• Save shorter webpages as one continuous PDF page
+• Automatically split longer webpages into the fewest practical pages
 • Preserve visible layout, images, colors, tables, links, and searchable text where supported
 • Keep viewport-sized sections stable on modern responsive webpages
 • Save the complete question section and requested answer from supported Zhihu answer links without unrelated recommendations
@@ -39,7 +40,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.4.2 — Restored reliable webpage-title filenames and repaired common title encoding errors.
+Version 0.4.5 — The popup now stays compact during normal use and expands only when status or error text is shown.
 
 **Category**
 
@@ -51,7 +52,7 @@ English
 
 ## Single Purpose
 
-Save a webpage selected by the user as one continuous, searchable PDF page, optionally after removing unwanted elements.
+Save a webpage selected by the user as a searchable PDF with the fewest practical pages, optionally after removing unwanted elements.
 
 ## Permissions Justification
 
@@ -97,6 +98,7 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - Store icon: `icons/icon-128.png`
 - Small promotional image: `store-assets/small-promo-440x280.png`
 - Popup screenshot: `store-assets/screenshot-popup-640x400.png`
+- Refresh the popup screenshot before store submission to reflect the compact default height.
 - Recommended additional screenshot: capture the completed PDF preview during the final Chrome acceptance test.
 - Marquee promotional image: optional, not prepared
 
@@ -120,6 +122,18 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.4.5 — 2026-09-21
+
+- Removed unused empty space below the popup controls during normal use
+- Displayed status and error messages only when present
+- Limited long error messages to a scrollable region so the popup stays within Chrome's size limits
+
+### 0.4.4 — 2026-09-21
+
+- Kept webpages within Chrome's safe single-page height as one continuous PDF page
+- Exported longer webpages across maximum-height PDF pages instead of rejecting multi-page output
+- Preserved searchable text, selectable text, links, and browser-rendered page content without a screenshot fallback
 
 ### 0.4.2 — 2026-09-18
 

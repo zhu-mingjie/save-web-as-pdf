@@ -19,6 +19,18 @@ interface ReadResponse {
   eof: boolean;
 }
 
+export interface PrintPlan {
+  mode: "single-page" | "paginated";
+  scale: number;
+  paperWidth: number;
+  paperHeights: number[];
+  estimatedPageCount: number;
+}
+
+const MIN_PRINT_SCALE = 0.1;
+const PAPER_WIDTH_PADDING_INCHES = 0.01;
+const MAX_ROUNDING_PADDING_INCHES = 0.1;
+
 function decodeBase64Chunk(value: string): Uint8Array {
   const decoded = atob(value);
   const bytes = new Uint8Array(decoded.length);
@@ -81,18 +93,42 @@ export function countPdfPages(pdf: Uint8Array): number | undefined {
 
 function normalizeMetrics(metrics: LayoutMetricsResponse): PageMetrics {
   const size = metrics.cssContentSize ?? metrics.contentSize;
-  if (!size || !Number.isFinite(size.width) || !Number.isFinite(size.height)) {
+  if (
+    !size ||
+    !Number.isFinite(size.width) ||
+    !Number.isFinite(size.height) ||
+    size.width <= 0 ||
+    size.height <= 0
+  ) {
     throw userError("errorMeasureWebpage");
   }
   return { width: Math.ceil(size.width * 100) / 100, height: Math.ceil(size.height * 100) / 100 };
 }
 
-function validateSize({ width, height }: PageMetrics): void {
+export function createPrintPlan({ width, height }: PageMetrics): PrintPlan | undefined {
   const widthInches = width / PDF_DPI;
-  const heightInches = height / PDF_DPI;
-  if (widthInches > MAX_PAPER_INCHES || heightInches > MAX_PAPER_INCHES) {
-    throw userError("errorWebpageTooLarge", [String(Math.round(width)), String(Math.round(height)), String(MAX_PAPER_INCHES)]);
-  }
+  const maximumContentWidth = MAX_PAPER_INCHES - PAPER_WIDTH_PADDING_INCHES;
+  const requiredScale = Math.min(1, maximumContentWidth / widthInches);
+  if (!Number.isFinite(requiredScale) || requiredScale < MIN_PRINT_SCALE) return undefined;
+
+  const scaledHeight = (height * requiredScale) / PDF_DPI;
+  const maximumSinglePageContentHeight = MAX_PAPER_INCHES - MAX_ROUNDING_PADDING_INCHES;
+  const singlePage = scaledHeight <= maximumSinglePageContentHeight;
+  const paperHeights = singlePage
+    ? [0.01, 0.04, MAX_ROUNDING_PADDING_INCHES].map((padding) => scaledHeight + padding)
+    : [MAX_PAPER_INCHES];
+
+  return {
+    mode: singlePage ? "single-page" : "paginated",
+    scale: requiredScale,
+    paperWidth: Math.min(MAX_PAPER_INCHES, widthInches * requiredScale + PAPER_WIDTH_PADDING_INCHES),
+    paperHeights,
+    estimatedPageCount: singlePage ? 1 : Math.ceil(scaledHeight / MAX_PAPER_INCHES)
+  };
+}
+
+export function isAcceptablePageCount(plan: PrintPlan, pageCount: number): boolean {
+  return pageCount >= 1 && (plan.mode === "paginated" || pageCount === 1);
 }
 
 function validatePreparedMetrics(measured: PageMetrics, prepared: PrepareResult): void {
@@ -111,23 +147,32 @@ export async function generatePdf(
   prepared: PrepareResult
 ): Promise<{ pdf: Uint8Array; metrics: PageMetrics }> {
   const session = new DebuggerSession(tabId);
-  const attempts: Array<{ paperWidth: number; paperHeight: number; pageCount?: number; durationMs: number }> = [];
+  const attempts: Array<{
+    scale: number;
+    paperWidth: number;
+    paperHeight: number;
+    pageCount?: number;
+    durationMs: number;
+  }> = [];
   try {
     await session.attach();
     await session.send("Page.enable");
     await session.send("Emulation.setEmulatedMedia", { media: "screen" });
     const metrics = normalizeMetrics(await session.send<LayoutMetricsResponse>("Page.getLayoutMetrics"));
     validatePreparedMetrics(metrics, prepared);
-    validateSize(metrics);
+    const printPlan = createPrintPlan(metrics);
+    if (!printPlan) {
+      throw userError("errorWebpageTooLarge", [
+        String(Math.round(metrics.width)),
+        String(Math.round(metrics.height)),
+        String(MAX_PAPER_INCHES)
+      ]);
+    }
 
-    const paperWidth = metrics.width / PDF_DPI + 0.01;
-    const basePaperHeight = metrics.height / PDF_DPI;
-    const roundingPadding = [0.01, 0.04, 0.1];
+    const { scale, paperWidth } = printPlan;
     let lastPageCount: number | undefined;
 
-    for (const padding of roundingPadding) {
-      const paperHeight = basePaperHeight + padding;
-      if (paperHeight > MAX_PAPER_INCHES) break;
+    for (const paperHeight of printPlan.paperHeights) {
       const startedAt = performance.now();
       const result = await session.send<PrintResponse>("Page.printToPDF", {
         paperWidth,
@@ -139,25 +184,28 @@ export async function generatePdf(
         printBackground: true,
         displayHeaderFooter: false,
         preferCSSPageSize: false,
-        scale: 1,
+        scale,
         transferMode: "ReturnAsStream"
       });
       if (!result.stream) throw userError("errorMissingPdfStream");
       const pdf = await readPdfStream(session, result.stream);
       lastPageCount = countPdfPages(pdf);
       attempts.push({
+        scale,
         paperWidth,
         paperHeight,
         pageCount: lastPageCount,
         durationMs: Math.round(performance.now() - startedAt)
       });
-      if (lastPageCount === 1) return { pdf, metrics };
       if (lastPageCount === undefined) {
         throw userError("errorUnverifiedPageCount");
       }
+      if (isAcceptablePageCount(printPlan, lastPageCount)) return { pdf, metrics };
     }
 
     console.info("Save Web as PDF print attempts", {
+      printMode: printPlan.mode,
+      estimatedPageCount: printPlan.estimatedPageCount,
       captureMode: prepared.captureMode,
       prepared: prepared.diagnostics.prepared,
       measured: metrics,

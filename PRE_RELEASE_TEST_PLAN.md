@@ -1,6 +1,6 @@
-# Save Web as PDF 0.4.2 — Final Acceptance Test
+# Save Web as PDF 0.4.5 — Final Acceptance Test
 
-Use the exact `release/save-web-as-pdf-v0.4.2.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
+Use the exact `release/save-web-as-pdf-v0.4.5.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
 
 ## Clean-device installation
 
@@ -17,13 +17,14 @@ Run once on a Windows computer and once on a macOS computer that does not have N
 - Export a short static webpage.
 - Export a long article with images, tables, links, and lazy-loaded content.
 - Start from the middle of a page and confirm the original scroll position is restored.
-- Confirm the preview opens and the PDF contains exactly one page.
+- Confirm the preview opens and shorter pages produce exactly one PDF page.
 - Confirm the suggested filename uses the webpage's current title rather than an earlier cached tab title.
 - Confirm Chinese, Japanese, Korean, accented Latin, emoji, and percent-encoded titles remain readable in the suggested filename.
 - Search and copy text from the PDF.
 - Download using a title containing Chinese, Japanese, Korean, emoji, accents, reserved Windows characters, and a very long title.
 - Confirm the saved filename is valid and the PDF opens normally.
 - Export `https://miengieh.com/` and `https://www.deepseek.com/harness/`; confirm each PDF has one page, preserves its beginning and ending content, and contains selectable text and working links.
+- Export `https://zh.wikipedia.org/wiki/维基百科` and `https://en.wikipedia.org/wiki/Wikipedia`; confirm each page exports successfully across the fewest practical maximum-height PDF pages, and confirm the first and last article content remain present.
 
 ## Dynamic pages and Zhihu
 
@@ -56,11 +57,13 @@ Run once on a Windows computer and once on a macOS computer that does not have N
 
 - Try a `chrome://` page and the Chrome Web Store; confirm a clear access error.
 - Open DevTools on the source tab and confirm debugger conflict is explained.
-- Test an extremely long page and confirm the extension reports its size or page-verification error without saving a multi-page file.
+- Test an extremely long page and confirm it exports across maximum-height PDF pages without dropping the final page; pages that exceed the separate preparation height guard should still stop with a clear error.
 - Close or navigate the source tab during export and confirm cleanup completes without a stuck session.
 
 ## Accessibility
 
+- Confirm the popup has no empty status row in its normal state, expands while progress or error text is visible, and returns to its compact height when retrying.
+- Trigger an unusually long error message and confirm the message region scrolls instead of pushing the popup beyond Chrome's maximum height.
 - Navigate the popup and preview with Tab, Shift+Tab, Enter, Space, and Escape.
 - Confirm focus indicators are visible.
 - Confirm status and error text is announced by a screen reader.

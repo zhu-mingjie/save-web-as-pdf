@@ -1,10 +1,11 @@
 # Save Web as PDF
 
-Save a complete webpage as one continuous, searchable PDF page while preserving the page's visual layout.
+Save a complete webpage as a searchable PDF while preserving the page's visual layout. Pages that fit within Chrome's safe single-page limit stay continuous; longer webpages are split into the fewest practical pages.
 
 ## Features
 
-- Save a complete webpage as one continuous PDF page
+- Save shorter webpages as one continuous PDF page
+- Split longer webpages into pages up to Chrome's safe maximum height, keeping the page count as low as practical
 - Keep text selectable, copyable, and searchable
 - Preserve the webpage's screen layout, images, colors, tables, and links where Chromium supports them
 - Stabilize viewport-height sections and spacing before Chrome lays out an extra-long PDF page
@@ -91,7 +92,7 @@ The same release package is used across supported desktop Chrome platforms; ther
 
 ## Release policy
 
-Every version update must be published as a GitHub Release tagged `vX.X.X`. Attach the matching `release/save-web-as-pdf-vX.X.X.zip` package and include a short, user-facing summary of what changed. Follow [RELEASING.md](RELEASING.md) for the required checks and publishing steps.
+Commit and push each reasonably complete development or test version so the source history remains backed up and reversible. A decision to delay a public release does not delay normal source commits or pushes. Create a Git tag, GitHub Release, and public release package only after the version has been tested and the maintainer explicitly approves publication. Follow [RELEASING.md](RELEASING.md) for the required checks and publishing steps.
 
 ## Privacy
 
@@ -107,7 +108,7 @@ The source code, original extension icon, and repository-owned promotional asset
 
 - Chrome blocks extension access to internal pages, the Chrome Web Store, and some other protected pages.
 - DevTools or another debugger cannot own the source tab while an export is running.
-- Very long or wide pages can exceed Chromium or PDF viewer single-page limits. The extension reports an error instead of silently paginating or creating a screenshot.
+- Pages that fit within Chromium's safe single-page height are exported as one continuous page. Longer webpages are automatically paginated with each page using the maximum safe height, except for the final remainder. Extremely wide pages can still exceed Chromium or PDF viewer limits even at the minimum supported print scale.
 - Infinite-scroll and slow-loading pages are bounded by time, iteration, and height guards so an export cannot run forever.
 - Zhihu feeds use a snapshot of the content already loaded when export starts. Supported direct answer URLs preserve the main question section and the requested answer; if either cannot be identified safely, the extension stops instead of exporting different content.
 - Viewport-dependent layout can be stabilized only when the responsible page styles are inspectable. Cross-origin or script-generated styles may still prevent a one-page result, in which case the extension reports the limitation without saving an incomplete PDF.

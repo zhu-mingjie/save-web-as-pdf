@@ -1,5 +1,5 @@
 {
-  "extensionName":{"message":"Save Web as PDF"},"extensionDescription":{"message":"현재 웹페이지를 하나의 연속된 검색 가능한 PDF 페이지로 저장합니다."},"popupSubtitle":{"message":"하나의 연속된 검색 가능한 PDF 페이지."},
+  "extensionName":{"message":"Save Web as PDF"},"extensionDescription":{"message":"현재 웹페이지를 가능한 한 긴 페이지로 구성된 검색 가능한 PDF로 저장합니다."},"popupSubtitle":{"message":"가능한 한 긴 페이지로 구성된 검색 가능한 PDF."},
   "saveFullPage":{"message":"전체 페이지 저장"},"editBeforeSaving":{"message":"편집 후 저장"},"cancelExport":{"message":"내보내기 취소"},
   "preparingZhihuAnswer":{"message":"Zhihu 질문과 선택한 답변을 준비하는 중…"},"preparingZhihuSnapshot":{"message":"현재 로드된 Zhihu 콘텐츠를 준비하는 중…"},"preparingFullPage":{"message":"전체 페이지를 준비하는 중…"},"openingEditor":{"message":"편집기를 여는 중…"},"cancelingExport":{"message":"내보내기를 취소하는 중…"},
   "previewTitle":{"message":"PDF 미리보기 — Save Web as PDF"},"filenameLabel":{"message":"파일 이름"},"downloadPdf":{"message":"PDF 다운로드"},"loadingPreview":{"message":"미리보기를 불러오는 중…"},"generatedPdfPreview":{"message":"생성된 PDF 미리보기"},

@@ -12,5 +12,5 @@ button.danger { border-color: #b3261e; background: transparent; color: #b3261e; 
 button:focus-visible { outline: 3px solid #8ab4f8; outline-offset: 2px; }
 button:disabled { cursor: wait; opacity: .58; }
 [hidden] { display: none !important; }
-#status { min-height: 16px; margin: 0; color: #b3261e; font-size: 12px; line-height: 1.35; }
+#status { max-height: 120px; margin: 0; overflow-wrap: anywhere; overflow-y: auto; color: #b3261e; font-size: 12px; line-height: 1.35; }
 #status.busy { color: color-mix(in srgb, CanvasText 70%, transparent); }

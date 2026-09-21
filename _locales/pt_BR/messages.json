@@ -1,5 +1,5 @@
 {
-  "extensionName":{"message":"Save Web as PDF"},"extensionDescription":{"message":"Salve a página atual como uma única página PDF contínua e pesquisável."},"popupSubtitle":{"message":"Uma única página PDF contínua e pesquisável."},
+  "extensionName":{"message":"Save Web as PDF"},"extensionDescription":{"message":"Salve a página atual em um PDF pesquisável com páginas o mais longas possível."},"popupSubtitle":{"message":"PDF pesquisável com páginas o mais longas possível."},
   "saveFullPage":{"message":"Salvar página inteira"},"editBeforeSaving":{"message":"Editar antes de salvar"},"cancelExport":{"message":"Cancelar exportação"},
   "preparingZhihuAnswer":{"message":"Preparando a pergunta do Zhihu e a resposta selecionada…"},"preparingZhihuSnapshot":{"message":"Preparando o conteúdo do Zhihu já carregado…"},"preparingFullPage":{"message":"Preparando a página inteira…"},"openingEditor":{"message":"Abrindo o editor…"},"cancelingExport":{"message":"Cancelando a exportação…"},
   "previewTitle":{"message":"Visualização do PDF — Save Web as PDF"},"filenameLabel":{"message":"Nome do arquivo"},"downloadPdf":{"message":"Baixar PDF"},"loadingPreview":{"message":"Carregando visualização…"},"generatedPdfPreview":{"message":"Visualização do PDF gerado"},

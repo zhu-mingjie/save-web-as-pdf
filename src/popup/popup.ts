@@ -14,6 +14,12 @@ let completed = false;
 let keepalivePort: chrome.runtime.Port | null = null;
 let keepaliveTimer: number | null = null;
 
+function setStatus(message = "", kind: "busy" | "error" | "" = ""): void {
+  status.textContent = message;
+  status.className = kind;
+  status.hidden = message.length === 0;
+}
+
 function preparationStatus(url?: string): string {
   return /^https:\/\/(?:www\.)?zhihu\.com\/question\/\d+\/answer\/\d+(?:[/?#]|$)/i.test(url ?? "")
     ? t("preparingZhihuAnswer")
@@ -47,8 +53,8 @@ function setBusy(busy: boolean, busyText = ""): void {
   editButton.disabled = busy;
   cancelButton.hidden = !busy;
   cancelButton.disabled = false;
-  status.className = busy ? "busy" : "";
-  if (busyText) status.textContent = busyText;
+  if (busy) setStatus(busyText, "busy");
+  else if (status.classList.contains("busy")) setStatus();
 }
 
 async function request(message: RuntimeRequest, busyText: string, tabId: number): Promise<void> {
@@ -62,8 +68,8 @@ async function request(message: RuntimeRequest, busyText: string, tabId: number)
     completed = true;
     window.close();
   } catch (error) {
-    status.textContent = visibleError(error);
     setBusy(false);
+    setStatus(visibleError(error), "error");
   } finally {
     stopKeepalive();
     currentTabId = null;
@@ -71,6 +77,7 @@ async function request(message: RuntimeRequest, busyText: string, tabId: number)
 }
 
 saveButton.addEventListener("click", async () => {
+  setStatus();
   try {
     const tab = await activeTab();
     await request(
@@ -83,11 +90,12 @@ saveButton.addEventListener("click", async () => {
       tab.id!
     );
   } catch (error) {
-    status.textContent = visibleError(error);
+    setStatus(visibleError(error), "error");
   }
 });
 
 editButton.addEventListener("click", async () => {
+  setStatus();
   try {
     const tab = await activeTab();
     await request(
@@ -100,14 +108,14 @@ editButton.addEventListener("click", async () => {
       tab.id!
     );
   } catch (error) {
-    status.textContent = visibleError(error);
+    setStatus(visibleError(error), "error");
   }
 });
 
 cancelButton.addEventListener("click", async () => {
   if (!exporting || currentTabId === null) return;
   cancelButton.disabled = true;
-  status.textContent = t("cancelingExport");
+  setStatus(t("cancelingExport"), "busy");
   try {
     const response = (await chrome.runtime.sendMessage({
       type: "CANCEL_EXPORT",
@@ -115,7 +123,7 @@ cancelButton.addEventListener("click", async () => {
     } satisfies RuntimeRequest)) as MessageResponse;
     if (!response.ok) throw new UserFacingError(response.error);
   } catch (error) {
-    status.textContent = visibleError(error);
+    setStatus(visibleError(error), "error");
     cancelButton.disabled = false;
   }
 });

@@ -1,5 +1,5 @@
 {
-  "extensionName":{"message":"Save Web as PDF"},"extensionDescription":{"message":"現在のウェブページを、連続した検索可能な1ページのPDFとして保存します。"},"popupSubtitle":{"message":"連続した検索可能な1ページのPDF。"},
+  "extensionName":{"message":"Save Web as PDF"},"extensionDescription":{"message":"現在のウェブページを、可能な限り長いページを使った検索可能なPDFとして保存します。"},"popupSubtitle":{"message":"可能な限り長いページを使った検索可能なPDF。"},
   "saveFullPage":{"message":"ページ全体を保存"},"editBeforeSaving":{"message":"編集してから保存"},"cancelExport":{"message":"書き出しをキャンセル"},
   "preparingZhihuAnswer":{"message":"知乎の質問と指定した回答を準備しています…"},"preparingZhihuSnapshot":{"message":"読み込み済みの知乎コンテンツを準備しています…"},"preparingFullPage":{"message":"ページ全体を準備しています…"},"openingEditor":{"message":"エディターを開いています…"},"cancelingExport":{"message":"書き出しをキャンセルしています…"},
   "previewTitle":{"message":"PDFプレビュー — Save Web as PDF"},"filenameLabel":{"message":"ファイル名"},"downloadPdf":{"message":"PDFをダウンロード"},"loadingPreview":{"message":"プレビューを読み込んでいます…"},"generatedPdfPreview":{"message":"生成されたPDFのプレビュー"},
