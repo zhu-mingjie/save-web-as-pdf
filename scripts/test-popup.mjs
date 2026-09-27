@@ -41,6 +41,7 @@ for (const asset of ["icons/popup-brand.svg", "icons/globe.svg"]) {
 }
 
 assert.match(css, /html, body\s*\{[^}]*width:\s*320px;[^}]*min-width:\s*320px;/s);
+assert.match(css, /:root\s*\{[^}]*--surface-muted:\s*#f9f9f9;/s);
 assert.match(css, /\.brand-header\s*\{[^}]*min-height:\s*48px;[^}]*padding:\s*10px 16px;/s);
 assert.match(css, /h1\s*\{[^}]*font-size:\s*15px;[^}]*font-weight:\s*400;/s);
 assert.match(css, /main\s*\{[^}]*padding:\s*15px 16px 0;/s);

@@ -40,7 +40,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.4.10 — The popup uses lighter title styling and slightly smaller text and icons for a more refined appearance.
+Version 0.5.0 — The popup uses lighter title styling, slightly smaller text and icons, and a softer header background.
 
 **Category**
 
@@ -123,10 +123,11 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 
 ## Version History
 
-### 0.4.10 — 2026-09-27
+### 0.5.0 — 2026-09-27
 
 - Changed the popup title to regular weight
 - Reduced popup text and icons to approximately 90% of their previous sizes using integer pixel values
+- Updated the popup brand-header background to `#f9f9f9` in the light theme
 - Kept the popup layout, interaction targets, and PDF behavior unchanged
 
 ### 0.4.9 — 2026-09-27

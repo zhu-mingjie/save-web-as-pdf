@@ -2,7 +2,7 @@
 
 > Primary source of truth for project context across AI tools and development sessions.
 >
-> Last reviewed: 2026-09-27. Evidence was taken from the 0.4.10 beta working tree and the authoritative Git checkout of GitHub `main`; see sections 12–14 for current status and Git rules.
+> Last reviewed: 2026-09-27. Evidence was taken from the 0.5.0 beta working tree and the authoritative Git checkout of GitHub `main`; see sections 12–14 for current status and Git rules.
 
 ## 1. Project Overview
 
@@ -10,7 +10,7 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 
 - Primary users: desktop Google Chrome users who want a clean archival PDF of a webpage.
 - Product goals: preserve readable page content, avoid screenshot-only output, require no backend or account, and work without Node.js or build tools on the end user's computer.
-- Current maturity: pre-release/beta. GitHub's latest published release recorded in this context is `v0.4.2`; source version `0.4.10` is the current beta and is not an approved public release.
+- Current maturity: pre-release/beta. GitHub's latest published release recorded in this context is `v0.4.2`; source version `0.5.0` is the current beta and is not an approved public release.
 - Repository: `https://github.com/zhu-mingjie/save-web-as-pdf`
 - Default branch: `main`
 
@@ -190,9 +190,9 @@ npm run verify:release  # Validate an existing release artifact
 
 ### Current local snapshot
 
-- The local version is `0.4.10`.
+- The local version is `0.5.0`.
 - The authoritative checkout uses `main` and tracks `origin/main` at `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
-- The 0.4.10 beta keeps the 320px popup layout, changes the title to regular weight, and reduces popup text and icons to approximately 90% using integer pixel values while retaining minimum interaction-target sizes. PDF capture and filename behavior are unchanged.
+- The 0.5.0 beta keeps the 320px popup layout, changes the title to regular weight, reduces popup text and icons to approximately 90% using integer pixel values, and uses `#f9f9f9` for the light-theme brand header while retaining minimum interaction-target sizes. PDF capture and filename behavior are unchanged.
 - The popup website, support, and GitHub destinations are active. The rating text is present but intentionally disabled because `CHROME_WEB_STORE_REVIEW_URL` remains empty.
 - The approved AI handoff files and minimal secret/local-file ignore patterns are included with this beta source sync.
 - Local prompt and analysis Markdown files were intentionally excluded from the public repository.
@@ -214,7 +214,7 @@ npm run verify:release  # Validate an existing release artifact
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The local version (`0.4.10`) is ahead of the latest published tag recorded here (`v0.4.2`), so version history and release notes must be reconciled before the next approved release.
+- The local version (`0.5.0`) is ahead of the latest published tag recorded here (`v0.4.2`), so version history and release notes must be reconciled before the next approved release.
 
 ## 14. Git Workflow
 
@@ -232,6 +232,7 @@ This section is the default authorization model for future AI-assisted work in t
 10. A normal commit/push is not a release. Do not create or publish a Git tag, GitHub Release, Chrome Web Store submission, or other release artifact unless the user explicitly approves that release.
 11. Before any approved release, synchronize versions, run the full test/package checklist, prepare concise user-facing release notes, and let the user perform any explicitly reserved final publish action.
 12. Task-specific user instructions override this default. For the 2026-09-21 handoff task, the user explicitly requested review before any commit or push.
+13. Keep semantic-version components to a single digit for this project; after a patch reaches `.9`, advance the minor version instead of using a two-digit patch component (for example, advance `0.4.9` to `0.5.0`).
 
 ## 15. AI Agent Working Rules
 
@@ -293,9 +294,9 @@ This section is the default authorization model for future AI-assisted work in t
 - **Localization:** long footer labels may wrap within the narrower popup instead of overflowing; the normal Chinese layout remains compact.
 - **Release state:** test ZIP only; no tag, GitHub Release, or store submission is authorized until the user confirms testing passed.
 
-### 2026-09-27 — Codex (0.4.10 lighter popup typography)
+### 2026-09-27 — Codex (0.5.0 lighter popup typography)
 
 - **Worked on:** adjusted only popup typography and icon sizing after beta visual review.
-- **Changed:** removed the bold title weight; changed title/body/button/footer/status text to 15/13/13/11/11px; and changed the brand/globe icons to 22/14px.
+- **Changed:** removed the bold title weight; changed title/body/button/footer/status text to 15/13/13/11/11px; changed the brand/globe icons to 22/14px; and set the light-theme brand-header background to `#f9f9f9`.
 - **Unchanged:** popup width, spacing, minimum interaction targets, error behavior, PDF capture, and filename behavior.
 - **Release state:** test ZIP only; no tag, GitHub Release, or store submission is authorized until the user confirms testing passed.
