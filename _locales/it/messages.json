@@ -1,5 +1,6 @@
 {
   "extensionName":{"message":"Save Web as PDF"},"extensionDescription":{"message":"Salva la pagina web corrente in un PDF ricercabile con pagine più lunghe possibile."},"popupSubtitle":{"message":"PDF ricercabile con pagine più lunghe possibile."},
+  "popupPrompt":{"message":"Scegli come salvare questa pagina"},"supportThisProject":{"message":"Sostieni questo progetto"},"rateThisExtension":{"message":"Valuta questa estensione"},"openWebsite":{"message":"Visita il sito web di Save Web as PDF"},
   "saveFullPage":{"message":"Salva pagina intera"},"editBeforeSaving":{"message":"Modifica prima di salvare"},"cancelExport":{"message":"Annulla esportazione"},
   "preparingZhihuAnswer":{"message":"Preparazione della domanda Zhihu e della risposta selezionata…"},"preparingZhihuSnapshot":{"message":"Preparazione dei contenuti Zhihu già caricati…"},"preparingFullPage":{"message":"Preparazione della pagina intera…"},"openingEditor":{"message":"Apertura dell’editor…"},"cancelingExport":{"message":"Annullamento dell’esportazione…"},
   "previewTitle":{"message":"Anteprima PDF — Save Web as PDF"},"filenameLabel":{"message":"Nome file"},"downloadPdf":{"message":"Scarica PDF"},"loadingPreview":{"message":"Caricamento dell’anteprima…"},"generatedPdfPreview":{"message":"Anteprima del PDF generato"},

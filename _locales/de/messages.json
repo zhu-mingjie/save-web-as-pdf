@@ -1,5 +1,6 @@
 {
   "extensionName":{"message":"Save Web as PDF"},"extensionDescription":{"message":"Speichert die aktuelle Webseite als durchsuchbare PDF-Datei mit möglichst langen Seiten."},"popupSubtitle":{"message":"Durchsuchbare PDF mit möglichst langen Seiten."},
+  "popupPrompt":{"message":"Wählen Sie, wie Sie diese Seite speichern möchten"},"supportThisProject":{"message":"Dieses Projekt unterstützen"},"rateThisExtension":{"message":"Diese Erweiterung bewerten"},"openWebsite":{"message":"Website von Save Web as PDF besuchen"},
   "saveFullPage":{"message":"Ganze Seite speichern"},"editBeforeSaving":{"message":"Vor dem Speichern bearbeiten"},"cancelExport":{"message":"Export abbrechen"},
   "preparingZhihuAnswer":{"message":"Zhihu-Frage und ausgewählte Antwort werden vorbereitet…"},"preparingZhihuSnapshot":{"message":"Bereits geladene Zhihu-Inhalte werden vorbereitet…"},"preparingFullPage":{"message":"Ganze Seite wird vorbereitet…"},"openingEditor":{"message":"Editor wird geöffnet…"},"cancelingExport":{"message":"Export wird abgebrochen…"},
   "previewTitle":{"message":"PDF-Vorschau — Save Web as PDF"},"filenameLabel":{"message":"Dateiname"},"downloadPdf":{"message":"PDF herunterladen"},"loadingPreview":{"message":"Vorschau wird geladen…"},"generatedPdfPreview":{"message":"Vorschau der erstellten PDF"},

@@ -7,14 +7,29 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <main>
+    <header class="brand-header">
+      <img class="brand-icon" src="../icons/popup-brand.svg" width="34" height="34" alt="" />
       <h1 data-i18n="extensionName"></h1>
-      <p class="subtitle" data-i18n="popupSubtitle"></p>
-      <button id="save" class="primary" type="button" data-i18n="saveFullPage"></button>
-      <button id="edit" type="button" data-i18n="editBeforeSaving"></button>
-      <button id="cancel" class="danger" type="button" data-i18n="cancelExport" hidden></button>
+    </header>
+    <main>
+      <p class="prompt" data-i18n="popupPrompt"></p>
+      <div class="actions">
+        <button id="save" class="primary" type="button" data-i18n="saveFullPage"></button>
+        <button id="edit" type="button" data-i18n="editBeforeSaving"></button>
+        <button id="cancel" class="danger" type="button" data-i18n="cancelExport" hidden></button>
+      </div>
       <p id="status" role="status" aria-live="polite" aria-atomic="true" hidden></p>
     </main>
+    <footer>
+      <a id="website-link" class="website-link" data-i18n-aria-label="openWebsite" title="" target="_blank" rel="noopener noreferrer">
+        <img src="../icons/globe.svg" width="16" height="16" alt="" />
+      </a>
+      <a id="support-link" class="footer-link" data-i18n="supportThisProject" target="_blank" rel="noopener noreferrer"></a>
+      <span class="separator" aria-hidden="true">·</span>
+      <a id="review-link" class="footer-link is-disabled" role="link" aria-disabled="true" tabindex="0" data-i18n="rateThisExtension"></a>
+      <span class="separator" aria-hidden="true">·</span>
+      <a id="github-link" class="footer-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </footer>
     <script type="module" src="popup.js"></script>
   </body>
 </html>

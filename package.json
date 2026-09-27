@@ -1,6 +1,6 @@
 {
   "name": "save-web-as-pdf",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "private": true,
   "license": "MIT",
   "description": "A local-first Chrome extension that saves the current webpage as a searchable PDF using the longest practical pages.",
@@ -11,6 +11,7 @@
     "test:filename": "node scripts/test-filename.mjs",
     "test:export": "node scripts/test-export-logic.mjs",
     "test:i18n": "node scripts/test-i18n.mjs",
+    "test:popup": "node scripts/test-popup.mjs",
     "verify:release": "node scripts/verify-release.mjs",
     "package": "node scripts/package.mjs",
     "check": "node scripts/check.mjs"

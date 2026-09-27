@@ -56,7 +56,7 @@ const referencedKeys = new Set();
 for (const filename of sourceFiles) {
   const source = await readFile(path.join(root, filename), "utf8");
   for (const match of source.matchAll(/(?:\bt|userError)\(\s*["']([A-Za-z0-9_]+)["']/g)) referencedKeys.add(match[1]);
-  for (const match of source.matchAll(/data-i18n(?:-title)?=["']([A-Za-z0-9_]+)["']/g)) referencedKeys.add(match[1]);
+  for (const match of source.matchAll(/data-i18n(?:-(?:title|aria-label))?=["']([A-Za-z0-9_]+)["']/g)) referencedKeys.add(match[1]);
 }
 for (const key of referencedKeys) assert.ok(english[key], `Missing English message: ${key}`);
 
@@ -103,8 +103,9 @@ for (const filename of ["README.md", "PRIVACY.md"]) {
 }
 
 const popupCss = await readFile(path.join(root, "src/popup/popup.css"), "utf8");
-assert.match(popupCss, /html, body\s*\{[^}]*width:\s*340px;[^}]*min-width:\s*340px;/s);
+assert.match(popupCss, /html, body\s*\{[^}]*width:\s*430px;[^}]*min-width:\s*430px;/s);
 assert.doesNotMatch(popupCss, /max-width:\s*100vw/);
 assert.match(popupCss, /button\s*\{[^}]*white-space:\s*nowrap;[^}]*text-wrap:\s*nowrap;/s);
+assert.match(popupCss, /#status\s*\{[^}]*max-height:\s*120px;[^}]*overflow-y:\s*auto;/s);
 
 console.log(`i18n tests: OK (${expectedLocales.length} locale catalogs, ${englishKeys.length} messages)`);

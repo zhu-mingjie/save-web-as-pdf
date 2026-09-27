@@ -55,7 +55,8 @@ class EditorController {
         #toolbar { position: fixed; z-index: 2147483647; top: 16px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; max-width: calc(100vw - 32px); padding: 8px; border: 1px solid rgba(0,0,0,.14); border-radius: 12px; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,.22); font: 13px/1.2 system-ui, sans-serif; color: #202124; }
         button { min-height: 32px; padding: 6px 12px; border: 1px solid #dadce0; border-radius: 7px; background: #fff; color: #202124; font: 600 13px/1.2 system-ui, sans-serif; white-space: nowrap; cursor: pointer; }
         button:hover:not(:disabled) { background: #f1f3f4; }
-        button.primary { border-color: #0b57d0; background: #0b57d0; color: #fff; }
+        button.primary { border-color: #000; background: #000; color: #fff; }
+        button.primary:hover:not(:disabled) { background: #242424; }
         button.danger { color: #b3261e; }
         button:disabled { opacity: .45; cursor: default; }
         #status { min-width: 72px; margin: 0 4px; color: #5f6368; text-align: center; }
@@ -65,7 +66,7 @@ class EditorController {
         #tip h2 { margin: 0 0 8px; font-size: 18px; }
         #tip p { margin: 0 0 16px; color: #5f6368; }
         [hidden] { display: none !important; }
-        button:focus-visible { outline: 3px solid #8ab4f8; outline-offset: 2px; }
+        button:focus-visible { outline: 3px solid #5f6368; outline-offset: 2px; }
       </style>
       <div id="overlay" hidden></div>
       <div id="toolbar">

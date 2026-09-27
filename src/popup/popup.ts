@@ -1,6 +1,13 @@
 import type { MessageResponse, RuntimeRequest } from "../shared/messages";
 import { createSourcePageMetadata } from "../shared/filename";
 import { localizeDocument, t, userError, UserFacingError, visibleError } from "../shared/i18n";
+import {
+  CHROME_WEB_STORE_REVIEW_URL,
+  GITHUB_URL,
+  safeExternalUrl,
+  SUPPORT_URL,
+  WEBSITE_URL
+} from "./links";
 
 localizeDocument();
 
@@ -8,11 +15,61 @@ const saveButton = document.querySelector<HTMLButtonElement>("#save")!;
 const editButton = document.querySelector<HTMLButtonElement>("#edit")!;
 const cancelButton = document.querySelector<HTMLButtonElement>("#cancel")!;
 const status = document.querySelector<HTMLParagraphElement>("#status")!;
+const websiteLink = document.querySelector<HTMLAnchorElement>("#website-link")!;
+const supportLink = document.querySelector<HTMLAnchorElement>("#support-link")!;
+const reviewLink = document.querySelector<HTMLAnchorElement>("#review-link")!;
+const githubLink = document.querySelector<HTMLAnchorElement>("#github-link")!;
+const footer = document.querySelector<HTMLElement>("footer")!;
 let currentTabId: number | null = null;
 let exporting = false;
 let completed = false;
 let keepalivePort: chrome.runtime.Port | null = null;
 let keepaliveTimer: number | null = null;
+
+function enableExternalLink(link: HTMLAnchorElement, url: string): void {
+  const href = safeExternalUrl(url);
+  if (!href) return;
+  link.dataset.href = href;
+  link.href = href;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.classList.remove("is-disabled");
+  link.removeAttribute("aria-disabled");
+}
+
+enableExternalLink(websiteLink, WEBSITE_URL);
+enableExternalLink(supportLink, SUPPORT_URL);
+enableExternalLink(githubLink, GITHUB_URL);
+enableExternalLink(reviewLink, CHROME_WEB_STORE_REVIEW_URL);
+
+footer.addEventListener("click", (event) => {
+  if (event.target instanceof Element && event.target.closest("a[aria-disabled='true']")) event.preventDefault();
+});
+footer.addEventListener("keydown", (event) => {
+  if (
+    (event.key === "Enter" || event.key === " ") &&
+    event.target instanceof Element &&
+    event.target.closest("a[aria-disabled='true']")
+  ) {
+    event.preventDefault();
+  }
+});
+
+function setFooterLinksBusy(busy: boolean): void {
+  for (const link of [websiteLink, supportLink, githubLink, reviewLink]) {
+    const href = link.dataset.href;
+    if (!href) continue;
+    if (busy) {
+      link.removeAttribute("href");
+      link.classList.add("is-disabled");
+      link.setAttribute("aria-disabled", "true");
+    } else {
+      link.href = href;
+      link.classList.remove("is-disabled");
+      link.removeAttribute("aria-disabled");
+    }
+  }
+}
 
 function setStatus(message = "", kind: "busy" | "error" | "" = ""): void {
   status.textContent = message;
@@ -49,6 +106,7 @@ function stopKeepalive(): void {
 
 function setBusy(busy: boolean, busyText = ""): void {
   exporting = busy;
+  setFooterLinksBusy(busy);
   saveButton.disabled = busy;
   editButton.disabled = busy;
   cancelButton.hidden = !busy;

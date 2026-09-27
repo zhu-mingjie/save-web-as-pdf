@@ -1,6 +1,6 @@
-# Save Web as PDF 0.4.5 — Final Acceptance Test
+# Save Web as PDF 0.4.6 — Final Acceptance Test
 
-Use the exact `release/save-web-as-pdf-v0.4.5.zip` artifact. Record the Chrome version, operating system version, result, and any console error for every test.
+Use the exact `release/save-web-as-pdf-v0.4.6.zip` artifact after release is explicitly approved. Record the Chrome version, operating system version, result, and any console error for every test.
 
 ## Clean-device installation
 
@@ -62,6 +62,10 @@ Run once on a Windows computer and once on a macOS computer that does not have N
 
 ## Accessibility
 
+- Confirm the popup header uses the supplied document/download SVG, the primary action is black, and the secondary action is light gray without changing the export actions.
+- Confirm the footer stays readable in one line and preserves the order: website globe, Support this project, Rate this extension, GitHub.
+- Confirm the website, support, and GitHub entries open their exact configured HTTPS destinations in new tabs without starting or canceling an export.
+- With the review URL empty, confirm Rate this extension remains visible, exposes disabled semantics, and does nothing on mouse click, Enter, or Space. Temporarily use a non-empty HTTPS test URL to verify the enabled path, then restore the empty value before delivery.
 - Confirm the popup has no empty status row in its normal state, expands while progress or error text is visible, and returns to its compact height when retrying.
 - Trigger an unusually long error message and confirm the message region scrolls instead of pushing the popup beyond Chrome's maximum height.
 - Navigate the popup and preview with Tab, Shift+Tab, Enter, Space, and Escape.
@@ -78,6 +82,7 @@ Run once on a Windows computer and once on a macOS computer that does not have N
 - Confirm `zh-CN` and `zh-SG` use Simplified Chinese, while `zh-TW` and `zh-HK` use Traditional Chinese.
 - Confirm an unsupported Chrome language and a deliberately missing translated message fall back to English.
 - Check that longer German and French controls wrap without clipping and that Chinese, Japanese, and Korean text renders correctly.
+- Confirm the localized popup prompt, footer text, and website accessible label are present in every catalog and do not overlap at the fixed popup width.
 
 ## Store submission
 

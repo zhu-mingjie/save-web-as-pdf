@@ -2,7 +2,7 @@
 
 > Primary source of truth for project context across AI tools and development sessions.
 >
-> Last reviewed: 2026-09-21. Evidence was taken from the reviewed 0.4.5 beta snapshot and the authoritative Git checkout of GitHub `main`. The last remote commit before this beta sync was `7700017c1ecac67d11c0841e0acdb5aa16532162`; see sections 12–14 for current status and Git rules.
+> Last reviewed: 2026-09-27. Evidence was taken from the 0.4.6 beta working tree and the authoritative Git checkout of GitHub `main`; see sections 12–14 for current status and Git rules.
 
 ## 1. Project Overview
 
@@ -10,7 +10,7 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 
 - Primary users: desktop Google Chrome users who want a clean archival PDF of a webpage.
 - Product goals: preserve readable page content, avoid screenshot-only output, require no backend or account, and work without Node.js or build tools on the end user's computer.
-- Current maturity: pre-release/beta. GitHub's latest published release is `v0.4.2`; source version `0.4.5` is the current beta and is not an approved public release.
+- Current maturity: pre-release/beta. GitHub's latest published release recorded in this context is `v0.4.2`; source version `0.4.6` is the current beta and is not an approved public release.
 - Repository: `https://github.com/zhu-mingjie/save-web-as-pdf`
 - Default branch: `main`
 
@@ -23,7 +23,7 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 | Browser APIs | Chrome extensions APIs, Chrome DevTools Protocol, DOM/Web APIs, IndexedDB |
 | UI | Plain HTML and CSS; no UI framework |
 | Build tooling | Node.js 20+, npm, TypeScript, esbuild |
-| Tests/checks | TypeScript typecheck plus Node-based filename, export, localization, build, and release-package checks |
+| Tests/checks | TypeScript typecheck plus Node-based filename, export, localization, popup UI/link, build, and release-package checks |
 | Backend/database/auth | None. PDF data is temporarily stored in local IndexedDB; operation state uses `chrome.storage.session` |
 | Runtime third-party dependencies | None identified; development dependencies are `@types/chrome`, `esbuild`, and `typescript` |
 
@@ -98,6 +98,7 @@ The popup can enter an injected editor mode. The user selects page elements to r
 - **One-time local PDF handoff.** IndexedDB bridges background generation and preview without network transfer or long-lived file retention.
 - **Unicode-safe filenames.** Titles are decoded, common mojibake is repaired, normalized to NFC, stripped of Windows-forbidden characters/reserved names, and capped at 180 UTF-8 bytes.
 - **No runtime framework or dependency bundle.** Plain DOM/CSS and bundled TypeScript keep the runtime small. The historical rationale for selecting esbuild over alternatives is not documented and should not be invented.
+- **Popup resource links are explicit and local-first.** Website, support, and GitHub destinations are configured in `src/popup/links.ts` and open only after a user click. `CHROME_WEB_STORE_REVIEW_URL` is intentionally empty until a stable store review URL exists; the visible rating entry remains disabled without navigation or export side effects.
 
 ## 6. Coding Conventions
 
@@ -157,6 +158,7 @@ npm run typecheck       # TypeScript only
 npm run test:filename   # Filename encoding and cross-platform safety
 npm run test:export     # Print planning and export behavior
 npm run test:i18n       # Catalog shape, fallback, and localization integrity
+npm run test:popup      # Popup resources, links, review configuration, and layout contracts
 npm run build           # Bundle five browser entry points and copy runtime assets
 npm run check           # Typecheck + focused tests + build validation
 npm run package         # Clean, test, build, validate, and create the release ZIP
@@ -183,22 +185,21 @@ npm run verify:release  # Validate an existing release artifact
 
 ### Confirmed on GitHub
 
-- GitHub `main` currently ends at `7700017c1ecac67d11c0841e0acdb5aa16532162` (`fix: restore readable webpage-title filenames`, 2026-09-18).
-- A fresh read-only clone was aligned with `origin/main`, so there were no unpushed commits in that clone.
+- Before the 0.4.6 popup work, the authoritative checkout and `origin/main` were aligned at `f98fa0667ad776b4604969d02eecb8bd801f2aee` (`feat: sync 0.4.5 beta source and AI handoff docs`).
 - Published tags/releases found: `v0.3.1`, `v0.4.1`, and `v0.4.2`; `v0.4.2` is the latest published release.
 
 ### Current local snapshot
 
-- The local version is `0.4.5`.
+- The local version is `0.4.6`.
 - The authoritative checkout uses `main` and tracks `origin/main` at `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
-- The reviewed beta contained 23 tracked-file changes relative to the previous GitHub `main` (170 insertions, 64 deletions before workflow-document updates).
-- Those changes were confirmed as cohesive 0.4.5 beta work: adaptive long-page pagination and tests, compact popup status/error layout, synchronized localization/store/test documentation, and version/build metadata after `v0.4.2`.
+- The 0.4.6 beta adds the requested popup brand layout, exact supplied SVG resources, black brand accents across extension-owned controls, localized footer links, and focused popup configuration tests without changing PDF capture or filename behavior.
+- The popup website, support, and GitHub destinations are active. The rating text is present but intentionally disabled because `CHROME_WEB_STORE_REVIEW_URL` remains empty.
 - The approved AI handoff files and minimal secret/local-file ignore patterns are included with this beta source sync.
 - Local prompt and analysis Markdown files were intentionally excluded from the public repository.
 
 ### Next recommended steps
 
-1. Continue manual beta testing from the built `dist/`, especially Wikipedia long pages, Zhihu answer pages, popup error expansion, localized filenames, and clean-device installs.
+1. Continue manual beta testing from the built `dist/`, especially the popup in English, Simplified Chinese, and a longer locale; footer link behavior; Wikipedia long pages; Zhihu answer pages; popup error expansion; localized filenames; and clean-device installs.
 2. Record reproducible compatibility issues without broadening permissions or changing capture semantics silently.
 3. Create a tag, public package, or GitHub Release only after the user explicitly confirms testing passed and requests publication.
 
@@ -213,7 +214,7 @@ npm run verify:release  # Validate an existing release artifact
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The local version (`0.4.5`) is ahead of the latest published tag (`v0.4.2`), so version history and release notes must be reconciled before the next approved release.
+- The local version (`0.4.6`) is ahead of the latest published tag recorded here (`v0.4.2`), so version history and release notes must be reconciled before the next approved release.
 
 ## 14. Git Workflow
 
@@ -264,3 +265,10 @@ This section is the default authorization model for future AI-assisted work in t
 - **Excluded:** local prompt/analysis files, generated build output, dependencies, credentials, tags, GitHub Releases, and public release packages.
 - **Validation:** the existing typecheck, filename tests, export-logic tests, localization tests (11 catalogs, 58 messages), and production build passed before this source sync. The built bundles contained no detected Node-only runtime or personal local-path markers.
 - **Release state:** source-only beta; no tag or public release is authorized by this handoff.
+
+### 2026-09-27 — Codex (0.4.6 popup UI)
+
+- **Worked on:** rebuilt the popup presentation around the supplied reference layout while preserving export, editing, cancellation, status, and error flows.
+- **Changed:** added the supplied popup brand and globe SVGs; added localized prompt/footer copy; centralized external destinations and the empty review URL in `src/popup/links.ts`; changed extension-owned primary accents from blue to black; and added popup UI/link tests.
+- **Important decision:** `CHROME_WEB_STORE_REVIEW_URL` stays empty until the real listing review URL exists. The rating entry remains visible with disabled semantics and no navigation.
+- **Release state:** source-only beta; no tag, GitHub Release, store submission, or public package is authorized by this handoff.

@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Save Web as PDF
 
-> Last Updated: 2026-09-21
+> Last Updated: 2026-09-27
 
 ## Store Listing
 
@@ -40,7 +40,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.4.5 — The popup now stays compact during normal use and expands only when status or error text is shown.
+Version 0.4.6 — The popup now uses a clearer brand header, black primary actions, and optional project links while preserving its compact status and error behavior.
 
 **Category**
 
@@ -78,7 +78,7 @@ No host permissions are requested. The extension does not request the `tabs` per
 
 **Transmission and sharing**
 
-No data is transmitted to the developer or third parties. There is no analytics, advertising, tracking, account system, remote API, or backend service.
+No webpage content or generated PDF data is transmitted to the developer or third parties. There is no analytics, advertising, tracking, account system, remote API, or backend service. The popup includes user-initiated links to the project website, support page, and source repository; they open only when selected.
 
 **Retention**
 
@@ -98,7 +98,7 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - Store icon: `icons/icon-128.png`
 - Small promotional image: `store-assets/small-promo-440x280.png`
 - Popup screenshot: `store-assets/screenshot-popup-640x400.png`
-- Refresh the popup screenshot before store submission to reflect the compact default height.
+- Refresh the popup screenshot before store submission to reflect the 0.4.6 brand header, black actions, and footer links.
 - Recommended additional screenshot: capture the completed PDF preview during the final Chrome acceptance test.
 - Marquee promotional image: optional, not prepared
 
@@ -111,7 +111,7 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] Privacy policy text prepared
 - [x] 128×128 store icon prepared and included in the extension package
 - [x] 440×280 small promotional image prepared
-- [x] Current 640×400 popup screenshot prepared
+- [ ] Replace the 640×400 popup screenshot with a current 0.4.6 capture
 - [x] Chrome Web Store ZIP places `manifest.json` at the archive root
 - [x] Support and privacy contact set to `support@miengieh.com`
 - [ ] Host the privacy policy at a public URL
@@ -122,6 +122,13 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.4.6 — 2026-09-27
+
+- Refreshed the popup with the supplied brand icon, clearer hierarchy, black primary actions, and a compact footer
+- Added localized links for the project website, support page, extension rating, and GitHub repository
+- Kept the rating entry disabled until the real Chrome Web Store review URL is configured
+- Unified extension-owned primary actions in the editor and preview with the black brand accent
 
 ### 0.4.5 — 2026-09-21
 

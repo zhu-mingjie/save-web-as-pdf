@@ -26,4 +26,8 @@ export function localizeDocument(root: ParentNode = document): void {
   for (const element of Array.from(root.querySelectorAll<HTMLElement>("[data-i18n-title]"))) {
     element.title = t(element.dataset.i18nTitle!);
   }
+  for (const element of Array.from(root.querySelectorAll<HTMLElement>("[data-i18n-aria-label]"))) {
+    element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel!));
+    if (!element.title) element.title = t(element.dataset.i18nAriaLabel!);
+  }
 }
