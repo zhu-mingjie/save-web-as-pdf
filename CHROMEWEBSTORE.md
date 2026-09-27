@@ -40,7 +40,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.4.7 — The popup now uses a tighter natural height and larger, evenly spaced project links while expanding only for active status or error text.
+Version 0.4.8 — The popup keeps its compact natural height and presents the project links as a centered, tightly grouped footer row.
 
 **Category**
 
@@ -122,6 +122,10 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.4.8 — 2026-09-27
+
+- Kept the enlarged footer icon and text while returning the four project links to a compact centered group
 
 ### 0.4.7 — 2026-09-27
 

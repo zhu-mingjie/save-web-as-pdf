@@ -62,7 +62,7 @@ button:disabled { cursor: wait; opacity: .55; }
 footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 6px;
   padding: 16px 24px;
   color: var(--text-muted);
