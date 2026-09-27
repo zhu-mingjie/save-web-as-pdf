@@ -14,33 +14,33 @@
 }
 
 * { box-sizing: border-box; }
-html, body { width: 430px; min-width: 430px; }
+html, body { width: 320px; min-width: 320px; }
 body { margin: 0; background: var(--surface); color: var(--text); }
 
 .brand-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 68px;
-  padding: 16px 24px;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--surface-muted);
 }
 .brand-icon { display: block; flex: 0 0 auto; object-fit: contain; }
-h1 { margin: 0; font-size: 21px; letter-spacing: -0.02em; line-height: 1.2; white-space: nowrap; }
+h1 { margin: 0; font-size: 17px; letter-spacing: -0.02em; line-height: 1.2; white-space: nowrap; }
 
-main { display: grid; gap: 16px; padding: 22px 24px 0; }
-.prompt { margin: 0; color: var(--text-muted); font-size: 17px; line-height: 1.45; }
-.actions { display: grid; gap: 10px; }
+main { display: grid; gap: 11px; padding: 15px 16px 0; }
+.prompt { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.45; }
+.actions { display: grid; gap: 7px; }
 button {
-  min-height: 50px;
-  padding: 11px 16px;
+  min-height: 40px;
+  padding: 8px 12px;
   border: 1px solid #cfcfcf;
-  border-radius: 12px;
+  border-radius: 9px;
   background: #f2f2f2;
   color: var(--text);
   font: inherit;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 650;
   line-height: 1.25;
   white-space: nowrap;
@@ -61,10 +61,11 @@ button:disabled { cursor: wait; opacity: .55; }
 
 footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 16px 24px;
+  padding: 11px 8px;
   color: var(--text-muted);
   font-size: 12px;
   line-height: 16px;

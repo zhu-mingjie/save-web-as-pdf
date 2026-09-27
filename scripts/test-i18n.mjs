@@ -103,7 +103,7 @@ for (const filename of ["README.md", "PRIVACY.md"]) {
 }
 
 const popupCss = await readFile(path.join(root, "src/popup/popup.css"), "utf8");
-assert.match(popupCss, /html, body\s*\{[^}]*width:\s*430px;[^}]*min-width:\s*430px;/s);
+assert.match(popupCss, /html, body\s*\{[^}]*width:\s*320px;[^}]*min-width:\s*320px;/s);
 assert.doesNotMatch(popupCss, /max-width:\s*100vw/);
 assert.match(popupCss, /button\s*\{[^}]*white-space:\s*nowrap;[^}]*text-wrap:\s*nowrap;/s);
 assert.match(popupCss, /#status\s*\{[^}]*max-height:\s*120px;[^}]*overflow-y:\s*auto;/s);
