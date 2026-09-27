@@ -32,7 +32,8 @@ assert.ok(websiteIndex >= 0 && websiteIndex < supportIndex && supportIndex < rev
 assert.match(html, /id="review-link"[^>]*aria-disabled="true"[^>]*tabindex="0"/);
 assert.doesNotMatch(html.match(/<a id="review-link"[^>]*>/)?.[0] ?? "", /\shref=/);
 assert.match(html, /src="\.\.\/icons\/popup-brand\.svg"/);
-assert.match(html, /class="brand-icon"[^>]*width="24"[^>]*height="24"/);
+assert.match(html, /class="brand-icon"[^>]*width="22"[^>]*height="22"/);
+assert.match(html, /src="\.\.\/icons\/globe\.svg"[^>]*width="14"[^>]*height="14"/);
 assert.match(html, /src="\.\.\/icons\/globe\.svg"/);
 
 for (const asset of ["icons/popup-brand.svg", "icons/globe.svg"]) {
@@ -41,11 +42,12 @@ for (const asset of ["icons/popup-brand.svg", "icons/globe.svg"]) {
 
 assert.match(css, /html, body\s*\{[^}]*width:\s*320px;[^}]*min-width:\s*320px;/s);
 assert.match(css, /\.brand-header\s*\{[^}]*min-height:\s*48px;[^}]*padding:\s*10px 16px;/s);
+assert.match(css, /h1\s*\{[^}]*font-size:\s*15px;[^}]*font-weight:\s*400;/s);
 assert.match(css, /main\s*\{[^}]*padding:\s*15px 16px 0;/s);
-assert.match(css, /button\s*\{[^}]*min-height:\s*40px;[^}]*font-size:\s*14px;/s);
+assert.match(css, /button\s*\{[^}]*min-height:\s*40px;[^}]*font-size:\s*13px;/s);
 assert.match(css, /\[hidden\],\s*#status\[hidden\]\s*\{\s*display:\s*none\s*!important;/s);
 assert.match(css, /#status\s*\{[^}]*max-height:\s*120px;[^}]*overflow-y:\s*auto;/s);
-assert.match(css, /footer\s*\{[^}]*flex-wrap:\s*wrap;[^}]*justify-content:\s*center;[^}]*gap:\s*6px;[^}]*padding:\s*11px 8px;[^}]*font-size:\s*12px;/s);
+assert.match(css, /footer\s*\{[^}]*flex-wrap:\s*wrap;[^}]*justify-content:\s*center;[^}]*gap:\s*6px;[^}]*padding:\s*11px 8px;[^}]*font-size:\s*11px;/s);
 assert.match(css, /\.website-link\s*\{[^}]*min-width:\s*24px;[^}]*min-height:\s*24px;/s);
 assert.match(css, /\.footer-link\s*\{[^}]*min-height:\s*24px;/s);
 assert.doesNotMatch(css, /(?:html|body|main)\s*\{[^}]*(?:^|[;\s])(?:height|min-height)\s*:/ms);
