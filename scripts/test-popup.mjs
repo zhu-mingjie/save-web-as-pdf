@@ -23,6 +23,7 @@ assert.equal(links.safeExternalUrl("http://example.com/review"), null);
 assert.equal(links.safeExternalUrl("https://chromewebstore.google.com/detail/example/reviews"), "https://chromewebstore.google.com/detail/example/reviews");
 
 const html = await readFile("src/popup/popup.html", "utf8");
+const css = await readFile("src/popup/popup.css", "utf8");
 const websiteIndex = html.indexOf('id="website-link"');
 const supportIndex = html.indexOf('id="support-link"');
 const reviewIndex = html.indexOf('id="review-link"');
@@ -36,5 +37,12 @@ assert.match(html, /src="\.\.\/icons\/globe\.svg"/);
 for (const asset of ["icons/popup-brand.svg", "icons/globe.svg"]) {
   assert.match(await readFile(asset, "utf8"), /<svg\b/);
 }
+
+assert.match(css, /main\s*\{[^}]*padding:\s*22px 24px 0;/s);
+assert.match(css, /\[hidden\],\s*#status\[hidden\]\s*\{\s*display:\s*none\s*!important;/s);
+assert.match(css, /#status\s*\{[^}]*max-height:\s*120px;[^}]*overflow-y:\s*auto;/s);
+assert.match(css, /footer\s*\{[^}]*justify-content:\s*space-between;[^}]*padding:\s*16px 24px;[^}]*font-size:\s*12px;/s);
+assert.match(css, /\.footer-link\s*\{[^}]*min-height:\s*24px;/s);
+assert.doesNotMatch(css, /(?:html|body|main)\s*\{[^}]*(?:^|[;\s])(?:height|min-height)\s*:/ms);
 
 console.log("Popup UI/link tests: OK");

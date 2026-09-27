@@ -2,7 +2,7 @@
 
 > Primary source of truth for project context across AI tools and development sessions.
 >
-> Last reviewed: 2026-09-27. Evidence was taken from the 0.4.6 beta working tree and the authoritative Git checkout of GitHub `main`; see sections 12–14 for current status and Git rules.
+> Last reviewed: 2026-09-27. Evidence was taken from the 0.4.7 beta working tree and the authoritative Git checkout of GitHub `main`; see sections 12–14 for current status and Git rules.
 
 ## 1. Project Overview
 
@@ -10,7 +10,7 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 
 - Primary users: desktop Google Chrome users who want a clean archival PDF of a webpage.
 - Product goals: preserve readable page content, avoid screenshot-only output, require no backend or account, and work without Node.js or build tools on the end user's computer.
-- Current maturity: pre-release/beta. GitHub's latest published release recorded in this context is `v0.4.2`; source version `0.4.6` is the current beta and is not an approved public release.
+- Current maturity: pre-release/beta. GitHub's latest published release recorded in this context is `v0.4.2`; source version `0.4.7` is the current beta and is not an approved public release.
 - Repository: `https://github.com/zhu-mingjie/save-web-as-pdf`
 - Default branch: `main`
 
@@ -190,9 +190,9 @@ npm run verify:release  # Validate an existing release artifact
 
 ### Current local snapshot
 
-- The local version is `0.4.6`.
+- The local version is `0.4.7`.
 - The authoritative checkout uses `main` and tracks `origin/main` at `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
-- The 0.4.6 beta adds the requested popup brand layout, exact supplied SVG resources, black brand accents across extension-owned controls, localized footer links, and focused popup configuration tests without changing PDF capture or filename behavior.
+- The 0.4.7 beta keeps the 0.4.6 popup design while tightening its natural height, hiding an empty status/error region completely, and enlarging and aligning the footer links without changing PDF capture or filename behavior.
 - The popup website, support, and GitHub destinations are active. The rating text is present but intentionally disabled because `CHROME_WEB_STORE_REVIEW_URL` remains empty.
 - The approved AI handoff files and minimal secret/local-file ignore patterns are included with this beta source sync.
 - Local prompt and analysis Markdown files were intentionally excluded from the public repository.
@@ -214,7 +214,7 @@ npm run verify:release  # Validate an existing release artifact
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The local version (`0.4.6`) is ahead of the latest published tag recorded here (`v0.4.2`), so version history and release notes must be reconciled before the next approved release.
+- The local version (`0.4.7`) is ahead of the latest published tag recorded here (`v0.4.2`), so version history and release notes must be reconciled before the next approved release.
 
 ## 14. Git Workflow
 
@@ -272,3 +272,10 @@ This section is the default authorization model for future AI-assisted work in t
 - **Changed:** added the supplied popup brand and globe SVGs; added localized prompt/footer copy; centralized external destinations and the empty review URL in `src/popup/links.ts`; changed extension-owned primary accents from blue to black; and added popup UI/link tests.
 - **Important decision:** `CHROME_WEB_STORE_REVIEW_URL` stays empty until the real listing review URL exists. The rating entry remains visible with disabled semantics and no navigation.
 - **Release state:** source-only beta; no tag, GitHub Release, store submission, or public package is authorized by this handoff.
+
+### 2026-09-27 — Codex (0.4.7 popup spacing)
+
+- **Worked on:** tightened the popup's natural content height and resized the footer navigation to match the main action width more closely.
+- **Changed:** removed bottom padding from the main content, gave the footer equal block padding, increased footer text to 12px and interactive targets to at least 24px, and added layout regression assertions.
+- **Status behavior:** the status/error element remains `display: none` while empty and adds only its actual content height when shown, with a 120px scroll limit for long messages.
+- **Release state:** a test ZIP may be produced for user acceptance, but no tag, GitHub Release, or store submission is authorized until the user confirms testing passed.

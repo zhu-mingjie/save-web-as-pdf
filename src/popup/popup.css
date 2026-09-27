@@ -29,11 +29,11 @@ body { margin: 0; background: var(--surface); color: var(--text); }
 .brand-icon { display: block; flex: 0 0 auto; object-fit: contain; }
 h1 { margin: 0; font-size: 21px; letter-spacing: -0.02em; line-height: 1.2; white-space: nowrap; }
 
-main { display: grid; gap: 18px; padding: 26px 24px 22px; }
+main { display: grid; gap: 16px; padding: 22px 24px 0; }
 .prompt { margin: 0; color: var(--text-muted); font-size: 17px; line-height: 1.45; }
-.actions { display: grid; gap: 12px; }
+.actions { display: grid; gap: 10px; }
 button {
-  min-height: 52px;
+  min-height: 50px;
   padding: 11px 16px;
   border: 1px solid #cfcfcf;
   border-radius: 12px;
@@ -55,36 +55,35 @@ button.primary:active:not(:disabled) { background: var(--brand-active); }
 button.danger { border-color: var(--error); background: transparent; color: var(--error); }
 button:focus-visible, a:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 button:disabled { cursor: wait; opacity: .55; }
-[hidden] { display: none !important; }
+[hidden], #status[hidden] { display: none !important; }
 #status { max-height: 120px; margin: 0; overflow-wrap: anywhere; overflow-y: auto; color: var(--error); font-size: 12px; line-height: 1.4; }
 #status.busy { color: var(--text-muted); }
 
 footer {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 0 18px 18px;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 16px 24px;
   color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1.25;
+  font-size: 12px;
+  line-height: 16px;
   white-space: nowrap;
 }
 .website-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin-right: 1px;
+  min-width: 24px;
+  min-height: 24px;
   border-radius: 50%;
 }
 .website-link img { display: block; opacity: .62; }
-.footer-link { color: var(--text-muted); text-decoration: none; }
+.footer-link { display: inline-flex; align-items: center; min-height: 24px; color: var(--text-muted); text-decoration: none; }
 .website-link:hover, .footer-link:hover:not(.is-disabled) { color: var(--text); text-decoration: underline; }
 .website-link:hover img { opacity: .9; }
 .footer-link.is-disabled { cursor: default; opacity: .55; }
-.separator { color: #a0a0a0; }
+.separator { display: inline-flex; align-items: center; min-height: 24px; color: #a0a0a0; }
 
 @media (prefers-color-scheme: dark) {
   :root {
