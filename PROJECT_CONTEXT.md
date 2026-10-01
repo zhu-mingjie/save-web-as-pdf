@@ -10,7 +10,7 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 
 - Primary users: desktop Google Chrome users who want a clean archival PDF of a webpage.
 - Product goals: preserve readable page content, avoid screenshot-only output, require no backend or account, and work without Node.js or build tools on the end user's computer.
-- Current maturity: pre-release candidate. GitHub's latest published release recorded in this context is `v0.4.2`; source version `0.5.1` contains the current pagination and filename fixes. Publication depends on the task-specific completion gates recorded below.
+- Current maturity: released beta. GitHub Release `v0.5.1` contains the current pagination and filename fixes; Chrome Web Store submission remains maintainer-owned.
 - Repository: `https://github.com/zhu-mingjie/save-web-as-pdf`
 - Default branch: `main`
 
@@ -186,7 +186,8 @@ npm run verify:release  # Validate an existing release artifact
 ### Confirmed on GitHub
 
 - Before the 0.4.6 popup work, the authoritative checkout and `origin/main` were aligned at `f98fa0667ad776b4604969d02eecb8bd801f2aee` (`feat: sync 0.4.5 beta source and AI handoff docs`).
-- Published tags/releases found: `v0.3.1`, `v0.4.1`, and `v0.4.2`; `v0.4.2` is the latest published release.
+- Published tags/releases include `v0.3.1`, `v0.4.1`, `v0.4.2`, and `v0.5.1`; `v0.5.1` is the latest published release.
+- Release `v0.5.1` was created from source commit `5d7b98bae2a9bc21c4f89704b56721994bb0b650` with the verified `save-web-as-pdf-v0.5.1.zip` asset. Its local release artifact SHA-256 was `09730c1b499c2558b2e0f41ceaf60ceac7a2be081b047ed518618d259f786e26`.
 
 ### Current local snapshot
 
@@ -201,7 +202,7 @@ npm run verify:release  # Validate an existing release artifact
 
 1. Preserve the completed 0.5.1 controlled Chrome evidence for maximum-height pagination, complete multi-page output, cancellation/retry, and actual downloaded filenames; do not repeat the maintainer-owned real-site list or full clean-device matrix.
 2. The historical popup screenshot has been replaced with a real 640×400 capture from the installed 0.5.1 build, and the selected public privacy-policy URL/content has been verified.
-3. Run the final check/package validators, inspect runtime bundles, and apply the task-specific conditional GitHub Release authorization only if all release gates remain satisfied.
+3. Keep Chrome Web Store dashboard work and submission with the maintainer; do not submit or change the public listing without a new explicit request.
 
 ## 13. Known Issues and Technical Debt
 
@@ -215,7 +216,7 @@ npm run verify:release  # Validate an existing release artifact
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The local version (`0.5.1`) is ahead of the latest published tag recorded here (`v0.4.2`); the current task conditionally authorizes a new GitHub Release only after its explicit validation gates pass.
+- The source version and latest published GitHub tag are both `0.5.1`. Chrome Web Store publication has not been performed by the agent.
 
 ## 14. Git Workflow
 
