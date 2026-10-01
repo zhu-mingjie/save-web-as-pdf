@@ -1,6 +1,8 @@
 # Privacy Policy for Save Web as PDF
 
-Last updated: September 12, 2026
+Last updated: October 1, 2026
+
+Canonical public URL: [https://miengieh.com/save-web-as-pdf/privacy/](https://miengieh.com/save-web-as-pdf/privacy/)
 
 Save Web as PDF converts a webpage selected by the user into a PDF. The extension is designed to perform this work locally in Chrome and does not operate a developer-controlled server.
 

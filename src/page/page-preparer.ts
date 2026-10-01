@@ -66,8 +66,17 @@ interface StabilityResult {
 
 interface FreezeResult {
   frozen: number;
+  forcedPageBreaksNeutralized: number;
   inaccessibleStyleSheets: number;
 }
+
+const FORCED_PAGE_BREAK_PROPERTIES = [
+  "break-before",
+  "break-after",
+  "page-break-before",
+  "page-break-after"
+] as const;
+const FORCED_PAGE_BREAK_VALUES = new Set(["always", "page", "left", "right", "recto", "verso"]);
 
 function throwIfCanceled(signal: AbortSignal): void {
   if (signal.aborted) throw userError("errorExportCanceled");
@@ -205,37 +214,70 @@ function freezeDeclaration(
   return frozen;
 }
 
+function neutralizeForcedPageBreaks(
+  state: PagePreparationState,
+  element: Element,
+  declaration: CSSStyleDeclaration
+): number {
+  if (!(element instanceof HTMLElement)) return 0;
+  let neutralized = 0;
+  for (const property of FORCED_PAGE_BREAK_PROPERTIES) {
+    const value = declaration.getPropertyValue(property).trim().toLowerCase();
+    if (!FORCED_PAGE_BREAK_VALUES.has(value)) continue;
+    applyTemporaryStyle(state, element, property, "auto");
+    neutralized += 1;
+  }
+  return neutralized;
+}
+
 async function freezeViewportDependentSizing(
   state: PagePreparationState,
   signal: AbortSignal,
   startedAt: number
 ): Promise<FreezeResult> {
   let frozen = 0;
+  let forcedPageBreaksNeutralized = 0;
   let inaccessibleStyleSheets = 0;
   let deadline = performance.now() + 40;
 
-  const visitRules = async (rules: CSSRuleList): Promise<void> => {
+  const visitRules = async (
+    rules: CSSRuleList,
+    inspectViewportRules = true,
+    inspectPageBreakRules = true
+  ): Promise<void> => {
     for (const rule of Array.from(rules)) {
       throwIfCanceled(signal);
       throwIfPreparationTimedOut(startedAt);
-      if (rule instanceof CSSMediaRule && !matchMedia(rule.conditionText).matches) continue;
+      if (rule instanceof CSSMediaRule) {
+        if (!matchMedia(rule.conditionText).matches) continue;
+        await visitRules(rule.cssRules, inspectViewportRules, inspectPageBreakRules);
+        continue;
+      }
       if (rule instanceof CSSSupportsRule && !CSS.supports(rule.conditionText)) continue;
       if (rule instanceof CSSStyleRule) {
-        const hasCandidate = VIEWPORT_LAYOUT_PROPERTIES.some((property) => {
+        const hasViewportCandidate = inspectViewportRules && VIEWPORT_LAYOUT_PROPERTIES.some((property) => {
           const value = rule.style.getPropertyValue(property);
           return value.includes("var(") || hasViewportUnitToken(value);
         });
-        if (!hasCandidate) continue;
+        const hasPageBreakCandidate = inspectPageBreakRules && FORCED_PAGE_BREAK_PROPERTIES.some((property) =>
+          FORCED_PAGE_BREAK_VALUES.has(rule.style.getPropertyValue(property).trim().toLowerCase())
+        );
+        if (!hasViewportCandidate && !hasPageBreakCandidate) continue;
         let matches: NodeListOf<Element>;
         try {
           matches = document.querySelectorAll(rule.selectorText);
         } catch {
           continue;
         }
-        for (const element of Array.from(matches)) frozen += freezeDeclaration(state, element, rule.style);
+        for (const element of Array.from(matches)) {
+          if (hasViewportCandidate) frozen += freezeDeclaration(state, element, rule.style);
+          if (hasPageBreakCandidate) {
+            forcedPageBreaksNeutralized += neutralizeForcedPageBreaks(state, element, rule.style);
+          }
+        }
       } else if ("cssRules" in rule) {
         try {
-          await visitRules((rule as CSSGroupingRule).cssRules);
+          await visitRules((rule as CSSGroupingRule).cssRules, inspectViewportRules, inspectPageBreakRules);
         } catch {
           // Some browser-managed rule groups cannot be inspected from an isolated world.
         }
@@ -259,13 +301,14 @@ async function freezeViewportDependentSizing(
   for (const element of Array.from(document.querySelectorAll<HTMLElement>("[style]"))) {
     throwIfPreparationTimedOut(startedAt);
     frozen += freezeDeclaration(state, element, element.style);
+    forcedPageBreaksNeutralized += neutralizeForcedPageBreaks(state, element, element.style);
     if (performance.now() >= deadline) {
       await yieldToBrowser(signal);
       deadline = performance.now() + 40;
     }
   }
 
-  return { frozen, inaccessibleStyleSheets };
+  return { frozen, forcedPageBreaksNeutralized, inaccessibleStyleSheets };
 }
 
 function containsAnswerId(element: Element, answerId: string): boolean {
@@ -531,6 +574,7 @@ export async function preparePage(signal: AbortSignal): Promise<PrepareResult> {
       stableSamples: stability.stableSamples,
       observedGrowth: scroll.observedGrowth,
       viewportRulesFrozen: freeze.frozen,
+      forcedPageBreaksNeutralized: freeze.forcedPageBreaksNeutralized,
       inaccessibleStyleSheets: freeze.inaccessibleStyleSheets,
       hiddenBranches: plan.hiddenBranches,
       resourceWaitTimedOut

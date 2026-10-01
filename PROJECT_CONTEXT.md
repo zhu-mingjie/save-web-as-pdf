@@ -2,7 +2,7 @@
 
 > Primary source of truth for project context across AI tools and development sessions.
 >
-> Last reviewed: 2026-09-27. Evidence was taken from the 0.5.0 beta working tree and the authoritative Git checkout of GitHub `main`; see sections 12–14 for current status and Git rules.
+> Last reviewed: 2026-10-01. Evidence was taken from the 0.5.1 candidate working tree and the authoritative Git checkout of GitHub `main`; see sections 12–14 for current status and Git rules.
 
 ## 1. Project Overview
 
@@ -10,7 +10,7 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 
 - Primary users: desktop Google Chrome users who want a clean archival PDF of a webpage.
 - Product goals: preserve readable page content, avoid screenshot-only output, require no backend or account, and work without Node.js or build tools on the end user's computer.
-- Current maturity: pre-release/beta. GitHub's latest published release recorded in this context is `v0.4.2`; source version `0.5.0` is the current beta and is not an approved public release.
+- Current maturity: pre-release candidate. GitHub's latest published release recorded in this context is `v0.4.2`; source version `0.5.1` contains the current pagination and filename fixes. Publication depends on the task-specific completion gates recorded below.
 - Repository: `https://github.com/zhu-mingjie/save-web-as-pdf`
 - Default branch: `main`
 
@@ -90,13 +90,13 @@ The popup can enter an injected editor mode. The user selects page elements to r
 ## 5. Key Technical Decisions
 
 - **Searchable print output, not screenshots.** Chrome's print pipeline preserves text selection, searchability, links, and vector content. No screenshot fallback is used.
-- **Adaptive page strategy.** Pages within Chrome's practical single-page limit are exported as one continuous page with rounding retries. Longer pages are exported as multiple pages using the largest practical page height so each page holds as much content as possible. This behavior exists in the local snapshot and still requires release-level browser testing.
+- **Adaptive page strategy.** Pages within Chrome's practical single-page limit are first exported as one continuous page with bounded rounding retries. If Chrome still returns multiple pages, the shared generator remeasures the stabilized layout and replans at the verified 200-inch maximum height; a complete valid multi-page result is accepted. This rule is shared by full-page, edited-page, focused-site, and snapshot capture modes.
 - **Narrow permissions.** The manifest declares `activeTab`, `scripting`, `debugger`, `downloads`, and `storage`, with no host permissions and no `tabs` permission. Do not broaden permissions without a concrete requirement and updated store justification.
 - **Explicit page preparation and restoration.** Dynamic/lazy content is prepared before printing, but all temporary styles and mutations must be recoverable after success, cancellation, or error.
 - **Site-specific handling only where justified.** Zhihu answer and feed behavior use targeted capture rules; general logic remains site-independent.
 - **Ephemeral service worker.** Durable operation state belongs in Chrome storage rather than service-worker globals.
 - **One-time local PDF handoff.** IndexedDB bridges background generation and preview without network transfer or long-lived file retention.
-- **Unicode-safe filenames.** Titles are decoded, common mojibake is repaired, normalized to NFC, stripped of Windows-forbidden characters/reserved names, and capped at 180 UTF-8 bytes.
+- **Unicode-safe filenames.** Titles and the current preview input are decoded, common mojibake is repaired, normalized to NFC, stripped of Windows-forbidden characters/reserved names, capped at 180 UTF-8 bytes, and given exactly one `.pdf` suffix before the download request.
 - **No runtime framework or dependency bundle.** Plain DOM/CSS and bundled TypeScript keep the runtime small. The historical rationale for selecting esbuild over alternatives is not documented and should not be invented.
 - **Popup resource links are explicit and local-first.** Website, support, and GitHub destinations are configured in `src/popup/links.ts` and open only after a user click. `CHROME_WEB_STORE_REVIEW_URL` is intentionally empty until a stable store review URL exists; the visible rating entry remains disabled without navigation or export side effects.
 
@@ -177,7 +177,7 @@ npm run verify:release  # Validate an existing release artifact
 - Development builds are loaded unpacked from `dist/`.
 - Public distribution is intended through the Chrome Web Store and GitHub Releases.
 - `CHROMEWEBSTORE.md` is the store-submission source for listing copy, permission justifications, privacy disclosures, assets, and readiness checks.
-- The privacy-policy URL is still marked as required before submission; it must be hosted and matched to the Chrome Web Store data-use declarations.
+- The selected public privacy-policy URL is `https://miengieh.com/save-web-as-pdf/privacy/`. It returned HTTP 200 without sign-in on 2026-10-01 and its content matched the current local processing, permissions, retention, external-link, and support-email behavior. Developer Dashboard entry is tracked separately and remains with the maintainer.
 - No automated CI/CD or store-publishing workflow was found. Exact production signing/upload steps remain manual unless a future reviewed workflow is added.
 - GitHub tags and Releases are release events, not routine backup steps. Create them only after the user explicitly approves that version for release.
 
@@ -190,31 +190,32 @@ npm run verify:release  # Validate an existing release artifact
 
 ### Current local snapshot
 
-- The local version is `0.5.0`.
+- The local candidate version is `0.5.1`.
 - The authoritative checkout uses `main` and tracks `origin/main` at `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
-- The 0.5.0 beta keeps the 320px popup layout, changes the title to regular weight, reduces popup text and icons to approximately 90% using integer pixel values, and uses `#f9f9f9` for the light-theme brand header while retaining minimum interaction-target sizes. PDF capture and filename behavior are unchanged.
+- The 0.5.1 candidate keeps the approved 0.5.0 popup design. Its scoped behavior changes are maximum-height replanning after an unexpected multi-page single-page attempt, PDF header/EOF validation, targeted neutralization of explicit forced page breaks in active inspectable styles, and current-input filename handling in the preview download request.
 - The popup website, support, and GitHub destinations are active. The rating text is present but intentionally disabled because `CHROME_WEB_STORE_REVIEW_URL` remains empty.
 - The approved AI handoff files and minimal secret/local-file ignore patterns are included with this beta source sync.
 - Local prompt and analysis Markdown files were intentionally excluded from the public repository.
 
 ### Next recommended steps
 
-1. Continue manual beta testing from the built `dist/`, especially the popup in English, Simplified Chinese, and a longer locale; footer link behavior; Wikipedia long pages; Zhihu answer pages; popup error expansion; localized filenames; and clean-device installs.
-2. Record reproducible compatibility issues without broadening permissions or changing capture semantics silently.
-3. Create a tag, public package, or GitHub Release only after the user explicitly confirms testing passed and requests publication.
+1. Preserve the completed 0.5.1 controlled Chrome evidence for maximum-height pagination, complete multi-page output, cancellation/retry, and actual downloaded filenames; do not repeat the maintainer-owned real-site list or full clean-device matrix.
+2. The historical popup screenshot has been replaced with a real 640×400 capture from the installed 0.5.1 build, and the selected public privacy-policy URL/content has been verified.
+3. Run the final check/package validators, inspect runtime bundles, and apply the task-specific conditional GitHub Release authorization only if all release gates remain satisfied.
 
 ## 13. Known Issues and Technical Debt
 
 - There is no automated real-Chrome end-to-end suite; critical behavior still depends on manual website and clean-device testing.
 - There is no CI workflow enforcing typecheck, focused tests, packaging validation, or secret scanning on pushes.
-- The Chrome Web Store privacy-policy URL is unresolved, and store screenshots may need refresh after UI changes.
-- `README.md` still describes no automatic pagination, but the local PDF logic now intentionally paginates pages that exceed the practical single-page limit.
+- The public privacy-policy URL is selected and verified; Developer Dashboard entry remains maintainer-owned.
+- The 640×400 store screenshot is a real capture from the installed 0.5.1 build. Future UI changes must refresh it before store submission.
+- Actual VoiceOver announcement and a reliable navigation/tab-close interruption test were not completed in the current automation environment. Docked DevTools did not reproduce a debugger conflict because the tested Chrome build allowed the export to complete.
 - `README.md` and `RELEASING.md` now distinguish routine beta source commits/pushes from explicitly approved public tags and Releases.
 - Chrome printing remains sensitive to cross-origin stylesheet access, canvas/media content, virtualized lists, viewport-dependent layouts, lazy resources, and site DOM changes.
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The local version (`0.5.0`) is ahead of the latest published tag recorded here (`v0.4.2`), so version history and release notes must be reconciled before the next approved release.
+- The local version (`0.5.1`) is ahead of the latest published tag recorded here (`v0.4.2`); the current task conditionally authorizes a new GitHub Release only after its explicit validation gates pass.
 
 ## 14. Git Workflow
 

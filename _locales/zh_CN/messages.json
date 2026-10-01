@@ -57,8 +57,6 @@
   "errorLayoutChanged":{"message":"网页布局在打印前再次发生变化。请等待网页加载完成后重试。"},
   "errorMissingPdfStream":{"message":"Chrome 未返回 PDF 数据流。"},
   "errorUnverifiedPageCount":{"message":"Chrome 返回的 PDF 无法验证页数，因此未保存该文件。"},
-  "errorMultiplePagesCrossOrigin":{"message":"Chrome 生成了 $COUNT$ 页 PDF。部分跨域页面样式无法稳定处理，因此未保存不完整的 PDF。","placeholders":{"count":{"content":"$1","example":"2"}}},
-  "errorMultiplePages":{"message":"Chrome 生成了 $COUNT$ 页 PDF，不符合单页导出要求，因此未保存不完整的 PDF。","placeholders":{"count":{"content":"$1","example":"2"}}},
   "errorPdfIdentifierMissing":{"message":"缺少 PDF 标识。"},
   "errorPreviewExpired":{"message":"此 PDF 预览已过期，请从网页重新生成。"}
 }

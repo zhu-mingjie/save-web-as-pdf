@@ -57,8 +57,6 @@
   "errorLayoutChanged": { "message": "The page layout changed again immediately before printing. Wait for the page to finish loading and try again." },
   "errorMissingPdfStream": { "message": "Chrome did not return a PDF stream." },
   "errorUnverifiedPageCount": { "message": "Chrome returned a PDF whose page count could not be verified. No unverified file was saved." },
-  "errorMultiplePagesCrossOrigin": { "message": "Chrome generated $COUNT$ PDF pages. Some cross-origin page styles could not be stabilized, so no incomplete PDF was saved.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
-  "errorMultiplePages": { "message": "Chrome generated $COUNT$ PDF pages, which does not meet the one-page export requirement. No incomplete PDF was saved.", "placeholders": { "count": { "content": "$1", "example": "2" } } },
   "errorPdfIdentifierMissing": { "message": "The PDF identifier is missing." },
   "errorPreviewExpired": { "message": "This PDF preview has expired. Generate it again from the webpage." }
 }

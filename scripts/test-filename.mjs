@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { build } from "esbuild";
 
 const result = await build({
@@ -10,7 +11,13 @@ const result = await build({
   write: false
 });
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString("base64")}`;
-const { createPdfFilename, createLiveSourcePageMetadata, createSourcePageMetadata, normalizePageTitle } = await import(moduleUrl);
+const {
+  createPdfDownloadFilename,
+  createPdfFilename,
+  createLiveSourcePageMetadata,
+  createSourcePageMetadata,
+  normalizePageTitle
+} = await import(moduleUrl);
 
 assert.equal(
   createPdfFilename("监督学习 - 维基百科，自由的百科全书"),
@@ -29,6 +36,20 @@ assert.equal(createPdfFilename("ä¸­æ–‡æ ‡é¢˜"), "中文标题.pdf
 assert.equal(createPdfFilename("FranÃ§ais – actualités"), "Français – actualités.pdf");
 assert.equal(createPdfFilename("Märchen und Café"), "Märchen und Café.pdf");
 assert.equal(normalizePageTitle("\ufeff  标题\u200b  测试  "), "标题 测试");
+assert.equal(createPdfDownloadFilename("中文标题.pdf"), "中文标题.pdf");
+assert.equal(createPdfDownloadFilename("Manual name"), "Manual name.pdf");
+assert.equal(createPdfDownloadFilename("  Mixed 标题 .PDF  "), "Mixed 标题.pdf");
+assert.equal(createPdfDownloadFilename("report.pdf.pdf"), "report.pdf");
+assert.equal(createPdfDownloadFilename(""), "webpage.pdf");
+assert.equal(createPdfDownloadFilename("CON.pdf"), "_CON.pdf");
+assert.equal(createPdfDownloadFilename("A/B:C*D?.pdf"), "A_B_C_D_.pdf");
+
+const previewHtml = await readFile("src/preview/preview.html", "utf8");
+const previewSource = await readFile("src/preview/preview.ts", "utf8");
+assert.match(previewHtml, /<input id="filename" type="text" autocomplete="off" \/>/);
+assert.doesNotMatch(previewHtml, /id="filename"[^>]*\breadonly\b/);
+assert.match(previewSource, /filename:\s*createPdfDownloadFilename\(filenameInput\.value\)/);
+assert.doesNotMatch(previewSource, /let downloadFilename\s*=/);
 
 const longFilename = createPdfFilename("🚀".repeat(200));
 assert.ok(new TextEncoder().encode(longFilename).byteLength <= 180);

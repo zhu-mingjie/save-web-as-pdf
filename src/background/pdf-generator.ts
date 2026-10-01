@@ -31,6 +31,12 @@ const MIN_PRINT_SCALE = 0.1;
 const PAPER_WIDTH_PADDING_INCHES = 0.01;
 const MAX_ROUNDING_PADDING_INCHES = 0.1;
 
+interface PrintSizing {
+  scale: number;
+  paperWidth: number;
+  scaledHeight: number;
+}
+
 function decodeBase64Chunk(value: string): Uint8Array {
   const decoded = atob(value);
   const bytes = new Uint8Array(decoded.length);
@@ -91,6 +97,18 @@ export function countPdfPages(pdf: Uint8Array): number | undefined {
   return count > 0 ? count : undefined;
 }
 
+export function isCompletePdfDocument(pdf: Uint8Array): boolean {
+  const header = [37, 80, 68, 70, 45];
+  if (pdf.length < header.length || !header.every((byte, index) => pdf[index] === byte)) return false;
+
+  const eof = [37, 37, 69, 79, 70];
+  const start = Math.max(header.length, pdf.length - 2048);
+  for (let index = pdf.length - eof.length; index >= start; index -= 1) {
+    if (eof.every((byte, offset) => pdf[index + offset] === byte)) return true;
+  }
+  return false;
+}
+
 function normalizeMetrics(metrics: LayoutMetricsResponse): PageMetrics {
   const size = metrics.cssContentSize ?? metrics.contentSize;
   if (
@@ -105,13 +123,24 @@ function normalizeMetrics(metrics: LayoutMetricsResponse): PageMetrics {
   return { width: Math.ceil(size.width * 100) / 100, height: Math.ceil(size.height * 100) / 100 };
 }
 
-export function createPrintPlan({ width, height }: PageMetrics): PrintPlan | undefined {
+function createPrintSizing({ width, height }: PageMetrics): PrintSizing | undefined {
   const widthInches = width / PDF_DPI;
   const maximumContentWidth = MAX_PAPER_INCHES - PAPER_WIDTH_PADDING_INCHES;
   const requiredScale = Math.min(1, maximumContentWidth / widthInches);
   if (!Number.isFinite(requiredScale) || requiredScale < MIN_PRINT_SCALE) return undefined;
 
-  const scaledHeight = (height * requiredScale) / PDF_DPI;
+  return {
+    scale: requiredScale,
+    paperWidth: Math.min(MAX_PAPER_INCHES, widthInches * requiredScale + PAPER_WIDTH_PADDING_INCHES),
+    scaledHeight: (height * requiredScale) / PDF_DPI
+  };
+}
+
+export function createPrintPlan(metrics: PageMetrics): PrintPlan | undefined {
+  const sizing = createPrintSizing(metrics);
+  if (!sizing) return undefined;
+
+  const { scale, paperWidth, scaledHeight } = sizing;
   const maximumSinglePageContentHeight = MAX_PAPER_INCHES - MAX_ROUNDING_PADDING_INCHES;
   const singlePage = scaledHeight <= maximumSinglePageContentHeight;
   const paperHeights = singlePage
@@ -120,10 +149,22 @@ export function createPrintPlan({ width, height }: PageMetrics): PrintPlan | und
 
   return {
     mode: singlePage ? "single-page" : "paginated",
-    scale: requiredScale,
-    paperWidth: Math.min(MAX_PAPER_INCHES, widthInches * requiredScale + PAPER_WIDTH_PADDING_INCHES),
+    scale,
+    paperWidth,
     paperHeights,
     estimatedPageCount: singlePage ? 1 : Math.ceil(scaledHeight / MAX_PAPER_INCHES)
+  };
+}
+
+export function createMaximumHeightPrintPlan(metrics: PageMetrics): PrintPlan | undefined {
+  const sizing = createPrintSizing(metrics);
+  if (!sizing) return undefined;
+  return {
+    mode: "paginated",
+    scale: sizing.scale,
+    paperWidth: sizing.paperWidth,
+    paperHeights: [MAX_PAPER_INCHES],
+    estimatedPageCount: Math.max(1, Math.ceil(sizing.scaledHeight / MAX_PAPER_INCHES))
   };
 }
 
@@ -148,6 +189,7 @@ export async function generatePdf(
 ): Promise<{ pdf: Uint8Array; metrics: PageMetrics }> {
   const session = new DebuggerSession(tabId);
   const attempts: Array<{
+    phase: "initial" | "maximum-height-fallback";
     scale: number;
     paperWidth: number;
     paperHeight: number;
@@ -160,8 +202,8 @@ export async function generatePdf(
     await session.send("Emulation.setEmulatedMedia", { media: "screen" });
     const metrics = normalizeMetrics(await session.send<LayoutMetricsResponse>("Page.getLayoutMetrics"));
     validatePreparedMetrics(metrics, prepared);
-    const printPlan = createPrintPlan(metrics);
-    if (!printPlan) {
+    const initialPlan = createPrintPlan(metrics);
+    if (!initialPlan) {
       throw userError("errorWebpageTooLarge", [
         String(Math.round(metrics.width)),
         String(Math.round(metrics.height)),
@@ -169,51 +211,82 @@ export async function generatePdf(
       ]);
     }
 
-    const { scale, paperWidth } = printPlan;
-    let lastPageCount: number | undefined;
-
-    for (const paperHeight of printPlan.paperHeights) {
-      const startedAt = performance.now();
-      const result = await session.send<PrintResponse>("Page.printToPDF", {
-        paperWidth,
-        paperHeight,
-        marginTop: 0,
-        marginBottom: 0,
-        marginLeft: 0,
-        marginRight: 0,
-        printBackground: true,
-        displayHeaderFooter: false,
-        preferCSSPageSize: false,
-        scale,
-        transferMode: "ReturnAsStream"
-      });
-      if (!result.stream) throw userError("errorMissingPdfStream");
-      const pdf = await readPdfStream(session, result.stream);
-      lastPageCount = countPdfPages(pdf);
-      attempts.push({
-        scale,
-        paperWidth,
-        paperHeight,
-        pageCount: lastPageCount,
-        durationMs: Math.round(performance.now() - startedAt)
-      });
-      if (lastPageCount === undefined) {
-        throw userError("errorUnverifiedPageCount");
+    const printWithPlan = async (
+      printPlan: PrintPlan,
+      phase: "initial" | "maximum-height-fallback"
+    ): Promise<Uint8Array | undefined> => {
+      const { scale, paperWidth } = printPlan;
+      for (const paperHeight of printPlan.paperHeights) {
+        const startedAt = performance.now();
+        const result = await session.send<PrintResponse>("Page.printToPDF", {
+          paperWidth,
+          paperHeight,
+          marginTop: 0,
+          marginBottom: 0,
+          marginLeft: 0,
+          marginRight: 0,
+          printBackground: true,
+          displayHeaderFooter: false,
+          preferCSSPageSize: false,
+          scale,
+          transferMode: "ReturnAsStream"
+        });
+        if (!result.stream) throw userError("errorMissingPdfStream");
+        const pdf = await readPdfStream(session, result.stream);
+        if (!isCompletePdfDocument(pdf)) throw userError("errorUnverifiedPageCount");
+        const pageCount = countPdfPages(pdf);
+        attempts.push({
+          phase,
+          scale,
+          paperWidth,
+          paperHeight,
+          pageCount,
+          durationMs: Math.round(performance.now() - startedAt)
+        });
+        if (pageCount === undefined) throw userError("errorUnverifiedPageCount");
+        if (isAcceptablePageCount(printPlan, pageCount)) return pdf;
       }
-      if (isAcceptablePageCount(printPlan, lastPageCount)) return { pdf, metrics };
+      return undefined;
+    };
+
+    const initialPdf = await printWithPlan(initialPlan, "initial");
+    if (initialPdf) return { pdf: initialPdf, metrics };
+
+    const refreshedMetrics = normalizeMetrics(await session.send<LayoutMetricsResponse>("Page.getLayoutMetrics"));
+    validatePreparedMetrics(refreshedMetrics, prepared);
+    const fallbackPlan = createMaximumHeightPrintPlan(refreshedMetrics);
+    if (!fallbackPlan) {
+      throw userError("errorWebpageTooLarge", [
+        String(Math.round(refreshedMetrics.width)),
+        String(Math.round(refreshedMetrics.height)),
+        String(MAX_PAPER_INCHES)
+      ]);
+    }
+    const fallbackPdf = await printWithPlan(fallbackPlan, "maximum-height-fallback");
+    if (fallbackPdf) {
+      console.info("Save Web as PDF print attempts", {
+        initialPlan,
+        finalPlan: fallbackPlan,
+        fallbackReason: "single-page-plan-produced-multiple-pages",
+        captureMode: prepared.captureMode,
+        prepared: prepared.diagnostics.prepared,
+        initialMeasured: metrics,
+        refreshedMeasured: refreshedMetrics,
+        attempts
+      });
+      return { pdf: fallbackPdf, metrics: refreshedMetrics };
     }
 
     console.info("Save Web as PDF print attempts", {
-      printMode: printPlan.mode,
-      estimatedPageCount: printPlan.estimatedPageCount,
+      initialPlan,
+      finalPlan: fallbackPlan,
       captureMode: prepared.captureMode,
       prepared: prepared.diagnostics.prepared,
-      measured: metrics,
+      initialMeasured: metrics,
+      refreshedMeasured: refreshedMetrics,
       attempts
     });
-    const inaccessibleStyles = prepared.diagnostics.inaccessibleStyleSheets;
-    const pageCount = lastPageCount === undefined ? "?" : String(lastPageCount);
-    throw userError(inaccessibleStyles > 0 ? "errorMultiplePagesCrossOrigin" : "errorMultiplePages", pageCount);
+    throw userError("errorUnverifiedPageCount");
   } finally {
     try {
       await session.send("Emulation.setEmulatedMedia", { media: "" });

@@ -112,6 +112,12 @@ export function createPdfFilename(pageTitle: string | undefined, pageUrl?: strin
   return `${base || "webpage"}${PDF_EXTENSION}`;
 }
 
+export function createPdfDownloadFilename(input: string | undefined): string {
+  const normalized = normalizePageTitle(input);
+  const withoutExtension = normalized.replace(/(?:\.pdf)+$/i, "").trim();
+  return createPdfFilename(withoutExtension);
+}
+
 export function createSourcePageMetadata(
   pageTitle: string | undefined,
   pageUrl?: string

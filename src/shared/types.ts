@@ -41,6 +41,7 @@ export interface PreparationDiagnostics {
   stableSamples: number;
   observedGrowth: number;
   viewportRulesFrozen: number;
+  forcedPageBreaksNeutralized: number;
   inaccessibleStyleSheets: number;
   hiddenBranches: number;
   resourceWaitTimedOut: boolean;

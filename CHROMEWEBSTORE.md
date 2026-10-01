@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Save Web as PDF
 
-> Last Updated: 2026-09-27
+> Last Updated: 2026-10-01
 
 ## Store Listing
 
@@ -26,7 +26,7 @@ FEATURES
 • Undo, redo, or restore edits before export
 • Preview the generated PDF before downloading
 • Keep page processing and temporary PDF data on your device
-• Automatically match the interface to Chrome in 10 supported languages, with English fallback
+• Automatically match the interface to Chrome across 11 supported locales, with English fallback
 
 HOW TO USE
 1. Open the webpage you want to save.
@@ -40,7 +40,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.5.0 — The popup uses lighter title styling, slightly smaller text and icons, and a softer header background.
+Version 0.5.1 — Restores current-input PDF filenames and adds bounded maximum-height replanning when a nominal single-page print produces multiple pages.
 
 **Category**
 
@@ -90,7 +90,9 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 
 **Privacy Policy URL**
 
-[REQUIRED BEFORE SUBMISSION] Publish `PRIVACY.md` at a stable public URL, paste that URL here, and verify it without signing in. Support contact: [support@miengieh.com](mailto:support@miengieh.com).
+[https://miengieh.com/save-web-as-pdf/privacy/](https://miengieh.com/save-web-as-pdf/privacy/)
+
+This is the selected public policy URL. On 2026-10-01 it returned HTTP 200 without sign-in and disclosed local page/PDF processing, current permissions, IndexedDB/session retention, external links, support email handling, and no developer-operated processing backend or analytics. Entering it in the Chrome Web Store Developer Dashboard remains the maintainer's responsibility. Support contact: [support@miengieh.com](mailto:support@miengieh.com).
 
 ## Graphic Assets
 
@@ -98,7 +100,8 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - Store icon: `icons/icon-128.png`
 - Small promotional image: `store-assets/small-promo-440x280.png`
 - Popup screenshot: `store-assets/screenshot-popup-640x400.png`
-- Refresh the popup screenshot before store submission to reflect the 0.4.6 brand header, black actions, and footer links.
+- Chrome's current official image guidance accepts 1280×800 or 640×400 full-bleed screenshots with square corners; this project retains 640×400 for the compact popup.
+- `store-assets/screenshot-popup-640x400.png` is a real 640×400 capture of the installed final 0.5.1 popup, including the current black primary action, brand header, compact resource links, and disabled rating entry.
 - Recommended additional screenshot: capture the completed PDF preview during the final Chrome acceptance test.
 - Marquee promotional image: optional, not prepared
 
@@ -111,17 +114,25 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 - [x] Privacy policy text prepared
 - [x] 128×128 store icon prepared and included in the extension package
 - [x] 440×280 small promotional image prepared
-- [ ] Replace the 640×400 popup screenshot with a current 0.4.6 capture
+- [x] Replace the 640×400 popup screenshot with a real capture from the final 0.5.1 build
 - [x] Chrome Web Store ZIP places `manifest.json` at the archive root
 - [x] Support and privacy contact set to `support@miengieh.com`
-- [ ] Host the privacy policy at a public URL
-- [ ] Add the final privacy policy URL above and in the Developer Dashboard
+- [x] Final public privacy-policy URL selected and documented
+- [x] Confirmed the final privacy-policy URL returned HTTP 200 without sign-in and matched the current extension behavior on 2026-10-01
+- [ ] Enter the final privacy-policy URL in the Developer Dashboard
 - [ ] Complete the Developer Dashboard privacy disclosures and Limited Use certification
 - [ ] Optionally capture a second screenshot showing the completed PDF preview
-- [ ] Complete the Windows and macOS acceptance tests in `PRE_RELEASE_TEST_PLAN.md`
+- [x] Maintainer reports successful installation/use on Windows without development tools and on macOS; this is prior user verification, not a new 0.5.1 regression result
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.5.1 — 2026-10-01
+
+- Replanned nominal single-page prints with Chrome's maximum safe page height when Chrome unexpectedly returned multiple pages
+- Accepted complete multi-page output after bounded replanning while preserving PDF structure and page-count checks
+- Restored editable preview filenames and used the current sanitized input value for the actual download request
+- Added regression coverage for boundary planning, PDF completeness, Unicode filenames, repeated extensions, blank input, and reserved names
 
 ### 0.5.0 — 2026-09-27
 

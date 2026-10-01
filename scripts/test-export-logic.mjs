@@ -34,12 +34,21 @@ for (const value of ["100vw", "900px", "var(--height)", "auto", "url(/image-vh.p
 }
 
 const pdf = await loadSourceModule(`
-  export { countPdfPages, createPrintPlan, isAcceptablePageCount } from "./src/background/pdf-generator.ts";
+  export {
+    countPdfPages,
+    createMaximumHeightPrintPlan,
+    createPrintPlan,
+    isAcceptablePageCount,
+    isCompletePdfDocument
+  } from "./src/background/pdf-generator.ts";
 `);
 const bytes = (value) => new TextEncoder().encode(value);
 assert.equal(pdf.countPdfPages(bytes("%PDF-1.7\n1 0 obj << /Type /Pages /Count 1 >> endobj\n2 0 obj << /Type /Page >> endobj")), 1);
 assert.equal(pdf.countPdfPages(bytes("%PDF-1.7\n1 0 obj << /Type/Page >> endobj\n2 0 obj << /Type /Page /Parent 3 0 R >> endobj")), 2);
 assert.equal(pdf.countPdfPages(bytes("%PDF-1.7\n1 0 obj << /Type /Pages /Count 0 >> endobj")), undefined);
+assert.equal(pdf.isCompletePdfDocument(bytes("%PDF-1.7\n1 0 obj << /Type /Page >> endobj\n%%EOF\n")), true);
+assert.equal(pdf.isCompletePdfDocument(bytes("%PDF-1.7\n1 0 obj << /Type /Page >> endobj")), false);
+assert.equal(pdf.isCompletePdfDocument(bytes("not-a-pdf\n%%EOF")), false);
 
 const normalPlan = pdf.createPrintPlan({ width: 1440, height: 12000 });
 assert.equal(normalPlan.mode, "single-page");
@@ -49,6 +58,15 @@ assert.deepEqual(normalPlan.paperHeights, [125.01, 125.04, 125.1]);
 assert.equal(normalPlan.estimatedPageCount, 1);
 assert.equal(pdf.isAcceptablePageCount(normalPlan, 1), true);
 assert.equal(pdf.isAcceptablePageCount(normalPlan, 2), false);
+const normalFallbackPlan = pdf.createMaximumHeightPrintPlan({ width: 1440, height: 12000 });
+assert.equal(normalFallbackPlan.mode, "paginated");
+assert.deepEqual(normalFallbackPlan.paperHeights, [200]);
+assert.equal(pdf.isAcceptablePageCount(normalFallbackPlan, 2), true);
+
+const nearBoundaryPlan = pdf.createPrintPlan({ width: 1440, height: 19190 });
+assert.equal(nearBoundaryPlan.mode, "single-page");
+const aboveBoundaryPlan = pdf.createPrintPlan({ width: 1440, height: 19210 });
+assert.equal(aboveBoundaryPlan.mode, "paginated");
 
 const wikipediaPlan = pdf.createPrintPlan({ width: 2180, height: 31934 });
 assert.equal(wikipediaPlan.mode, "paginated");

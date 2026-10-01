@@ -57,8 +57,6 @@
   "errorLayoutChanged":{"message":"網頁版面配置在列印前再次變更。請等待網頁載入完成後再試一次。"},
   "errorMissingPdfStream":{"message":"Chrome 未傳回 PDF 資料串流。"},
   "errorUnverifiedPageCount":{"message":"無法驗證 Chrome 傳回之 PDF 的頁數，因此未儲存該檔案。"},
-  "errorMultiplePagesCrossOrigin":{"message":"Chrome 產生了 $COUNT$ 頁 PDF。部分跨來源頁面樣式無法穩定處理，因此未儲存不完整的 PDF。","placeholders":{"count":{"content":"$1","example":"2"}}},
-  "errorMultiplePages":{"message":"Chrome 產生了 $COUNT$ 頁 PDF，不符合單頁匯出要求，因此未儲存不完整的 PDF。","placeholders":{"count":{"content":"$1","example":"2"}}},
   "errorPdfIdentifierMissing":{"message":"缺少 PDF 識別碼。"},
   "errorPreviewExpired":{"message":"此 PDF 預覽已過期，請從網頁重新產生。"}
 }

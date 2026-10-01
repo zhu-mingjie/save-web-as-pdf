@@ -1,92 +1,71 @@
-# Save Web as PDF 0.5.0 — Final Acceptance Test
+# Save Web as PDF 0.5.1 — Pre-release Verification Record
 
-Use the exact `release/save-web-as-pdf-v0.5.0.zip` artifact after release is explicitly approved. Record the Chrome version, operating system version, result, and any console error for every test.
+This file separates prior maintainer verification, automated checks for the current candidate, current manual browser checks, intentionally deferred coverage, and work reserved for the maintainer. Do not treat an item from one category as evidence for another.
 
-## Clean-device installation
+## Prior maintainer verification — do not repeat as a release blocker
 
-Run once on a Windows computer and once on a macOS computer that does not have Node.js, npm, TypeScript, esbuild, or project dependencies installed.
+- **Windows without development tools:** the maintainer reports successful installation and use on a Windows computer without Node.js, npm, TypeScript, esbuild, or project dependencies.
+- **macOS:** the maintainer reports successful testing on macOS. No unreported machine or browser details are inferred.
+- **Previously designated real websites:** the maintainer reports the designated Zhihu and other real-site cases passed for the version they tested. Future real-site compatibility checks remain with the maintainer unless a new request says otherwise.
 
-1. Confirm the ZIP contains `manifest.json` at its root.
-2. Create a new empty folder and extract the ZIP into it.
-3. Open `chrome://extensions`, enable Developer mode, and choose Load unpacked.
-4. Select the extracted folder.
-5. Confirm the extension loads with its charcoal document-and-download icon and reports no manifest or service-worker errors.
+These results establish prior platform and compatibility coverage. They do not claim that the maintainer already tested the new 0.5.1 pagination and filename changes.
 
-## Core export
+## Current 0.5.1 automated verification
 
-- Export a short static webpage.
-- Export a long article with images, tables, links, and lazy-loaded content.
-- Start from the middle of a page and confirm the original scroll position is restored.
-- Confirm the preview opens and shorter pages produce exactly one PDF page.
-- Confirm the suggested filename uses the webpage's current title rather than an earlier cached tab title.
-- Confirm Chinese, Japanese, Korean, accented Latin, emoji, and percent-encoded titles remain readable in the suggested filename.
-- Search and copy text from the PDF.
-- Download using a title containing Chinese, Japanese, Korean, emoji, accents, reserved Windows characters, and a very long title.
-- Confirm the saved filename is valid and the PDF opens normally.
-- Export `https://miengieh.com/` and `https://www.deepseek.com/harness/`; confirm each PDF has one page, preserves its beginning and ending content, and contains selectable text and working links.
-- Export `https://zh.wikipedia.org/wiki/维基百科` and `https://en.wikipedia.org/wiki/Wikipedia`; confirm each page exports successfully across the fewest practical maximum-height PDF pages, and confirm the first and last article content remain present.
+Record the actual result when the candidate is built:
 
-## Dynamic pages and Zhihu
+- [x] TypeScript typecheck
+- [x] Filename regression tests, including Unicode, illegal characters, reserved names, blank input, byte limits, and repeated `.pdf` suffixes
+- [x] Export-plan regression tests, including the single-page boundary, maximum-height fallback, long-page planning, page counts, and PDF header/EOF validation
+- [x] All 11 locale catalogs have matching keys and valid placeholders
+- [x] Popup/source checks
+- [x] Production build
+- [x] Release-package validation, archive-root manifest, and absence of source/development debris
+- [x] Runtime bundles contain no Node-only API or personal/local path leakage
 
-- Open a direct Zhihu `/question/.../answer/...` URL and confirm the status says that the question and selected answer are being prepared.
-- Confirm the PDF includes the complete top question section (title, description, topics, and visible metadata), correct author, full target answer, images, code blocks, and links.
-- Confirm the compact duplicate question title in Zhihu's top navigation is excluded when it appears alongside the main question section.
-- Confirm unrelated answers, “更多回答”, recommendations, sidebars, fixed navigation, floating buttons, and answer action bars are excluded.
-- Test a direct-answer page whose answer cannot be accessed or matched; confirm no other answer is exported.
-- Export the Zhihu home feed and confirm preparation uses a finite snapshot rather than scrolling indefinitely.
-- After every success and failure above, confirm hidden page sections, eager-image attributes, viewport sizing, animation state, and the original scroll position are restored.
+These checks passed on 2026-10-01 using the 0.5.1 candidate. The validated archive contained 27 runtime files with `manifest.json` at its root.
 
-## Edit mode
+## Current 0.5.1 controlled Chrome regression
 
-- Open Edit Before Saving and dismiss the instruction dialog with its button.
-- Repeat and dismiss the instruction dialog with Escape.
-- Remove multiple elements and test Undo, Redo, and Restore.
-- Export after removing an element and confirm nearby content reflows.
-- Confirm the editor toolbar, selection outline, and removed content do not appear in the PDF.
-- Choose Exit and confirm all page changes are restored.
+Use local pages rather than repeating the maintainer's designated real-site list.
 
-## Cancellation and cleanup
+- [x] Clearly short page exports as one complete page.
+- [x] Near-boundary and rounding cases terminate after bounded attempts.
+- [x] A nominal single-page plan that Chrome renders as two pages is remeasured and replanned with the verified 200-inch maximum paper height.
+- [x] Pages slightly above the single-page limit, around twice the limit, and substantially longer export as complete multi-page PDFs with a shorter final page where applicable.
+- [x] Top, middle, and final markers are present; links and images cross page boundaries without the final content being dropped.
+- [x] Preview receives the complete PDF rather than only its first page.
+- [x] An automatic Chinese or mixed-language title is used for the actual downloaded filename.
+- [x] A manual filename edit made immediately before saving controls the actual downloaded filename.
+- [x] Blank input, long/invalid input, repeated saves, one-page output, and multi-page output preserve the shared safe filename rules.
+- [x] Canceling the Save As dialog does not report a completed download.
 
-- Start a long full-page export and click Cancel Export.
-- Confirm the export stops, no preview opens, the original scroll position returns, and the page has no leftover styles.
-- In edit mode, start an export and cancel before PDF rendering begins.
-- Close the popup during a long export and confirm it is treated as cancellation.
-- After cancellation or failure, start another export on the same tab and confirm it is not incorrectly reported as already running.
+These checks were completed in Chrome on macOS on 2026-10-01 with the installed 0.5.1 package and controlled local pages. The forced-break regression reproduced the historical unexpected two-page outcome from an initial single-page plan; the accepted result was a complete two-page PDF whose first page measured 200 inches high. A 50,000 CSS-pixel fixture produced three 200-inch pages. PDF header/EOF, page count, marker text, link annotation, preview page count, and rendered pages were inspected. A short page also completed through Edit Before Saving and opened a complete one-page preview with the expected title. The Save As cancellation produced no file.
 
-## Failure handling
+## Current 0.5.1 auxiliary and interruption checks
 
-- Try a `chrome://` page and the Chrome Web Store; confirm a clear access error.
-- Open DevTools on the source tab and confirm debugger conflict is explained.
-- Test an extremely long page and confirm it exports across maximum-height PDF pages without dropping the final page; pages that exceed the separate preparation height guard should still stop with a clear error.
-- Close or navigate the source tab during export and confirm cleanup completes without a stuck session.
+- [x] Keyboard focus order and visible focus for popup and preview controls
+- [x] Enter/Space activation, Escape dismissal, cancellation, and retry state restoration
+- [x] Empty status/error region remains absent; a long error remains scrollable and readable
+- [x] Accessibility-tree names and disabled state for buttons, icon links, progress, errors, and the disabled rating entry
+- [ ] Actual screen-reader announcement of progress and errors
+- [ ] DevTools/debugger conflict reports an error and releases state cleanly
+- [ ] Navigation or tab closure during export releases temporary DOM/styles and debugger state
 
-## Accessibility
+Keyboard order, accessible names/states, cancellation, and successful retry were exercised in the installed extension. Empty-region and maximum-height error behavior are covered by the popup source/layout regression checks; a synthetic long runtime error was not injected into the release build. VoiceOver was not enabled, so an actual screen-reader announcement is not claimed. Docked DevTools did not reproduce a debugger conflict in the tested Chrome build: export still completed and cleanup succeeded. Navigation/tab-close interruption could not be exercised reliably through the attached browser-control session and remains manual follow-up coverage.
 
-- Confirm the popup header uses the supplied document/download SVG, the primary action is black, and the secondary action is light gray without changing the export actions.
-- Confirm the footer remains a compact centered row and preserves the order: website globe, Support this project, Rate this extension, GitHub.
-- Confirm the website, support, and GitHub entries open their exact configured HTTPS destinations in new tabs without starting or canceling an export.
-- With the review URL empty, confirm Rate this extension remains visible, exposes disabled semantics, and does nothing on mouse click, Enter, or Space. Temporarily use a non-empty HTTPS test URL to verify the enabled path, then restore the empty value before delivery.
-- Confirm the popup has no empty status row in its normal state, expands while progress or error text is visible, and returns to its compact height when retrying.
-- Trigger an unusually long error message and confirm the message region scrolls instead of pushing the popup beyond Chrome's maximum height.
-- Navigate the popup and preview with Tab, Shift+Tab, Enter, Space, and Escape.
-- Confirm focus indicators are visible.
-- Confirm status and error text is announced by a screen reader.
-- Confirm the edit instructions behave as a modal dialog and Escape dismisses it.
-- Document the pointer-based element selector as a known limitation if a keyboard-equivalent selection workflow is not added before release.
+Static source or accessibility-tree inspection may support these items but does not count as an actual screen-reader announcement test.
 
-## Localization
+## Deferred by maintainer
 
-- Test the popup, edit toolbar, instructions dialog, progress, cancellation, errors, and PDF preview in all supported languages.
-- Confirm `en-US`, `de-AT`, `it-CH`, `es-MX`, `fr-CA`, `ja-JP`, and `ko-KR` select their base-language translations.
-- Confirm `pt-BR` uses Brazilian Portuguese and `pt-PT` uses European Portuguese.
-- Confirm `zh-CN` and `zh-SG` use Simplified Chinese, while `zh-TW` and `zh-HK` use Traditional Chinese.
-- Confirm an unsupported Chrome language and a deliberately missing translated message fall back to English.
-- Check that longer German and French controls wrap without clipping and that Chinese, Japanese, and Korean text renders correctly.
-- Confirm the localized popup prompt, footer text, and website accessible label are present in every catalog and do not overlap at the fixed popup width.
+- Manual end-to-end testing of every one of the 11 supported locales is postponed pending real-user feedback.
+- Continue automated catalog-key, placeholder, fallback, typecheck, build, and package checks.
+- The editor's pointer-based element selection remains a known accessibility limitation unless a separate keyboard selection workflow is implemented.
 
-## Store submission
+## Chrome Web Store work — maintainer owned
 
-- Verify the hosted privacy policy loads without sign-in and contains the final contact information.
-- Confirm Developer Dashboard disclosures match `PRIVACY.md` and `CHROMEWEBSTORE.md`.
-- Capture at least one current 1280×800 or 640×400 screenshot from the tested build.
-- Upload the ZIP to a draft Chrome Web Store item and confirm the manifest is accepted before submitting for review.
+- Enter `https://miengieh.com/save-web-as-pdf/privacy/` in the Developer Dashboard.
+- Confirm dashboard disclosures and Limited Use certification match `PRIVACY.md` and `CHROMEWEBSTORE.md`.
+- Upload the approved ZIP to the draft store item and perform the final store submission.
+
+The repository work may verify that the public policy URL is reachable and that a real current screenshot exists, but it must not mark the Developer Dashboard or store submission complete without maintainer action.

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>本地导出测试 Mixed Title</title>
+    <link id="forced-break-styles" rel="stylesheet" disabled />
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: #fff; color: #1f1f1f; font: 20px/1.5 system-ui, sans-serif; }
+      main { position: relative; width: 960px; max-width: 100%; margin: 0 auto; padding: 48px; background: #fff; }
+      .marker { padding: 24px; border: 3px solid #222; background: #f4f4f4; }
+      #middle-marker { position: absolute; left: 48px; right: 48px; top: 50%; }
+      #final-marker { position: absolute; left: 48px; right: 48px; bottom: 48px; }
+      img { display: block; width: 320px; height: 180px; margin: 32px 0; }
+    </style>
+  </head>
+  <body>
+    <main id="content">
+      <h1 id="top-marker" class="marker">TOP MARKER — 本地导出测试</h1>
+      <p><a href="#final-marker">Working link to the final marker</a></p>
+      <img
+        alt="Inline test graphic"
+        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180'%3E%3Crect width='320' height='180' fill='%23dedede'/%3E%3Ctext x='28' y='100' font-size='28'%3EIMAGE MARKER%3C/text%3E%3C/svg%3E"
+      />
+      <section id="forced-marker" class="marker">FORCED BREAK MARKER</section>
+      <section id="middle-marker" class="marker">MIDDLE MARKER</section>
+      <section id="final-marker" class="marker">FINAL MARKER — no content may be dropped</section>
+    </main>
+    <script>
+      const parameters = new URLSearchParams(location.search);
+      const height = Math.max(1200, Number(parameters.get("height")) || 12000);
+      document.querySelector("#content").style.height = `${height}px`;
+      if (parameters.get("forced") === "1") {
+        const sheet = document.querySelector("#forced-break-styles");
+        sheet.href = `http://localhost:${location.port}/forced-break.css`;
+        sheet.disabled = false;
+      }
+      if (parameters.get("title")) document.title = parameters.get("title");
+    </script>
+  </body>
+</html>

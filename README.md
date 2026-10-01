@@ -14,11 +14,11 @@ Save a complete webpage as a searchable PDF while preserving the page's visual l
 - Preview the generated PDF before downloading
 - Process and store PDF data locally in the browser
 - Use the same Chrome extension package on Windows, macOS, and Linux
-- Use the interface in English, Simplified Chinese, Traditional Chinese, German, Italian, Spanish, Brazilian or European Portuguese, French, Japanese, or Korean
+- Use the interface in 11 supported locales: English, Simplified Chinese, Traditional Chinese, German, Italian, Spanish, Brazilian Portuguese, European Portuguese, French, Japanese, and Korean
 
 The interface automatically follows Chrome's display language, including when Chrome follows the operating system language. Regional variants use Chrome's native locale matching, and unsupported languages fall back to English. No webpage-language detection, location lookup, or network translation service is used.
 
-Save Web as PDF uses the Chrome DevTools Protocol (`Page.printToPDF`) rather than a screenshot pipeline. It does not silently fall back to screenshots or automatic pagination.
+Save Web as PDF uses the Chrome DevTools Protocol (`Page.printToPDF`) rather than a screenshot pipeline. After the page is prepared, content that fits within the verified safe capacity is exported as one continuous page. Longer content is automatically exported across maximum-height pages, with a shorter final page when needed. This shared rule applies to every accessible, processable capture mode; it is not limited to a website list.
 
 ## Development installation
 
@@ -98,7 +98,7 @@ Commit and push each reasonably complete development or test version so the sour
 
 PDF generation and temporary storage happen locally in Chrome. The extension does not upload page content, HTML, screenshots, or generated PDFs, and it has no account, analytics, subscription, or backend service. The temporary IndexedDB record is deleted as soon as the preview reads it; records left by an interrupted operation are removed opportunistically after 24 hours. Query parameters and fragments are removed before a source URL is stored.
 
-See [PRIVACY.md](PRIVACY.md) for the complete privacy policy.
+Read the [public privacy policy](https://miengieh.com/save-web-as-pdf/privacy/) or its repository source in [PRIVACY.md](PRIVACY.md).
 
 ## License
 
@@ -111,7 +111,7 @@ The source code, original extension icon, and repository-owned promotional asset
 - Pages that fit within Chromium's safe single-page height are exported as one continuous page. Longer webpages are automatically paginated with each page using the maximum safe height, except for the final remainder. Extremely wide pages can still exceed Chromium or PDF viewer limits even at the minimum supported print scale.
 - Infinite-scroll and slow-loading pages are bounded by time, iteration, and height guards so an export cannot run forever.
 - Zhihu feeds use a snapshot of the content already loaded when export starts. Supported direct answer URLs preserve the main question section and the requested answer; if either cannot be identified safely, the extension stops instead of exporting different content.
-- Viewport-dependent layout can be stabilized only when the responsible page styles are inspectable. Cross-origin or script-generated styles may still prevent a one-page result, in which case the extension reports the limitation without saving an incomplete PDF.
+- Viewport-dependent layout can be stabilized only when the responsible page styles are inspectable. Cross-origin or script-generated styles can still cause layout differences, missing content, or export failure.
 - Canvas, WebGL, video, cross-origin frames, and site-specific CSS may not be preserved as selectable or vector PDF content.
 
 Not every website can currently be saved completely. Page structure, dynamic loading, and other compatibility differences may cause missing content, layout problems, or export failure. If you encounter a reproducible problem, email [support@miengieh.com](mailto:support@miengieh.com) with a publicly shareable page URL, your Chrome and extension versions, and the error message. Do not send passwords, cookies, or other sensitive credentials. Compatibility issues that can be addressed safely may receive targeted fixes, but support for every website cannot be guaranteed.

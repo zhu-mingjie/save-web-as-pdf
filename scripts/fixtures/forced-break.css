@@ -1,0 +1,4 @@
+#forced-marker {
+  break-before: page !important;
+  page-break-before: always !important;
+}

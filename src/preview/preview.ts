@@ -1,4 +1,5 @@
 import { takePdf } from "../shared/pdf-store";
+import { createPdfDownloadFilename } from "../shared/filename";
 import { localizeDocument, userError, visibleError } from "../shared/i18n";
 
 localizeDocument();
@@ -9,15 +10,13 @@ const preview = document.querySelector<HTMLEmbedElement>("#preview")!;
 const status = document.querySelector<HTMLParagraphElement>("#status")!;
 const source = document.querySelector<HTMLParagraphElement>("#source")!;
 let objectUrl: string | null = null;
-let downloadFilename = "webpage.pdf";
 
 async function load(): Promise<void> {
   const id = new URLSearchParams(location.search).get("id");
   if (!id) throw userError("errorPdfIdentifierMissing");
   const record = await takePdf(id);
   if (!record) throw userError("errorPreviewExpired");
-  downloadFilename = record.metadata.filename;
-  filenameInput.value = downloadFilename;
+  filenameInput.value = record.metadata.filename;
   source.textContent = record.metadata.url;
   source.title = record.metadata.url;
   objectUrl = URL.createObjectURL(record.blob);
@@ -33,7 +32,7 @@ downloadButton.addEventListener("click", async () => {
   try {
     await chrome.downloads.download({
       url: objectUrl,
-      filename: downloadFilename,
+      filename: createPdfDownloadFilename(filenameInput.value),
       saveAs: true
     });
   } catch (error) {
