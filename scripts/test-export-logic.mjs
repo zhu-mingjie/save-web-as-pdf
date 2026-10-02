@@ -88,4 +88,21 @@ assert.ok(Math.abs(widePlan.paperWidth - 200) < 0.000001);
 
 assert.equal(pdf.createPrintPlan({ width: 200000, height: 12000 }), undefined);
 
+const lastPage = await loadSourceModule(`
+  export {
+    LAST_PAGE_BOTTOM_PADDING_MM,
+    LAST_PAGE_BOTTOM_PADDING_POINTS,
+    calculateLastPageTrim
+  } from "./src/shared/last-page-height.ts";
+`);
+assert.equal(lastPage.LAST_PAGE_BOTTOM_PADDING_MM, 4);
+assert.ok(Math.abs(lastPage.LAST_PAGE_BOTTOM_PADDING_POINTS - 11.3386) < 0.001);
+const shortLastPage = lastPage.calculateLastPageTrim(14400, 200, 14400, 1);
+assert.ok(shortLastPage);
+assert.ok(Math.abs(shortLastPage.newHeightPoints - (200 + 11.3386 + 2)) < 0.001);
+assert.ok(shortLastPage.bottomTrimPoints > 14000);
+assert.equal(lastPage.calculateLastPageTrim(14400, 14380, 14400, 1), null);
+assert.equal(lastPage.calculateLastPageTrim(14400, -1, 14400, 1), null);
+assert.equal(lastPage.calculateLastPageTrim(14400, 200, 0, 1), null);
+
 console.log("Export logic tests: OK");

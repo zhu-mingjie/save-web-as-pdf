@@ -12,6 +12,12 @@
       .marker { padding: 24px; border: 3px solid #222; background: #f4f4f4; }
       #middle-marker { position: absolute; left: 48px; right: 48px; top: 50%; }
       #final-marker { position: absolute; left: 48px; right: 48px; bottom: 48px; }
+      #final-marker img { width: 240px; height: 120px; margin: 8px 0 0; }
+      #final-marker svg { display: block; width: 240px; height: 96px; margin-top: 8px; }
+      #final-marker table { margin-top: 8px; border-collapse: collapse; }
+      #final-marker th, #final-marker td { padding: 8px 12px; border: 2px solid #555; }
+      #final-marker.light { color: #ededed; background: #fff; border-color: #f4f4f4; }
+      #final-marker.shadow { background: #fff; box-shadow: 0 20px 24px rgba(0, 0, 0, 0.2); }
       img { display: block; width: 320px; height: 180px; margin: 32px 0; }
     </style>
   </head>
@@ -37,6 +43,23 @@
         sheet.disabled = false;
       }
       if (parameters.get("title")) document.title = parameters.get("title");
+      const ending = parameters.get("ending") || "text";
+      const finalMarker = document.querySelector("#final-marker");
+      if (ending === "image") {
+        finalMarker.insertAdjacentHTML("beforeend", `<img alt="Final image marker" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Crect width='240' height='120' fill='%236e93c7'/%3E%3Ccircle cx='190' cy='60' r='34' fill='%23f8d66d'/%3E%3C/svg%3E">`);
+      } else if (ending === "table") {
+        finalMarker.insertAdjacentHTML("beforeend", "<table><tr><th>Final table</th><th>值</th></tr><tr><td>Last row</td><td>完整</td></tr></table>");
+      } else if (ending === "svg") {
+        finalMarker.insertAdjacentHTML("beforeend", "<svg viewBox='0 0 240 96' role='img' aria-label='Final vector marker'><path d='M8 80 L72 16 L136 80 L200 16 L232 80 Z' fill='#7aa85b'/></svg>");
+      } else if (ending === "link") {
+        finalMarker.insertAdjacentHTML("beforeend", "<p><a href='https://example.com/final-link'>Clickable final external link</a></p>");
+      } else if (ending === "light" || ending === "shadow") {
+        finalMarker.classList.add(ending);
+      }
+      if (parameters.get("background") === "page") {
+        document.documentElement.style.background = "linear-gradient(#ffffff, #f1f5fb)";
+        document.body.style.background = "linear-gradient(#ffffff, #f1f5fb)";
+      }
     </script>
   </body>
 </html>

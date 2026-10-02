@@ -2,7 +2,7 @@
 
 > Primary source of truth for project context across AI tools and development sessions.
 >
-> Last reviewed: 2026-10-01. Evidence was taken from the 0.5.1 candidate working tree and the authoritative Git checkout of GitHub `main`; see sections 12–14 for current status and Git rules.
+> Last reviewed: 2026-10-02. Evidence was taken from the 0.5.2 beta working tree and the authoritative Git checkout of GitHub `main`; see sections 12–14 for current status and Git rules.
 
 ## 1. Project Overview
 
@@ -22,10 +22,10 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 | Runtime language | TypeScript compiled to browser-native ES modules (ES2022) |
 | Browser APIs | Chrome extensions APIs, Chrome DevTools Protocol, DOM/Web APIs, IndexedDB |
 | UI | Plain HTML and CSS; no UI framework |
-| Build tooling | Node.js 20+, npm, TypeScript, esbuild |
+| Build tooling | Node.js 22.13+, npm, TypeScript, esbuild |
 | Tests/checks | TypeScript typecheck plus Node-based filename, export, localization, popup UI/link, build, and release-package checks |
 | Backend/database/auth | None. PDF data is temporarily stored in local IndexedDB; operation state uses `chrome.storage.session` |
-| Runtime third-party dependencies | None identified; development dependencies are `@types/chrome`, `esbuild`, and `typescript` |
+| Runtime third-party dependencies | Locally bundled `pdfjs-dist` 6.3.289 (Apache-2.0) and `pdf-lib` 1.17.1 (MIT); development dependencies are `@types/chrome`, `esbuild`, and `typescript` |
 
 Node.js, npm, TypeScript, and esbuild are development/build tools only. A built `dist/` directory or release ZIP must install and run directly in Chrome on a clean Windows or macOS computer without those tools.
 
@@ -67,7 +67,9 @@ Generated or local-only directories include `node_modules/`, `dist/`, `release/`
 4. The background debugger session attaches through the Chrome DevTools Protocol and calls `Page.printToPDF`, receiving the PDF through a protocol stream.
 5. The PDF generator validates the resulting page count and restores page state and the debugger connection even on failure or cancellation.
 6. The completed PDF and safe filename are written to IndexedDB, and an extension preview tab is opened.
-7. The preview consumes the one-time local record, embeds the PDF, and downloads it through `chrome.downloads` when requested.
+7. The preview consumes the one-time local record. For multi-page PDFs within the resource budget, local PDF.js rendering finds the last page's painted, image, and annotation boundary. If the boundary and page boxes are safe, pdf-lib raises only the last page's lower page-box edge, retaining about 4 mm bottom padding.
+8. The rewritten PDF must preserve page count, every earlier page box, final-page text and annotations, expected dimensions, the PDF envelope, and the white-composited rendered top region. Any ambiguity, timeout, limit, parse/write error, or validation mismatch keeps the original valid PDF.
+9. The preview embeds the selected original or verified optimized PDF and uses that same object URL for the requested `chrome.downloads` save.
 
 ### Editing flow
 
@@ -97,7 +99,8 @@ The popup can enter an injected editor mode. The user selects page elements to r
 - **Ephemeral service worker.** Durable operation state belongs in Chrome storage rather than service-worker globals.
 - **One-time local PDF handoff.** IndexedDB bridges background generation and preview without network transfer or long-lived file retention.
 - **Unicode-safe filenames.** Titles and the current preview input are decoded, common mojibake is repaired, normalized to NFC, stripped of Windows-forbidden characters/reserved names, capped at 180 UTF-8 bytes, and given exactly one `.pdf` suffix before the download request.
-- **No runtime framework or dependency bundle.** Plain DOM/CSS and bundled TypeScript keep the runtime small. The historical rationale for selecting esbuild over alternatives is not documented and should not be invented.
+- **No runtime UI framework; two scoped PDF dependencies.** Plain DOM/CSS and bundled TypeScript remain in use. PDF.js is bundled only for local PDF parsing/rendering and pdf-lib only for last-page box updates. Their license texts ship in `dist/licenses/`; no remote code, Node runtime, optional native canvas package, or additional Chrome permission is included.
+- **Conservative final-page shortening.** Single-page PDFs are excluded. Multi-page inputs are limited to 64 MiB, four million render pixels, a 12-second render timeout, and a 20-second total deadline. Full-page non-white/gradient backgrounds, rotations, nonmatching MediaBox/CropBox values, small savings, and all failed validations preserve the original page.
 - **Popup resource links are explicit and local-first.** Website, support, and GitHub destinations are configured in `src/popup/links.ts` and open only after a user click. `CHROME_WEB_STORE_REVIEW_URL` is intentionally empty until a stable store review URL exists; the visible rating entry remains disabled without navigation or export side effects.
 
 ## 6. Coding Conventions
@@ -134,7 +137,7 @@ The popup can enter an injected editor mode. The user selects page elements to r
 
 ## 9. Local Development
 
-Prerequisites: Node.js 20+, npm, and Chrome 120+.
+Prerequisites: Node.js 22.13+, npm, and Chrome 120+.
 
 ```bash
 npm ci
@@ -191,18 +194,20 @@ npm run verify:release  # Validate an existing release artifact
 
 ### Current local snapshot
 
-- The local candidate version is `0.5.1`.
+- The local candidate version is `0.5.2`.
 - The authoritative checkout uses `main` and tracks `origin/main` at `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
-- The 0.5.1 candidate keeps the approved 0.5.0 popup design. Its scoped behavior changes are maximum-height replanning after an unexpected multi-page single-page attempt, PDF header/EOF validation, targeted neutralization of explicit forced page breaks in active inspectable styles, and current-input filename handling in the preview download request.
+- The 0.5.2 beta keeps the approved popup, capture, pagination, naming, and editor behavior. Its scoped change is conservative preview-side shortening of only the last page of a multi-page PDF after content-boundary detection and post-write verification.
+- Controlled real-PDF tests on 2026-10-02 covered two and three pages; text, image, table, SVG, link, shallow-color, and shadow endings; full-page gradient fallback; a nearly full last page; and a single-page no-op. The representative last page changed from 14,400 pt to 203.677 pt with about 15 pt measured bottom whitespace, while page count, page 1, extracted text, annotations, and visual top content remained unchanged.
+- `pdfjs-dist` 6.3.289 and `pdf-lib` 1.17.1 are exact runtime dependencies. The production `dist/` is approximately 2.2 MiB, includes the local PDF.js worker and both license texts, and contains no detected Node-only runtime imports or calls.
 - The popup website, support, and GitHub destinations are active. The rating text is present but intentionally disabled because `CHROME_WEB_STORE_REVIEW_URL` remains empty.
 - The approved AI handoff files and minimal secret/local-file ignore patterns are included with this beta source sync.
 - Local prompt and analysis Markdown files were intentionally excluded from the public repository.
 
 ### Next recommended steps
 
-1. Preserve the completed 0.5.1 controlled Chrome evidence for maximum-height pagination, complete multi-page output, cancellation/retry, and actual downloaded filenames; do not repeat the maintainer-owned real-site list or full clean-device matrix.
-2. The historical popup screenshot has been replaced with a real 640×400 capture from the installed 0.5.1 build, and the selected public privacy-policy URL/content has been verified.
-3. Keep Chrome Web Store dashboard work and submission with the maintainer; do not submit or change the public listing without a new explicit request.
+1. Have the maintainer install and exercise the 0.5.2 test ZIP in ordinary Chrome, especially full-save and edit-save preview/download behavior on a representative long page. The automated test used real Chrome PDFs and the production optimizer but did not repeat the installed-extension edit-flow acceptance test.
+2. Preserve the completed 0.5.1 pagination/filename evidence and the 0.5.2 final-page-height matrix; do not repeat the maintainer-owned real-site list or full clean-device matrix without a separate need.
+3. Keep Chrome Web Store dashboard work, tag, GitHub Release, and submission with the maintainer; do not publish without a new explicit request.
 
 ## 13. Known Issues and Technical Debt
 
@@ -216,7 +221,7 @@ npm run verify:release  # Validate an existing release artifact
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The source version and latest published GitHub tag are both `0.5.1`. Chrome Web Store publication has not been performed by the agent.
+- The source beta version is `0.5.2`; the latest published GitHub tag remains `0.5.1`. Chrome Web Store publication has not been performed by the agent.
 
 ## 14. Git Workflow
 
@@ -250,6 +255,14 @@ This section is the default authorization model for future AI-assisted work in t
 - At handoff, summarize changed files, validation, Git status, remaining risks, and the safest next action. Update the handoff log below when the information will help the next session.
 
 ## 16. Handoff Log
+
+### 2026-10-02 — Codex (0.5.2 last-page auto height)
+
+- **Worked on:** added conservative last-page height optimization for multi-page PDFs without changing capture, print planning, page breaks, filenames, popup UI, or permissions.
+- **Implementation:** the preview locally renders only the last page within fixed resource budgets, treats verified white paper background as blank, includes recorded image and annotation bounds, retains 4 mm plus raster safety padding, and updates matching final-page PDF boxes without translating content. A second parse/render validation gates use of the rewritten PDF; all failures retain the original.
+- **Dependencies:** exact `pdfjs-dist` 6.3.289 (Apache-2.0) and `pdf-lib` 1.17.1 (MIT), both bundled locally with license texts. Browser builds remove Node-only branches and no network-loaded code or new permission is used.
+- **Validation:** typecheck, focused rules, real Chrome-generated PDF integration matrix, Poppler page-box/render review, localization, popup, filename, build, package validation, Node-API/local-path scan, and npm audit were completed for the beta candidate. See `PRE_RELEASE_TEST_PLAN.md` for the exact matrix and remaining installed-ZIP acceptance step.
+- **Release state:** source-only 0.5.2 beta. No tag, GitHub Release, Chrome Web Store action, or public release is authorized by this handoff.
 
 ### 2026-09-21 — Codex
 

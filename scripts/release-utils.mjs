@@ -15,10 +15,10 @@ const FORBIDDEN_TEXT = [
   { label: "127.0.0.1", pattern: /127\.0\.0\.1/ },
   { label: "file URL", pattern: /file:\/\//i },
   { label: "macOS user path", pattern: /\/Users\// },
-  { label: "Linux home path", pattern: /\/home\// },
+  { label: "Linux home path", pattern: /\/home\/(?!web_user(?:["'/:]|$))/ },
   { label: "Windows drive path", pattern: /[A-Za-z]:\\\\/ }
 ];
-const RUNTIME_EXTENSIONS = new Set([".css", ".html", ".js", ".json", ".png", ".svg", ".webp"]);
+const RUNTIME_EXTENSIONS = new Set([".css", ".html", ".js", ".json", ".png", ".svg", ".txt", ".webp"]);
 
 export async function walkFiles(directory) {
   const files = [];

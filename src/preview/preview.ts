@@ -1,6 +1,7 @@
 import { takePdf } from "../shared/pdf-store";
 import { createPdfDownloadFilename } from "../shared/filename";
 import { localizeDocument, userError, visibleError } from "../shared/i18n";
+import { optimizeLastPageHeight } from "./last-page-optimizer";
 
 localizeDocument();
 
@@ -19,7 +20,15 @@ async function load(): Promise<void> {
   filenameInput.value = record.metadata.filename;
   source.textContent = record.metadata.url;
   source.title = record.metadata.url;
-  objectUrl = URL.createObjectURL(record.blob);
+  const originalPdf = new Uint8Array(await record.blob.arrayBuffer());
+  const result = await optimizeLastPageHeight(originalPdf);
+  console.info("Last-page height optimization:", {
+    status: result.status,
+    reason: result.reason,
+    originalLastPageHeight: result.originalLastPageHeight,
+    optimizedLastPageHeight: result.optimizedLastPageHeight
+  });
+  objectUrl = URL.createObjectURL(new Blob([result.pdf.slice().buffer], { type: "application/pdf" }));
   preview.src = objectUrl;
   preview.style.display = "block";
   status.hidden = true;

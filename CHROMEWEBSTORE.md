@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Save Web as PDF
 
-> Last Updated: 2026-10-01
+> Last Updated: 2026-10-02
 
 ## Store Listing
 
@@ -19,6 +19,7 @@ Save the current webpage as a PDF while preserving searchable and selectable tex
 FEATURES
 • Save shorter webpages as one continuous PDF page
 • Automatically split longer webpages into the fewest practical pages
+• Safely shorten the final page when the remaining content uses only part of a maximum-height page
 • Preserve visible layout, images, colors, tables, links, and searchable text where supported
 • Keep viewport-sized sections stable on modern responsive webpages
 • Save the complete question section and requested answer from supported Zhihu answer links without unrelated recommendations
@@ -40,7 +41,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.5.1 — Restores current-input PDF filenames and adds bounded maximum-height replanning when a nominal single-page print produces multiple pages.
+Version 0.5.2 — Safely shortens the final page of multi-page PDFs while preserving earlier pages, searchable text, images, and links.
 
 **Category**
 
@@ -126,6 +127,13 @@ This is the selected public policy URL. On 2026-10-01 it returned HTTP 200 witho
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.5.2 — 2026-10-02
+
+- Shortened only the final page of multi-page PDFs when local rendered-content, image, and annotation bounds can be verified safely
+- Preserved the existing page count, all earlier page sizes, searchable final-page text, and link annotations; ambiguous or failed cases keep the original PDF
+- Added a fixed 4 mm bottom-padding target plus raster safety allowance, bounded local processing, and real-PDF regression coverage
+- Bundled PDF.js and pdf-lib locally with their license texts; no new permission, backend, remote code, or user-side development tool is required
 
 ### 0.5.1 — 2026-10-01
 

@@ -6,6 +6,7 @@ Save a complete webpage as a searchable PDF while preserving the page's visual l
 
 - Save shorter webpages as one continuous PDF page
 - Split longer webpages into pages up to Chrome's safe maximum height, keeping the page count as low as practical
+- Shorten only the final page of a multi-page PDF when its content boundary can be verified safely
 - Keep text selectable, copyable, and searchable
 - Preserve the webpage's screen layout, images, colors, tables, and links where Chromium supports them
 - Stabilize viewport-height sections and spacing before Chrome lays out an extra-long PDF page
@@ -18,11 +19,11 @@ Save a complete webpage as a searchable PDF while preserving the page's visual l
 
 The interface automatically follows Chrome's display language, including when Chrome follows the operating system language. Regional variants use Chrome's native locale matching, and unsupported languages fall back to English. No webpage-language detection, location lookup, or network translation service is used.
 
-Save Web as PDF uses the Chrome DevTools Protocol (`Page.printToPDF`) rather than a screenshot pipeline. After the page is prepared, content that fits within the verified safe capacity is exported as one continuous page. Longer content is automatically exported across maximum-height pages, with a shorter final page when needed. This shared rule applies to every accessible, processable capture mode; it is not limited to a website list.
+Save Web as PDF uses the Chrome DevTools Protocol (`Page.printToPDF`) rather than a screenshot pipeline. After the page is prepared, content that fits within the verified safe capacity is exported as one continuous page. Longer content is automatically exported across maximum-height pages. When the last page's rendered content, image, and annotation bounds can be verified safely, only that page's PDF boxes are shortened with about 4 mm of bottom padding. The original searchable PDF content and links remain intact; ambiguous backgrounds, unsupported page boxes, resource limits, and validation failures keep the original page unchanged. This shared rule applies to every accessible, processable capture mode; it is not limited to a website list.
 
 ## Development installation
 
-1. Install [Node.js](https://nodejs.org/) 20 or newer and npm.
+1. Install [Node.js](https://nodejs.org/) 22.13 or newer and npm.
 2. Install dependencies and build the extension:
 
    ```bash
@@ -41,7 +42,7 @@ The debugger permission is required for Chromium's PDF-generation protocol. The 
 
 Requirements:
 
-- Node.js 20 or newer
+- Node.js 22.13 or newer
 - npm
 - Chrome or another compatible Chromium-based desktop browser
 
@@ -55,7 +56,7 @@ npm run build
 
 `npm run check` runs TypeScript validation, filename and export-logic tests, and a production build. `npm run build` removes the previous `dist` directory, compiles the TypeScript entry points, and copies only the Manifest V3 runtime files required by Chrome.
 
-The runtime uses Chrome Extension APIs, the Chrome DevTools Protocol, IndexedDB, and standard Web APIs. It does not use operating-system-specific shell commands, native applications, fixed filesystem paths, or Native Messaging.
+The runtime uses Chrome Extension APIs, the Chrome DevTools Protocol, IndexedDB, standard Web APIs, and locally bundled browser builds of PDF.js and pdf-lib. It does not use operating-system-specific shell commands, native applications, fixed filesystem paths, Native Messaging, or remotely loaded code.
 
 ## Create a release package
 
@@ -102,13 +103,14 @@ Read the [public privacy policy](https://miengieh.com/save-web-as-pdf/privacy/) 
 
 ## License
 
-The source code, original extension icon, and repository-owned promotional assets are available under the [MIT License](LICENSE).
+The source code, original extension icon, and repository-owned promotional assets are available under the [MIT License](LICENSE). Bundled third-party components retain their Apache-2.0 or MIT terms; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Known limitations
 
 - Chrome blocks extension access to internal pages, the Chrome Web Store, and some other protected pages.
 - DevTools or another debugger cannot own the source tab while an export is running.
 - Pages that fit within Chromium's safe single-page height are exported as one continuous page. Longer webpages are automatically paginated with each page using the maximum safe height, except for the final remainder. Extremely wide pages can still exceed Chromium or PDF viewer limits even at the minimum supported print scale.
+- Final-page shortening is conservative. A full-page background, unusual page boxes or rotation, a large/slow PDF, or any mismatch in page count, earlier page sizes, final-page text, annotations, dimensions, or rendered content leaves the original valid PDF unchanged.
 - Infinite-scroll and slow-loading pages are bounded by time, iteration, and height guards so an export cannot run forever.
 - Zhihu feeds use a snapshot of the content already loaded when export starts. Supported direct answer URLs preserve the main question section and the requested answer; if either cannot be identified safely, the extension stops instead of exporting different content.
 - Viewport-dependent layout can be stabilized only when the responsible page styles are inspectable. Cross-origin or script-generated styles can still cause layout differences, missing content, or export failure.

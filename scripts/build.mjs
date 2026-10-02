@@ -19,8 +19,25 @@ await build({
   bundle: true,
   format: "esm",
   target: "chrome120",
+  platform: "browser",
+  define: { process: "undefined" },
+  minify: true,
   outdir,
   sourcemap: false,
+  logLevel: "info"
+});
+
+await build({
+  entryPoints: ["node_modules/pdfjs-dist/build/pdf.worker.min.mjs"],
+  bundle: true,
+  format: "esm",
+  target: "chrome120",
+  platform: "browser",
+  define: { process: "undefined" },
+  minify: true,
+  outfile: path.join(outdir, "vendor/pdf.worker.min.js"),
+  sourcemap: false,
+  legalComments: "none",
   logLevel: "info"
 });
 
@@ -31,5 +48,11 @@ await Promise.all([
   cp("src/popup/popup.html", path.join(outdir, "popup/popup.html")),
   cp("src/popup/popup.css", path.join(outdir, "popup/popup.css")),
   cp("src/preview/preview.html", path.join(outdir, "preview/preview.html")),
-  cp("src/preview/preview.css", path.join(outdir, "preview/preview.css"))
+  cp("src/preview/preview.css", path.join(outdir, "preview/preview.css")),
+  mkdir(path.join(outdir, "licenses"), { recursive: true }).then(() =>
+    Promise.all([
+      cp("node_modules/pdfjs-dist/LICENSE", path.join(outdir, "licenses/pdfjs-apache-2.0.txt")),
+      cp("node_modules/pdf-lib/LICENSE.md", path.join(outdir, "licenses/pdf-lib-mit.txt"))
+    ])
+  )
 ]);

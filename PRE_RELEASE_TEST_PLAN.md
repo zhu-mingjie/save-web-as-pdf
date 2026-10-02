@@ -1,4 +1,4 @@
-# Save Web as PDF 0.5.1 — Pre-release Verification Record
+# Save Web as PDF 0.5.2 — Pre-release Verification Record
 
 This file separates prior maintainer verification, automated checks for the current candidate, current manual browser checks, intentionally deferred coverage, and work reserved for the maintainer. Do not treat an item from one category as evidence for another.
 
@@ -8,9 +8,23 @@ This file separates prior maintainer verification, automated checks for the curr
 - **macOS:** the maintainer reports successful testing on macOS. No unreported machine or browser details are inferred.
 - **Previously designated real websites:** the maintainer reports the designated Zhihu and other real-site cases passed for the version they tested. Future real-site compatibility checks remain with the maintainer unless a new request says otherwise.
 
-These results establish prior platform and compatibility coverage. They do not claim that the maintainer already tested the new 0.5.1 pagination and filename changes.
+These results establish prior platform and compatibility coverage. They do not claim that the maintainer has already accepted the 0.5.2 beta.
 
-## Current 0.5.1 automated verification
+## Current 0.5.2 final-page-height verification
+
+- [x] Pure boundary tests confirm the centralized 4 mm padding, raster safety allowance, minimum-benefit threshold, and invalid-input fallback.
+- [x] Real Chrome-generated two-page PDF with a short text remainder keeps two pages and changes only page 2 from 14,400 pt to 203.677 pt high.
+- [x] Real Chrome-generated three-page PDF keeps all earlier page boxes unchanged and shortens only page 3.
+- [x] Final content ending in an image, table, SVG, external link, shallow-color text, or shadow remains present and passes the post-write text/annotation/render validation.
+- [x] A full-page gradient background remains at the original height because its lower boundary is not safe to treat as redundant whitespace.
+- [x] A nearly full final page remains unchanged when the safe reduction is below the configured minimum; a single-page PDF remains byte-for-byte unmodified by this feature.
+- [x] Page count, earlier page boxes, final-page extracted text, annotations, PDF envelope, and the white-composited rendered top region are checked after rewriting; any failure returns the original valid PDF.
+- [x] The representative before/after PDFs were reopened with Poppler. Both have two pages; page 1 remains 720.96 × 14,400 pt, while page 2 changes from 720.96 × 14,400 pt to 720.96 × 203.677 pt. The top content render is visually unchanged.
+- [x] Processing is local and bounded to 64 MiB PDF input, four million render pixels, a 12-second page-render timeout, and a 20-second optimization deadline.
+
+The controlled matrix ran on 2026-10-02 with Headless Chrome 154 on macOS against local fixtures. It does not replace maintainer acceptance of the installed ZIP, the existing clean-device matrix, or the maintainer-owned website list. Full-save and edit-save both converge on the same preview-side optimizer by code path; an installed-extension manual edit-flow regression was not repeated in this automated run.
+
+## Current 0.5.2 automated verification
 
 Record the actual result when the candidate is built:
 
@@ -23,9 +37,9 @@ Record the actual result when the candidate is built:
 - [x] Release-package validation, archive-root manifest, and absence of source/development debris
 - [x] Runtime bundles contain no Node-only API or personal/local path leakage
 
-These checks passed on 2026-10-01 using the 0.5.1 candidate. The validated archive contained 27 runtime files with `manifest.json` at its root.
+These checks passed on 2026-10-02 using the 0.5.2 beta. The validated 728 KiB archive contained 30 runtime files with `manifest.json` at its root, including the local PDF worker and both third-party license texts.
 
-## Current 0.5.1 controlled Chrome regression
+## Prior 0.5.1 controlled Chrome regression
 
 Use local pages rather than repeating the maintainer's designated real-site list.
 
@@ -42,7 +56,7 @@ Use local pages rather than repeating the maintainer's designated real-site list
 
 These checks were completed in Chrome on macOS on 2026-10-01 with the installed 0.5.1 package and controlled local pages. The forced-break regression reproduced the historical unexpected two-page outcome from an initial single-page plan; the accepted result was a complete two-page PDF whose first page measured 200 inches high. A 50,000 CSS-pixel fixture produced three 200-inch pages. PDF header/EOF, page count, marker text, link annotation, preview page count, and rendered pages were inspected. A short page also completed through Edit Before Saving and opened a complete one-page preview with the expected title. The Save As cancellation produced no file.
 
-## Current 0.5.1 auxiliary and interruption checks
+## Prior 0.5.1 auxiliary and interruption checks
 
 - [x] Keyboard focus order and visible focus for popup and preview controls
 - [x] Enter/Space activation, Escape dismissal, cancellation, and retry state restoration
