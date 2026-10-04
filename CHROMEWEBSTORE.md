@@ -63,7 +63,7 @@ Save a webpage selected by the user as a searchable PDF with the fewest practica
 | `scripting` | Injects the locally bundled page-preparation and optional editing controls into the active webpage after the user requests them. |
 | `debugger` | Temporarily connects to the selected tab so Chrome can render that webpage as a searchable PDF. It is attached only during generation and detached during cleanup or cancellation. |
 | `downloads` | Opens Chrome's Save As flow when the user clicks Download PDF in the preview. |
-| `storage` | Stores only ephemeral per-tab export coordination state in browser session storage so duplicate exports can be prevented across service-worker restarts. The state clears at the end of the export or browser session. |
+| `storage` | Stores only ephemeral per-tab export coordination state in browser session storage so duplicate exports can be prevented across service-worker restarts. The state clears at the end of the export or browser session. It also stores one local on/off preference for adding the page URL and save time as a PDF footer. |
 
 No host permissions are requested. The extension does not request the `tabs` permission; `activeTab` provides the narrower, user-initiated access needed for the current page.
 

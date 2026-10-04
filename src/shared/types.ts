@@ -10,6 +10,7 @@ export interface PdfRecord {
   blob: Blob;
   metadata: SourcePageMetadata;
   createdAt: number;
+  includeSourceFooter?: boolean;
 }
 
 export interface ExportSession {

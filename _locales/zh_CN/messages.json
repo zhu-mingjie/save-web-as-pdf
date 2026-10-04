@@ -58,5 +58,7 @@
   "errorMissingPdfStream":{"message":"Chrome 未返回 PDF 数据流。"},
   "errorUnverifiedPageCount":{"message":"Chrome 返回的 PDF 无法验证页数，因此未保存该文件。"},
   "errorPdfIdentifierMissing":{"message":"缺少 PDF 标识。"},
-  "errorPreviewExpired":{"message":"此 PDF 预览已过期，请从网页重新生成。"}
+  "errorPreviewExpired":{"message":"此 PDF 预览已过期，请从网页重新生成。"},
+  "includeSourceFooter":{"message":"在页脚添加网页地址和保存时间"},
+  "errorSourceFooterFailed":{"message":"PDF 已生成，但未能添加网址和时间页脚。"}
 }

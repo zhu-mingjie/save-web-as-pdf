@@ -1,6 +1,7 @@
 import { takePdf } from "../shared/pdf-store";
 import { createPdfDownloadFilename } from "../shared/filename";
-import { localizeDocument, userError, visibleError } from "../shared/i18n";
+import { localizeDocument, t, userError, visibleError } from "../shared/i18n";
+import { addSourceFooter } from "../shared/source-footer";
 import { optimizeLastPageHeight } from "./last-page-optimizer";
 
 localizeDocument();
@@ -28,10 +29,22 @@ async function load(): Promise<void> {
     originalLastPageHeight: result.originalLastPageHeight,
     optimizedLastPageHeight: result.optimizedLastPageHeight
   });
-  objectUrl = URL.createObjectURL(new Blob([result.pdf.slice().buffer], { type: "application/pdf" }));
+  let finalPdf = result.pdf;
+  let footerFailed = false;
+  // Stamp after last-page optimization so the footer is never mistaken for page content.
+  if (record.includeSourceFooter) {
+    try {
+      finalPdf = await addSourceFooter(result.pdf, { url: record.metadata.url, savedAt: record.createdAt });
+    } catch (error) {
+      console.error("Save Web as PDF source footer failed", error);
+      footerFailed = true;
+    }
+  }
+  objectUrl = URL.createObjectURL(new Blob([finalPdf.slice().buffer], { type: "application/pdf" }));
   preview.src = objectUrl;
   preview.style.display = "block";
-  status.hidden = true;
+  status.hidden = !footerFailed;
+  if (footerFailed) status.textContent = t("errorSourceFooterFailed");
   downloadButton.disabled = false;
 }
 

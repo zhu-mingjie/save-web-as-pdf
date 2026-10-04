@@ -53,8 +53,12 @@ button.primary { border-color: var(--brand); background: var(--brand); color: #f
 button.primary:hover:not(:disabled) { background: var(--brand-hover); }
 button.primary:active:not(:disabled) { background: var(--brand-active); }
 button.danger { border-color: var(--error); background: transparent; color: var(--error); }
-button:focus-visible, a:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 button:disabled { cursor: wait; opacity: .55; }
+.option { display: flex; align-items: center; gap: 7px; color: var(--text-muted); font-size: 12px; line-height: 1.35; cursor: pointer; }
+.option input { flex: 0 0 auto; width: 14px; height: 14px; margin: 0; accent-color: var(--brand); cursor: pointer; }
+.option input:disabled { cursor: wait; }
+@media (prefers-color-scheme: dark) { .option input { accent-color: var(--text); } }
 [hidden], #status[hidden] { display: none !important; }
 #status { max-height: 120px; margin: 0; overflow-wrap: anywhere; overflow-y: auto; color: var(--error); font-size: 11px; line-height: 1.4; }
 #status.busy { color: var(--text-muted); }
