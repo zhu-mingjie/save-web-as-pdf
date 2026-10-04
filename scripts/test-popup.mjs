@@ -53,4 +53,6 @@ assert.match(css, /\.website-link\s*\{[^}]*min-width:\s*24px;[^}]*min-height:\s*
 assert.match(css, /\.footer-link\s*\{[^}]*min-height:\s*24px;/s);
 assert.doesNotMatch(css, /(?:html|body|main)\s*\{[^}]*(?:^|[;\s])(?:height|min-height)\s*:/ms);
 
+assert.match(html, /<label class="option">\s*<input id="source-footer" type="checkbox" \/>\s*<span data-i18n="includeSourceFooter"><\/span>/);
+
 console.log("Popup UI/link tests: OK");

@@ -1,4 +1,5 @@
 import type { MessageResponse, PrepareResponse, RuntimeRequest } from "../shared/messages";
+import { SOURCE_FOOTER_SETTING_KEY } from "../shared/constants";
 import { createLiveSourcePageMetadata } from "../shared/filename";
 import { t, userError, UserFacingError, visibleError } from "../shared/i18n";
 import { deleteExpiredPdfs, putPdf } from "../shared/pdf-store";
@@ -128,6 +129,7 @@ async function exportTab(tabId: number, mode: ExportMode, capturedMetadata: Sour
     if (mode === "edit") await hideEditorForExport(tabId);
     const { pdf } = await generatePdf(tabId, page);
     await assertExportActive(tabId, operationId);
+    const settings = await chrome.storage.local.get(SOURCE_FOOTER_SETTING_KEY);
     const id = crypto.randomUUID();
     await putPdf({
       id,
@@ -136,7 +138,8 @@ async function exportTab(tabId: number, mode: ExportMode, capturedMetadata: Sour
         { type: "application/pdf" }
       ),
       metadata,
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      includeSourceFooter: settings[SOURCE_FOOTER_SETTING_KEY] === true
     });
     await chrome.tabs.create({ url: chrome.runtime.getURL(`preview/preview.html?id=${encodeURIComponent(id)}`) });
     void deleteExpiredPdfs().catch(() => undefined);

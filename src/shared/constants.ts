@@ -14,3 +14,4 @@ export const PDF_DB_NAME = "save-web-as-pdf";
 export const PDF_DB_VERSION = 1;
 export const PDF_STORE_NAME = "pdfs";
 export const PDF_RECORD_TTL_MS = 24 * 60 * 60 * 1000;
+export const SOURCE_FOOTER_SETTING_KEY = "includeSourceFooter";

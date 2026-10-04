@@ -1,4 +1,5 @@
 import type { MessageResponse, RuntimeRequest } from "../shared/messages";
+import { SOURCE_FOOTER_SETTING_KEY } from "../shared/constants";
 import { createSourcePageMetadata } from "../shared/filename";
 import { localizeDocument, t, userError, UserFacingError, visibleError } from "../shared/i18n";
 import {
@@ -15,6 +16,7 @@ const saveButton = document.querySelector<HTMLButtonElement>("#save")!;
 const editButton = document.querySelector<HTMLButtonElement>("#edit")!;
 const cancelButton = document.querySelector<HTMLButtonElement>("#cancel")!;
 const status = document.querySelector<HTMLParagraphElement>("#status")!;
+const sourceFooterInput = document.querySelector<HTMLInputElement>("#source-footer")!;
 const websiteLink = document.querySelector<HTMLAnchorElement>("#website-link")!;
 const supportLink = document.querySelector<HTMLAnchorElement>("#support-link")!;
 const reviewLink = document.querySelector<HTMLAnchorElement>("#review-link")!;
@@ -41,6 +43,19 @@ enableExternalLink(websiteLink, WEBSITE_URL);
 enableExternalLink(supportLink, SUPPORT_URL);
 enableExternalLink(githubLink, GITHUB_URL);
 enableExternalLink(reviewLink, CHROME_WEB_STORE_REVIEW_URL);
+
+void chrome.storage.local
+  .get(SOURCE_FOOTER_SETTING_KEY)
+  .then((settings) => {
+    sourceFooterInput.checked = settings[SOURCE_FOOTER_SETTING_KEY] === true;
+  })
+  .catch(() => undefined);
+
+sourceFooterInput.addEventListener("change", () => {
+  void chrome.storage.local.set({ [SOURCE_FOOTER_SETTING_KEY]: sourceFooterInput.checked }).catch((error: unknown) => {
+    setStatus(visibleError(error), "error");
+  });
+});
 
 footer.addEventListener("click", (event) => {
   if (event.target instanceof Element && event.target.closest("a[aria-disabled='true']")) event.preventDefault();
@@ -109,6 +124,7 @@ function setBusy(busy: boolean, busyText = ""): void {
   setFooterLinksBusy(busy);
   saveButton.disabled = busy;
   editButton.disabled = busy;
+  sourceFooterInput.disabled = busy;
   cancelButton.hidden = !busy;
   cancelButton.disabled = false;
   if (busy) setStatus(busyText, "busy");

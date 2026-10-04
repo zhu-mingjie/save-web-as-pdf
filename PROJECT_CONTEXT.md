@@ -24,7 +24,7 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 | UI | Plain HTML and CSS; no UI framework |
 | Build tooling | Node.js 22.13+, npm, TypeScript, esbuild |
 | Tests/checks | TypeScript typecheck plus Node-based filename, export, localization, popup UI/link, build, and release-package checks |
-| Backend/database/auth | None. PDF data is temporarily stored in local IndexedDB; operation state uses `chrome.storage.session` |
+| Backend/database/auth | None. PDF data is temporarily stored in local IndexedDB; operation state uses `chrome.storage.session`; the optional source-footer preference uses `chrome.storage.local` |
 | Runtime third-party dependencies | Locally bundled `pdfjs-dist` 6.3.289 (Apache-2.0) and `pdf-lib` 1.17.1 (MIT); development dependencies are `@types/chrome`, `esbuild`, and `typescript` |
 
 Node.js, npm, TypeScript, and esbuild are development/build tools only. A built `dist/` directory or release ZIP must install and run directly in Chrome on a clean Windows or macOS computer without those tools.
@@ -69,7 +69,8 @@ Generated or local-only directories include `node_modules/`, `dist/`, `release/`
 6. The completed PDF and safe filename are written to IndexedDB, and an extension preview tab is opened.
 7. The preview consumes the one-time local record. For multi-page PDFs within the resource budget, local PDF.js rendering finds the last page's painted, image, and annotation boundary. If the boundary and page boxes are safe, pdf-lib raises only the last page's lower page-box edge, retaining about 4 mm bottom padding.
 8. The rewritten PDF must preserve page count, every earlier page box, final-page text and annotations, expected dimensions, the PDF envelope, and the white-composited rendered top region. Any ambiguity, timeout, limit, parse/write error, or validation mismatch keeps the original valid PDF.
-9. The preview embeds the selected original or verified optimized PDF and uses that same object URL for the requested `chrome.downloads` save.
+9. If the popup's opt-in source-footer preference was on when the PDF record was stored, the preview uses pdf-lib to extend the final page downward by a small white band containing the sanitized source URL (with a link annotation for http/https) and the local save time with UTC offset. The footer is stamped after last-page optimization so it is never treated as page content. If the last page cannot be extended safely (rotation, mismatched boxes, or the 14,400 pt limit), a short footer page is appended instead; a stamping failure keeps the unstamped PDF and shows a notice.
+10. The preview embeds the selected original or verified optimized PDF and uses that same object URL for the requested `chrome.downloads` save.
 
 ### Editing flow
 
@@ -86,7 +87,8 @@ The popup can enter an injected editor mode. The user selects page elements to r
 - There is no application server, account system, analytics endpoint, advertising SDK, or remote database.
 - Operation status is session-scoped in `chrome.storage.session` so it survives service-worker suspension but clears with the browser session.
 - Generated PDFs are temporary IndexedDB records in database `save-web-as-pdf`, store `pdfs`, with a 24-hour cleanup horizon. `takePdf` removes a record when the preview consumes it.
-- Page URLs are sanitized before use; query strings and fragments are not retained as document metadata.
+- Page URLs are sanitized before use; query strings and fragments are not retained as document metadata or in the optional source footer.
+- The source-footer preference (`includeSourceFooter`, default off) is the only value in `chrome.storage.local`.
 - Runtime messages and tab identities are validated at extension boundaries.
 
 ## 5. Key Technical Decisions
@@ -162,6 +164,7 @@ npm run test:filename   # Filename encoding and cross-platform safety
 npm run test:export     # Print planning and export behavior
 npm run test:i18n       # Catalog shape, fallback, and localization integrity
 npm run test:popup      # Popup resources, links, review configuration, and layout contracts
+npm run test:source-footer # Optional URL/time footer stamping
 npm run build           # Bundle five browser entry points and copy runtime assets
 npm run check           # Typecheck + focused tests + build validation
 npm run package         # Clean, test, build, validate, and create the release ZIP
@@ -195,6 +198,7 @@ npm run verify:release  # Validate an existing release artifact
 ### Current local snapshot
 
 - The local candidate version is `0.5.2`.
+- An opt-in popup checkbox adds the page URL and save time as a footer on the final page. Unit tests in `scripts/test-source-footer.mjs` cover timestamp formatting, page extension, the 200-inch fallback page, and long URLs; a Chrome-printed sample was stamped and visually checked, but the installed-extension flow has not yet been exercised manually.
 - The authoritative checkout uses `main` and tracks `origin/main` at `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
 - The 0.5.2 beta keeps the approved popup, capture, pagination, naming, and editor behavior. Its scoped change is conservative preview-side shortening of only the last page of a multi-page PDF after content-boundary detection and post-write verification.
 - Controlled real-PDF tests on 2026-10-02 covered two and three pages; text, image, table, SVG, link, shallow-color, and shadow endings; full-page gradient fallback; a nearly full last page; and a single-page no-op. The representative last page changed from 14,400 pt to 203.677 pt with about 15 pt measured bottom whitespace, while page count, page 1, extracted text, annotations, and visual top content remained unchanged.

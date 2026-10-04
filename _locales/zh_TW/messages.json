@@ -58,5 +58,7 @@
   "errorMissingPdfStream":{"message":"Chrome 未傳回 PDF 資料串流。"},
   "errorUnverifiedPageCount":{"message":"無法驗證 Chrome 傳回之 PDF 的頁數，因此未儲存該檔案。"},
   "errorPdfIdentifierMissing":{"message":"缺少 PDF 識別碼。"},
-  "errorPreviewExpired":{"message":"此 PDF 預覽已過期，請從網頁重新產生。"}
+  "errorPreviewExpired":{"message":"此 PDF 預覽已過期，請從網頁重新產生。"},
+  "includeSourceFooter":{"message":"在頁尾加入網頁網址與儲存時間"},
+  "errorSourceFooterFailed":{"message":"PDF 已產生，但無法加入網址與時間頁尾。"}
 }

@@ -15,6 +15,7 @@
     "test:export": "node scripts/test-export-logic.mjs",
     "test:i18n": "node scripts/test-i18n.mjs",
     "test:popup": "node scripts/test-popup.mjs",
+    "test:source-footer": "node scripts/test-source-footer.mjs",
     "test:pdf-integration": "node scripts/test-last-page-integration.mjs",
     "verify:release": "node scripts/verify-release.mjs",
     "package": "node scripts/package.mjs",

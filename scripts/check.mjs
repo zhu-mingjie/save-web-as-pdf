@@ -10,4 +10,5 @@ runNode(path.join("scripts", "test-filename.mjs"));
 runNode(path.join("scripts", "test-export-logic.mjs"));
 runNode(path.join("scripts", "test-i18n.mjs"));
 runNode(path.join("scripts", "test-popup.mjs"));
+runNode(path.join("scripts", "test-source-footer.mjs"));
 runNode(path.join("scripts", "build.mjs"));
