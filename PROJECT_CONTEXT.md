@@ -154,6 +154,19 @@ For manual testing:
 
 Do not load the repository root as the extension. `dist/` is the installable development artifact.
 
+
+### Reusable cloud setup (pending execution)
+
+The 2026-10-08 cloud-handoff request was received in a restricted macOS host, not a Codex cloud checkout. Do not treat its local check results as cloud readiness. Select this GitHub repository in an actual cloud task and re-inspect the checkout before continuing.
+
+- Configure Node.js >=22.13.0 with npm available on PATH; use a supported version satisfying the committed package requirements. No dependency or lockfile migration is needed.
+- In the cloud environment setup, run `node --version`, `npm --version`, and `npm ci` from the actual Git repository root. Re-run `npm ci` when the lockfile changes or the dependency cache is absent.
+- Setup must be able to reach GitHub for source and the package registry referenced by `package-lock.json` (currently `registry.npmjs.org`). Check DNS, HTTPS and repository authorization rather than changing dependencies when access fails. Never put credentials in the repository.
+- Run `npm run check` in that environment and confirm `package.json` and `package-lock.json` remain unchanged. The check script performs typecheck, filename/export/i18n/popup checks, and the browser production build; it does not perform installed-extension acceptance.
+- PDF integration additionally requires a Chrome/Chromium executable, a writable temporary profile, permission to listen on loopback, and access to Chrome's local debugging port. Set `CHROME_PATH` to the installed executable when needed, then run `npm run test:pdf-integration`. The existing Linux default is `google-chrome`; root containers or restricted sandboxes may not support the existing Chrome launch. Record unsupported conditions instead of weakening the sandbox or modifying product code.
+- Before switching machines, commit/push meaningful verified work using the established branch/PR workflow. A remote backup does not update another local checkout automatically. If work exists only on a different Mac checkout, supply its committed branch or patch plus untracked source files; this session cannot certify those unseen changes.
+- For future requested acceptance, provide a version/commit-identified downloadable test ZIP (not a public Release), installation steps, and a brief full-save/edit-save, searchable-text, filename, preview/download and long-page checklist. Preserve the release-approval policy.
+
 ## 10. Build and Packaging
 
 ```bash
@@ -261,6 +274,18 @@ This section is the default authorization model for future AI-assisted work in t
 - At handoff, summarize changed files, validation, Git status, remaining risks, and the safest next action. Update the handoff log below when the information will help the next session.
 
 ## 16. Handoff Log
+
+### 2026-10-08 — Codex (cloud readiness preflight; cloud execution blocked)
+
+- **Scope and evidence:** read the complete current context, applicable agent rules, README, package/manifest, test and release documents, recent Git history and relevant source. Only this context document is changed. Existing accessible project summaries and repository history are partial evidence; full old-conversation inheritance is not claimed.
+- **Actual host:** Darwin 24.6.0 arm64. The project root is a non-Git synchronized mirror; the independent development clone remains `repositories/save-web-as-pdf/`. No cloud executor or cloud environment configuration capability was available in this task.
+- **Git baseline:** local `main`, cached `origin/main` and GitHub's live `main` endpoint all matched `a24911893ecff6dc04649a281e12d316b8d3272d`; the checkout initially had no uncommitted changes or ahead/behind commits. HTTPS origin is the existing repository. Direct `git fetch origin` failed with DNS resolution failure, so live remote alignment was checked through the GitHub connector instead.
+- **Environment:** Node/npm were absent from terminal PATH. An existing bundled Node 24.21.0 was usable without installing or altering the project. npm was unavailable; `npm ci` and `npm run check` both failed to start with `command not found: npm`. Registry HTTPS probing also failed to resolve `registry.npmjs.org`. Existing dependencies enabled the checks below, but a fresh locked npm installation was not completed or certified. Package and lock files remain unchanged.
+- **Actual automated result:** direct Node execution of the exact `scripts/check.mjs` configured by `npm run check` exited 0: TypeScript, filename, export logic, 11-locale/60-message i18n, popup UI/link tests, and production build passed. This validates the existing local dependency installation, not a fresh npm/cloud setup.
+- **PDF integration:** Chrome 154.0.8037.98 is installed. Direct Node execution of `scripts/test-last-page-integration.mjs` failed at its fixture server with `listen EPERM: operation not permitted 127.0.0.1`, before Chrome launch and before any PDF case ran. No PDF integration case passed in this session.
+- **Not performed:** actual cloud setup, fresh `npm ci`, installed-extension manual acceptance, Windows/macOS/Linux cross-platform acceptance, live-site acceptance, minimum-Chrome tests, package/ZIP validation or public release. Historical results above remain historical.
+- **Delivery limitation:** GitHub connector branch creation was rejected with `MCP tool call requires approval, but approval policy is never`; no remote branch, commit or PR was created by that attempt. Shell Git network access is also blocked by DNS resolution. Preserve the documentation on local branch `docs/cloud-handoff-2026-10-08`, commit if the environment permits, and push when authorized network/tool access is available. Report the resulting local commit separately; do not claim a remote backup or main/Mac synchronization.
+- **Next step:** launch a task in the actual cloud environment on the delivery branch (or updated main after merge), execute the setup/check recipe in section 9, and report new results. Continue the free/open-source, local searchable-PDF design, current UI/permissions/privacy and cross-platform goals. Minimum-Chrome compatibility and installed 0.5.2 acceptance remain future scoped work. No new feature, server, tag, GitHub Release or store submission is authorized by this handoff.
 
 ### 2026-10-08 — Codex (development handoff and baseline)
 
