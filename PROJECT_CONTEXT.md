@@ -276,6 +276,15 @@ This section is the default authorization model for future AI-assisted work in t
 
 ## 16. Handoff Log
 
+### 2026-10-10 — Codex (0.5.5 GitHub draft and homepage preparation)
+
+- **Authorization:** the maintainer requests a 0.5.5 GitHub Release draft with installation ZIP and English description, reserves the final Publish release button, and authorizes updating the GitHub homepage feature list. This supersedes the previous test-ZIP-only limit for draft preparation, not public publication or store submission.
+- **Content:** homepage and Release acknowledge the optional webpage source URL/save-time footer and thank @xuanzhaogao, linking to PR #1. The PR was inspected and is open; no merge of its separate implementation is requested or performed. Release notes also cover settings and final-page height improvements since v0.5.1.
+- **Persistent writing rule:** for future Releases that include bug fixes, end the entire English Release description with exactly: `Fixed various issues and improved the user experience.` Recorded in `RELEASING.md`; do not append installation, checksums or other sections afterward.
+- **Source/artifact:** draft targets the actual verified code commit `f363fbc73bab87a348fbac248fc6826fb7acfdb3`; upload the existing `save-web-as-pdf-v0.5.5.zip` without rebuilding. SHA-256 is `04a3bc4235bda48252a184c7d4a3e16527e6a3ca9d6ef5cdab1f969827cfd7e1`, 3,108,175 bytes. Documentation-only edits do not change the delivered runtime. Synchronize the already verified development history plus these docs to main by a normal fast-forward push; no force push/reset or unrelated PR merge.
+- **Verified draft:** GitHub Release id `408097678`, [draft page](https://github.com/zhu-mingjie/save-web-as-pdf/releases/tag/untagged-56824f6965d191a72665); API confirms `draft=true`, full target SHA, exact English final sentence and ZIP filename/size/SHA-256. No public tag was manually created. Homepage wording and workflow documents were checked; prior runtime tests were not repeated for documentation-only work.
+- **Publication boundaries:** latest public Release remains v0.5.1 until the maintainer publishes the draft. Exact live-Wikipedia/Windows acceptance limitations from the previous handoff remain recorded; no new browser or cross-platform result is inferred from Release preparation. Chrome Web Store and website privacy/screenshot work are not part of this request.
+
 ### 2026-10-10 — Codex (0.5.5 Wikipedia-reported layout/metadata fix)
 
 - **Report and limits:** the maintainer reports that most sites export metadata normally, but several Wikipedia pages reject with `errorLayoutChanged`. Exact URLs, selected metadata combination and browser build were requested but have not yet been supplied. Direct access to a representative Wikipedia page timed out in this environment; the resulting Chrome error page is not a Wikipedia test. No live-site pass or Windows pass is claimed.

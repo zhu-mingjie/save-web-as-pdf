@@ -12,10 +12,13 @@ Save a complete webpage as a searchable PDF while preserving the page's visual l
 - Stabilize viewport-height sections and spacing before Chrome lays out an extra-long PDF page
 - Save the complete question section and requested answer from supported Zhihu answer URLs without unrelated answers, recommendations, sidebars, or floating controls
 - Remove unwanted elements before saving, with Undo, Redo, and Restore
+- Optionally add the webpage source URL and save time at the end of the PDF
 - Preview the generated PDF before downloading
 - Process and store PDF data locally in the browser
 - Use the same Chrome extension package on Windows, macOS, and Linux
 - Use the interface in 11 supported locales: English, Simplified Chinese, Traditional Chinese, German, Italian, Spanish, Brazilian Portuguese, European Portuguese, French, Japanese, and Korean
+
+Thanks to [@xuanzhaogao](https://github.com/xuanzhaogao) for suggesting the optional source URL and save-time footer. See the discussion in [PR #1](https://github.com/zhu-mingjie/save-web-as-pdf/pull/1).
 
 The interface defaults to Chrome's display language, including when Chrome follows the operating system language. The gear at the right of the popup brand bar opens three locally saved settings: language, first-page header, and last-page footer. Language can be automatic or any supported locale. Header/footer independently offer none (default), source URL, time, or both. Changes save immediately. The settings view places dropdowns close to their labels and can grow wider for longer text; returning home restores the original compact width. Regional variants use Chrome's native locale matching, and unsupported languages fall back to English. No webpage-language detection, location lookup, or network translation service is used.
 

@@ -14,3 +14,13 @@ Create a Git tag, GitHub Release, and public release package only after the main
 8. Attach `release/save-web-as-pdf-vX.X.X.zip` and add a concise, user-facing summary of the changes.
 
 The attached ZIP is the same cross-platform package for Windows, macOS, and Linux. End users do not need Node.js, npm, TypeScript, esbuild, or any other development tool: they extract the ZIP and load the folder containing `manifest.json` from Chrome's Extensions page.
+
+## Release descriptions and maintainer publication
+
+Write GitHub Release descriptions in English. For any release that includes bug fixes, end the entire description with this exact sentence:
+
+> Fixed various issues and improved the user experience.
+
+When the maintainer reserves the final Publish release button, create or update a draft Release, fill in the title/tag/target/notes, upload the verified ZIP, and leave it as a draft. Do not publish it or manually create a public tag on the maintainer's behalf. Preparing that draft and updating the repository homepage are authorized by the request; Chrome Web Store submission remains separate.
+
+Credit @xuanzhaogao for suggesting the optional source URL and save-time PDF footer, linking to [PR #1](https://github.com/zhu-mingjie/save-web-as-pdf/pull/1). This credit acknowledges the suggestion/discussion; it does not imply that PR #1 was merged.

@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Save Web as PDF
 
-> Last Updated: 2026-10-09 (0.5.3 draft; no store submission)
+> Last Updated: 2026-10-10 (0.5.5 GitHub Release draft; no store submission)
 
 ## Store Listing
 
@@ -42,7 +42,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.5.3 test candidate — Fixes maximum-height single-page fallback and Chrome 120 runtime compatibility, terminates timed-out optimization, and adds local language/header/footer settings. Await maintainer installation acceptance before publication.
+Version 0.5.5 — GitHub Release preparation authorized as a draft; final publication remains with the maintainer. Includes local language/header/footer settings, PDF height/Chrome 120 compatibility improvements, refined settings layout and print dimension/percentage-height fixes. Chrome Web Store submission is not authorized.
 
 **Category**
 
@@ -131,6 +131,15 @@ The repository privacy policy now includes persistent preferences. The public we
 - [x] MIT License added for the source code and original project assets
 
 ## Version History
+
+### 0.5.5 — 2026-10-10 (GitHub draft; not submitted to the store)
+
+- Added optional source URL and save time at the end of the PDF, with independent header/footer choices and locally saved interface language
+- Added conservative final-page shortening, Chrome 120 compatibility handling and a hard deadline for optional PDF processing
+- Refined settings icons, labels and adaptive dropdown spacing
+- Fixed inconsistent print dimension checks and root/body percentage-height behavior with metadata
+- Credited @xuanzhaogao for the source-footer suggestion; discussion in [PR #1](https://github.com/zhu-mingjie/save-web-as-pdf/pull/1)
+- GitHub publication is reserved for the maintainer; store screenshots/privacy-site synchronization and store submission remain separate pending work
 
 ### 0.5.2 — 2026-10-02
 
