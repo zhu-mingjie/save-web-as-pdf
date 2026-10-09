@@ -24,9 +24,9 @@ The interface defaults to Chrome's display language, including when Chrome follo
 
 Save Web as PDF uses the Chrome DevTools Protocol (`Page.printToPDF`) rather than a screenshot pipeline. After the page is prepared, content that fits within the verified safe capacity is exported as one continuous page. Longer content is automatically exported across maximum-height pages. When the last page's rendered content, image, and annotation bounds can be verified safely, only the final page's PDF boxes are shortened (also for a one-page maximum-height fallback) with about 4 mm of bottom padding. The original searchable PDF content and links remain intact; ambiguous backgrounds, unsupported page boxes, resource limits, and validation failures keep the original page unchanged. This shared rule applies to every accessible, processable capture mode; it is not limited to a website list.
 
-## Install the 0.5.5 test package
+## Install version 0.5.5
 
-Extract the provided ZIP into an empty folder. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the folder containing `manifest.json`. No developer tools, Node.js, Python, or additional fonts are needed by users. This candidate has not been published as a GitHub Release or submitted to the store.
+Download the ZIP from [GitHub Release v0.5.5](https://github.com/zhu-mingjie/save-web-as-pdf/releases/tag/v0.5.5) and extract it into an empty folder. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the folder containing `manifest.json`. No developer tools, Node.js, Python, or additional fonts are needed by users. Version 0.5.5 is published on GitHub Releases; it has not been submitted to the Chrome Web Store.
 
 ## PDF metadata and compatibility
 

@@ -10,7 +10,7 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 
 - Primary users: desktop Google Chrome users who want a clean archival PDF of a webpage.
 - Product goals: remain free and open source under MIT, preserve readable page content, avoid screenshot-only output, require no backend or account, and work without Node.js or build tools on the end user's computer.
-- Current maturity: released beta. GitHub Release `v0.5.1` contains the current pagination and filename fixes; Chrome Web Store submission remains maintainer-owned.
+- Current maturity: released beta. GitHub Release `v0.5.5` is published with the current metadata/settings and PDF fixes; Chrome Web Store submission remains maintainer-owned.
 - Repository: `https://github.com/zhu-mingjie/save-web-as-pdf`
 - Default branch: `main`
 
@@ -203,7 +203,7 @@ npm run verify:release  # Validate an existing release artifact
 ### Confirmed on GitHub
 
 - Before the 0.4.6 popup work, the authoritative checkout and `origin/main` were aligned at `f98fa0667ad776b4604969d02eecb8bd801f2aee` (`feat: sync 0.4.5 beta source and AI handoff docs`).
-- Published tags/releases include `v0.3.1`, `v0.4.1`, `v0.4.2`, and `v0.5.1`; `v0.5.1` is the latest published release.
+- Published tags/releases include `v0.3.1`, `v0.4.1`, `v0.4.2`, `v0.5.1`, and `v0.5.5`; `v0.5.5` is the latest published release.
 - Release `v0.5.1` was created from source commit `5d7b98bae2a9bc21c4f89704b56721994bb0b650` with the verified `save-web-as-pdf-v0.5.1.zip` asset. Its local release artifact SHA-256 was `09730c1b499c2558b2e0f41ceaf60ceac7a2be081b047ed518618d259f786e26`.
 
 ### Current local snapshot
@@ -223,7 +223,7 @@ npm run verify:release  # Validate an existing release artifact
 
 1. Have the maintainer install the 0.5.5 test ZIP and retest the reported failing Wikipedia pages with their original header/footer choices. The new bug report authorizes targeted Wikipedia diagnosis; it does not require repeating the broader maintainer-owned site list or the Windows acceptance matrix. Exact failing URLs/settings and browser build remain unconfirmed. Preserve the pending Windows full-save/edit-save, preview/download and height acceptance from 0.5.3.
 2. Keep the prior 0.5.1/0.5.2 evidence and the new controlled Mac/Chrome 120/current matrix distinct from Windows/Linux installed acceptance. Recheck actual minimum-browser behavior whenever the PDF dependency changes; upstream's general legacy baseline remains newer than Chrome 120.
-3. Before any approved public publication, synchronize the website privacy policy and refresh the store screenshot/settings disclosures. No tag, GitHub Release or store operation is authorized for this task.
+3. Before a separately approved Chrome Web Store submission, synchronize the website privacy policy and refresh the store screenshot/settings disclosures. GitHub v0.5.5 was explicitly authorized and published on 2026-10-10; store submission remains unauthorized.
 
 ## 13. Known Issues and Technical Debt
 
@@ -241,7 +241,7 @@ npm run verify:release  # Validate an existing release artifact
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The source beta version is `0.5.5`; the latest published GitHub tag remains `0.5.1`. Chrome Web Store publication has not been performed by the agent.
+- The source beta version and latest published GitHub tag are `0.5.5`. Chrome Web Store publication has not been performed by the agent.
 
 ## 14. Git Workflow
 
@@ -275,6 +275,13 @@ This section is the default authorization model for future AI-assisted work in t
 - At handoff, summarize changed files, validation, Git status, remaining risks, and the safest next action. Update the handoff log below when the information will help the next session.
 
 ## 16. Handoff Log
+
+### 2026-10-10 — Codex (0.5.5 published with explicit authorization)
+
+- **Authorization change:** after being unable to open the draft link, the maintainer explicitly requested direct publication. This supersedes the earlier reserved-button restriction for this Release only; future publications still require their own explicit authorization.
+- **Result:** published existing Release id `408097678` as [v0.5.5](https://github.com/zhu-mingjie/save-web-as-pdf/releases/tag/v0.5.5) on 2026-10-10 at 00:23:31 Asia/Singapore. API confirms `draft=false`, latest release is v0.5.5, and the single ZIP retains SHA-256 `04a3bc4235bda48252a184c7d4a3e16527e6a3ca9d6ef5cdab1f969827cfd7e1`, size 3,108,175 bytes. No rebuild/runtime change or new acceptance result.
+- **Notes:** contributor credit, PR #1 discussion link and the exact English bug-fix closing sentence are preserved. README now links to the public Release rather than describing it as an unpublished candidate. Store status remains separate.
+- **Branch protection question:** explained GitHub's unprotected-main advisory and optional Dismiss action. No branch protection, permissions or repository rules were changed; the request was explanatory.
 
 ### 2026-10-10 — Codex (0.5.5 GitHub draft and homepage preparation)
 
