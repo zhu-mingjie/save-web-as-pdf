@@ -4,7 +4,7 @@ import os from 'node:os';
 import {createServer} from 'node:http';
 import path from 'node:path';
 const root=process.cwd();
-const server=createServer((request,response)=>{response.setHeader('content-type','text/html; charset=utf-8');response.end('<!doctype html><meta charset="utf-8"><title>Controlled 中文</title><style>html,body{margin:0;width:960px}main{height:19500px;display:flex;flex-direction:column;justify-content:space-between}</style><main><p>START 中文</p><a href="https://example.com/end">END 最后一行</a></main>');});
+const server=createServer((request,response)=>{response.setHeader('content-type','text/html; charset=utf-8');response.end('<!doctype html><meta charset="utf-8"><title>Controlled 中文</title><style>html,body{margin:0;width:960px;height:100%}main{height:19500px;display:flex;flex-direction:column;justify-content:space-between}</style><main><p>START 中文</p><a href="https://example.com/end">END 最后一行</a></main>');});
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const origin=`http://127.0.0.1:${server.address().port}`;
 const executable=process.env.CHROME_PATH??(process.platform==='darwin'?'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome':process.platform==='win32'?'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe':'google-chrome');
@@ -72,7 +72,8 @@ try{
  }
  if(!exportedState?.ready||!exportedState.filename.includes('Controlled 中文'))throw Error(JSON.stringify(exportedState));
  await wait(500);
- const clean=await send('Runtime.evaluate',{expression:"({nodes:document.documentElement.children.length,fonts:[...document.fonts].filter(f=>f.family.startsWith('SWP_Metadata')).length})",returnByValue:true},page.sessionId);
+ const clean=await send('Runtime.evaluate',{expression:"({nodes:document.documentElement.children.length,fonts:[...document.fonts].filter(f=>f.family.startsWith('SWP_Metadata')).length,rootHeight:document.documentElement.style.height,bodyHeight:document.body.style.height})",returnByValue:true},page.sessionId);
+ if(clean.result.value.rootHeight||clean.result.value.bodyHeight)throw Error('Temporary root/body sizing leaked');
  if(clean.result.value.fonts!==0)throw Error('Temporary fonts leaked');
  console.log('Installed full-save pipeline OK',exportedState.filename,clean.result.value);
 

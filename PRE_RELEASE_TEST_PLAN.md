@@ -1,8 +1,17 @@
-# Save Web as PDF 0.5.4 — Test Candidate Verification Record
+# Save Web as PDF 0.5.5 — Test Candidate Verification Record
 
 This file separates prior maintainer verification, automated checks for the current candidate, current manual browser checks, intentionally deferred coverage, and work reserved for the maintainer. Do not treat an item from one category as evidence for another.
 
-## Current 0.5.4 UI-only verification — 2026-10-09
+## Current 0.5.5 layout/metadata verification — 2026-10-09–10
+
+- `scripts/check.mjs` passes typecheck, focused tests and build. No UI, permissions or dependency updates; version identifies this test candidate.
+- `test:page-layout`: production preparation/generator with real Chrome protocol, 8 local cases each on Chrome 154.0.8037.98 and actual Chrome 120.0.6099.109 old headless. Covers root/body `height:100%`, header/footer/both/none, short and 19,500 px long content, root CSS scaling, constrained body and a real post-preparation mutation. Short pages require one print/one PDF page; long requires one print/two PDF pages. Searchable start/end text, body and metadata links, first/last metadata placement, and style/node/font restoration pass. Real changes still reject before printing.
+- Same suite against previous source `15a75a2` reproduces a false `errorLayoutChanged` on a stable scaled root and unwanted short-page pagination with percentage-height metadata. This provides before/after evidence for the two repaired defects, rather than proving the unvisited user's exact page has the same cause.
+- Actual unpacked 0.5.5 Chrome 154: local percentage-height fixture passes full-save, edit-save, production preview/worker, language update, resources/storage/CSP and active cancel/no new preview. Root/body height overrides and fonts restore. Native file dialog and Windows installation are not claimed.
+- Representative direct Wikipedia access timed out; Chrome's network error page was excluded. Exact failing URL/header/footer combination and browser build are pending. The user should retest the original pages. Previous PDF raster/optimizer/platform/site evidence remains historical; it was not repeated without a relevant change.
+- Package and verify-release pass: 0.5.5 ZIP, 3,108,175 bytes, 222 runtime files, archive-root manifest, SHA-256 `04a3bc4235bda48252a184c7d4a3e16527e6a3ca9d6ef5cdab1f969827cfd7e1`. Test ZIP only, no tag/Release/store operation.
+
+## Prior 0.5.4 UI-only verification — 2026-10-09
 
 - Existing `scripts/check.mjs` passes typecheck, focused filename/export/i18n/popup/settings checks and build. No business TypeScript, permissions or dependency changes; PDF integration and full export acceptance were not rerun for this presentation-only revision.
 - Actual Chrome 154 and Chrome 120 (old headless mode), local popup fixtures: all 11 translated layouts fit without label wrapping/overflow; all three labels have locale-appropriate colons. Chinese settings are 320×199 CSS px with 12 px label/control spacing and aligned 237 px dropdowns. Return and gear are both 18×18 px. The supplied SVG carets are 14×14 px and inset 10 px from the control edge.

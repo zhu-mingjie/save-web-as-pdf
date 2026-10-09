@@ -2,6 +2,7 @@ import { MAX_PAPER_INCHES, PDF_DPI } from "../shared/constants";
 import { userError } from "../shared/i18n";
 import type { PageMetrics, PrepareResult } from "../shared/types";
 import { DebuggerSession } from "./debugger-session";
+import { pageMetrics } from "../shared/page-metrics";
 
 interface LayoutMetricsResponse {
   cssContentSize?: { width: number; height: number };
@@ -172,13 +173,22 @@ export function isAcceptablePageCount(plan: PrintPlan, pageCount: number): boole
   return pageCount >= 1 && (plan.mode === "paginated" || pageCount === 1);
 }
 
-function validatePreparedMetrics(measured: PageMetrics, prepared: PrepareResult): void {
+async function validatePreparedMetrics(tabId: number, printMetrics: PageMetrics, prepared: PrepareResult): Promise<void> {
+  // DOM offset/scroll sizes and CDP content sizes differ for scaled or clipped
+  // bodies. Compare DOM with DOM; use CDP separately to size the printed PDF.
+  const results = await chrome.scripting.executeScript({ target: { tabId }, func: pageMetrics });
+  const measured = results.find((entry) => entry.frameId === 0)?.result;
+  if (!measured || !Number.isFinite(measured.width) || !Number.isFinite(measured.height) ||
+      measured.width <= 0 || measured.height <= 0) throw userError("errorMeasureWebpage");
   const heightTolerance = Math.max(8, prepared.height * 0.002);
   const widthTolerance = Math.max(4, prepared.width * 0.002);
   if (
     Math.abs(measured.height - prepared.height) > heightTolerance ||
     Math.abs(measured.width - prepared.width) > widthTolerance
   ) {
+    console.info("Save Web as PDF layout changed", {
+      prepared: { width: prepared.width, height: prepared.height }, current: measured, printMetrics
+    });
     throw userError("errorLayoutChanged");
   }
 }
@@ -201,7 +211,7 @@ export async function generatePdf(
     await session.send("Page.enable");
     await session.send("Emulation.setEmulatedMedia", { media: "screen" });
     const metrics = normalizeMetrics(await session.send<LayoutMetricsResponse>("Page.getLayoutMetrics"));
-    validatePreparedMetrics(metrics, prepared);
+    await validatePreparedMetrics(tabId, metrics, prepared);
     const initialPlan = createPrintPlan(metrics);
     if (!initialPlan) {
       throw userError("errorWebpageTooLarge", [
@@ -256,7 +266,7 @@ export async function generatePdf(
     };
 
     const refreshedMetrics = normalizeMetrics(await session.send<LayoutMetricsResponse>("Page.getLayoutMetrics"));
-    validatePreparedMetrics(refreshedMetrics, prepared);
+    await validatePreparedMetrics(tabId, refreshedMetrics, prepared);
     const fallbackPlan = createMaximumHeightPrintPlan(refreshedMetrics);
     if (!fallbackPlan) {
       throw userError("errorWebpageTooLarge", [

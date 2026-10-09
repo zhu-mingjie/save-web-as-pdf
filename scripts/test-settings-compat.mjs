@@ -47,6 +47,8 @@ assert.deepEqual(values,[1]);
 ReadableStream.prototype[Symbol.asyncIterator]=nativeIterator;
 const generator=await load('export {generatePdf} from "./src/background/pdf-generator.ts";');
 let printNumber=0, lastPdf, detached=0;
+let currentDom={width:960,height:1200};
+chrome.scripting={executeScript:async()=>[{frameId:0,result:currentDom}]};
 chrome.debugger={attach:async()=>{},detach:async()=>{detached++;},sendCommand:async(_,method)=>{
   if(method==='Page.getLayoutMetrics')return {cssContentSize:{width:960,height:1200}};
   if(method==='Page.printToPDF'){
@@ -60,6 +62,12 @@ chrome.debugger={attach:async()=>{},detach:async()=>{detached++;},sendCommand:as
 const generated=await generator.generatePdf(1,{width:960,height:1200,captureMode:'full-page',diagnostics:{prepared:{}}});
 assert.equal(printNumber,4);assert.equal(generated.optimizeSinglePage,true);
 assert.equal(generated.diagnostics.fallback,true);assert.equal(detached,1);
+currentDom={width:960,height:1600};
+const beforeRejectedPrint=printNumber;
+await assert.rejects(generator.generatePdf(1,{width:960,height:1200,captureMode:'full-page',diagnostics:{prepared:{}}}),/errorLayoutChanged/);
+assert.equal(printNumber,beforeRejectedPrint,'changed DOM must be rejected before printing');
+assert.equal(detached,2,'layout rejection must detach');
+currentDom={width:960,height:1200};
 const wrapper=await load('export * from "./src/preview/last-page-optimizer.ts";');
 chrome.runtime={getURL:path=>'extension:'+path};
 let workers=[];

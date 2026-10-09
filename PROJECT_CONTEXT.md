@@ -2,7 +2,7 @@
 
 > Primary source of truth for project context across AI tools and development sessions.
 >
-> Last reviewed: 2026-10-09. Current 0.5.4 UI revision builds on the 0.5.3 implementation and controlled verification supersede the 0.5.2 compatibility/deadline findings below. Previous review: 2026-10-08. Evidence was taken from a fresh development clone of GitHub `main` at `0072dc8`, the surviving project mirror/test ZIP, and accessible prior chat records; see sections 12–14 and the newest handoff entry. Historical browser tests remain explicitly historical.
+> Last reviewed: 2026-10-10. Current 0.5.5 layout/metadata fix builds on the 0.5.4 UI and 0.5.3 implementation; controlled verification supersedes the 0.5.2 compatibility/deadline findings below. Previous review: 2026-10-08. Evidence was taken from a fresh development clone of GitHub `main` at `0072dc8`, the surviving project mirror/test ZIP, and accessible prior chat records; see sections 12–14 and the newest handoff entry. Historical browser tests remain explicitly historical.
 
 ## 1. Project Overview
 
@@ -65,7 +65,7 @@ Generated or local-only directories include `node_modules/`, `dist/`, `release/`
 2. The MV3 service worker validates the sender, maintains per-tab operation state in `chrome.storage.session`, and injects the required page code.
 3. The page agent/preparer loads lazy content, waits for page stability, applies capture-specific rules, freezes unstable viewport-height behavior, and returns measured content dimensions.
 4. The background debugger session attaches through the Chrome DevTools Protocol and calls `Page.printToPDF`, receiving the PDF through a protocol stream.
-5. The PDF generator validates the resulting page count and restores page state and the debugger connection even on failure or cancellation.
+5. The PDF generator rechecks prepared/current dimensions using the identical injected DOM helper (CDP content dimensions separately size the paper), validates the resulting page count and restores page state and the debugger connection even on failure or cancellation.
 6. The completed PDF and safe filename are written to IndexedDB, and an extension preview tab is opened.
 7. The preview consumes the one-time local record. For multi-page PDFs within the resource budget, local PDF.js rendering finds the last page's painted, image, and annotation boundary. If the boundary and page boxes are safe, pdf-lib raises only the last page's lower page-box edge, retaining about 4 mm bottom padding.
 8. The rewritten PDF must preserve page count, every earlier page box, final-page text and annotations, expected dimensions, the PDF envelope, and the white-composited rendered top region. Any ambiguity, timeout, limit, parse/write error, or validation mismatch keeps the original valid PDF.
@@ -208,7 +208,7 @@ npm run verify:release  # Validate an existing release artifact
 
 ### Current local snapshot
 
-- The candidate version is `0.5.4` (UI-only test revision of 0.5.3). On 2026-10-09, GitHub `main` was fetched/confirmed at `a249118`; the actual local checkout had clean branch `docs/cloud-handoff-2026-10-08` at `7c2467c`, containing one unpushed documentation commit. That work was preserved by starting `fix/pdf-height-settings` from it. No reset/pull or overwrite was performed.
+- The candidate version is `0.5.5` (layout/metadata test fix following the 0.5.4 UI revision). On 2026-10-09, GitHub `main` was fetched/confirmed at `a249118`; the actual local checkout had clean branch `docs/cloud-handoff-2026-10-08` at `7c2467c`, containing one unpushed documentation commit. That work was preserved by starting `fix/pdf-height-settings` from it. No reset/pull or overwrite was performed.
 - The ChatGPT project root is a non-Git mirror still containing 0.5.0 source/context plus later delivery artifacts. Do not use its source or build output as the current development baseline. The development clone is now `repositories/save-web-as-pdf/` relative to that mirror. Work inside the clone and read its `AGENTS.md` and this file. Preserve synchronized mirror files.
 - Both earlier temporary development directories were found with incomplete `.git` remnants and no surviving source files. Their current uncommitted/unpushed state cannot be reconstructed or certified clean. The new clone started clean and aligned with `origin/main`; it does not prove that all historical local work was pushed. Surviving mirror source/script/locale differences match sampled historical commits; its globe SVG differs only in surrounding whitespace. No unique unbacked source change was found in that comparison.
 - The authoritative checkout now uses development branch `fix/pdf-height-settings`; remote remains `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
@@ -221,7 +221,7 @@ npm run verify:release  # Validate an existing release artifact
 
 ### Next recommended steps
 
-1. Have the maintainer install the 0.5.3 test ZIP on the reported Windows computer and compare short pages and long final-page remainders, including full-save/edit-save preview and download. Do not repeat the maintainer-owned Wikipedia/site list on their behalf.
+1. Have the maintainer install the 0.5.5 test ZIP and retest the reported failing Wikipedia pages with their original header/footer choices. The new bug report authorizes targeted Wikipedia diagnosis; it does not require repeating the broader maintainer-owned site list or the Windows acceptance matrix. Exact failing URLs/settings and browser build remain unconfirmed. Preserve the pending Windows full-save/edit-save, preview/download and height acceptance from 0.5.3.
 2. Keep the prior 0.5.1/0.5.2 evidence and the new controlled Mac/Chrome 120/current matrix distinct from Windows/Linux installed acceptance. Recheck actual minimum-browser behavior whenever the PDF dependency changes; upstream's general legacy baseline remains newer than Chrome 120.
 3. Before any approved public publication, synchronize the website privacy policy and refresh the store screenshot/settings disclosures. No tag, GitHub Release or store operation is authorized for this task.
 
@@ -241,7 +241,7 @@ npm run verify:release  # Validate an existing release artifact
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The source beta version is `0.5.4`; the latest published GitHub tag remains `0.5.1`. Chrome Web Store publication has not been performed by the agent.
+- The source beta version is `0.5.5`; the latest published GitHub tag remains `0.5.1`. Chrome Web Store publication has not been performed by the agent.
 
 ## 14. Git Workflow
 
@@ -275,6 +275,15 @@ This section is the default authorization model for future AI-assisted work in t
 - At handoff, summarize changed files, validation, Git status, remaining risks, and the safest next action. Update the handoff log below when the information will help the next session.
 
 ## 16. Handoff Log
+
+### 2026-10-10 — Codex (0.5.5 Wikipedia-reported layout/metadata fix)
+
+- **Report and limits:** the maintainer reports that most sites export metadata normally, but several Wikipedia pages reject with `errorLayoutChanged`. Exact URLs, selected metadata combination and browser build were requested but have not yet been supplied. Direct access to a representative Wikipedia page timed out in this environment; the resulting Chrome error page is not a Wikipedia test. No live-site pass or Windows pass is claimed.
+- **Confirmed defects:** preparation measured maxima of DOM scroll/offset boxes but generation compared them against CDP's content size. These are not interchangeable for CSS scaling/clipped bodies. The previous source at `15a75a2` reproduces the same false error on a stable scaled-root fixture. Wikimedia's official Vector and legacy `normalize.less` also declare `html, body { height: 100%; }` (see [official source](https://github.com/wikimedia/mediawiki-skins-Vector/blob/master/resources/skins.vector.styles/normalize.less)). With metadata siblings, Chrome resolves this percentage height against PDF sheets, adding unnecessary pages. The previous source reproduces this independently; it is not asserted to fully explain every reported live-page failure.
+- **Fix:** extracted the existing self-contained DOM measurement into `src/shared/page-metrics.ts`; the generator injects this same function before initial printing and maximum-height fallback. The existing tolerances remain unchanged, true dimension changes are still rejected, and native CDP content dimensions still determine the PDF paper. Mismatches log only dimensions. When metadata is enabled, the existing reversible viewport-style preparation also freezes html/body percentage height declarations at their current resolved pixel height. No per-domain bypass, UI/permission/dependency change or screenshot conversion.
+- **Actual validation (2026-10-09–10):** check script passes. New `test:page-layout` runs production preparation/generation with actual Chrome protocol transport: 8 cases on Chrome 154.0.8037.98 and Chrome 120.0.6099.109 (old headless), covering first/last/both/no metadata, short/long percentage-height pages, a scaled root, constrained body, and a genuine post-preparation change. Short cases now print once as one page; long case prints once as two pages. Body text/end link and metadata text/links remain searchable/clickable; header/footer positions, temporary style/node/font cleanup and rejection of genuine changes pass. The previous-source run proves both regressions rather than assuming them.
+- **Installed controlled flow:** actual unpacked 0.5.5 on Chrome 154 passes full-save, edit-save, real extension CSP/local resources/storage/preview worker, immediate editor language update and active-export cancel/no-new-preview on a local percentage-height fixture. Root/body height overrides, metadata fonts and editor resources are restored. This is separate from actual user file-dialog/Windows acceptance; the prior PDF raster/last-page matrix is historical and was not needlessly rerun for this change.
+- **Delivery:** verified 0.5.5 test ZIP: 3,108,175 bytes, 222 files, SHA-256 `04a3bc4235bda48252a184c7d4a3e16527e6a3ca9d6ef5cdab1f969827cfd7e1`; package/build/verify-release pass and package details are recorded in `PRE_RELEASE_TEST_PLAN.md`. Scoped commit/push backup on `fix/pdf-height-settings`; no tag, GitHub Release or store submission. Retest the original Wikipedia URLs before calling the reported real-site problem accepted.
 
 ### 2026-10-09 — Codex (0.5.4 settings UI refinement)
 

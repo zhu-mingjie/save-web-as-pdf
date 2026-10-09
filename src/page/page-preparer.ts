@@ -23,6 +23,7 @@ import { hasPageState, setPageState, takePageState } from "./page-state";
 import { defaultCaptureMode, extractZhihuAnswerId, hasViewportUnitToken } from "./capture-rules";
 import { addDecorations } from "./decorations";
 import type { ExportDecorations } from "../shared/settings";
+import { pageMetrics } from "../shared/page-metrics";
 
 const VIEWPORT_LAYOUT_PROPERTIES = [
   "height",
@@ -122,21 +123,6 @@ function throwIfPreparationTimedOut(startedAt: number): void {
   }
 }
 
-function pageMetrics(): PageMetrics {
-  const body = document.body;
-  const root = document.documentElement;
-  return {
-    width: Math.max(root.scrollWidth, root.offsetWidth, root.clientWidth, body?.scrollWidth ?? 0, body?.offsetWidth ?? 0),
-    height: Math.max(
-      root.scrollHeight,
-      root.offsetHeight,
-      root.clientHeight,
-      body?.scrollHeight ?? 0,
-      body?.offsetHeight ?? 0
-    )
-  };
-}
-
 function elementDocumentBottom(element: Element): number {
   const rect = element.getBoundingClientRect();
   return Math.max(0, rect.bottom + window.scrollY);
@@ -181,8 +167,10 @@ function applyTemporaryAttribute(
   element.setAttribute(name, value);
 }
 
-function valueReferencesViewportUnit(value: string, element: Element, seen = new Set<string>()): boolean {
-  if (hasViewportUnitToken(value)) return true;
+function valueReferencesViewportUnit(
+  value: string, element: Element, seen = new Set<string>(), includePercentages = false
+): boolean {
+  if (hasViewportUnitToken(value) || (includePercentages && value.includes("%"))) return true;
   const variablePattern = /var\(\s*(--[\w-]+)/g;
   let match: RegExpExecArray | null;
   while ((match = variablePattern.exec(value))) {
@@ -190,7 +178,7 @@ function valueReferencesViewportUnit(value: string, element: Element, seen = new
     if (seen.has(variable)) continue;
     seen.add(variable);
     const resolved = getComputedStyle(element).getPropertyValue(variable);
-    if (resolved && valueReferencesViewportUnit(resolved, element, seen)) return true;
+    if (resolved && valueReferencesViewportUnit(resolved, element, seen, includePercentages)) return true;
   }
   return false;
 }
@@ -198,14 +186,20 @@ function valueReferencesViewportUnit(value: string, element: Element, seen = new
 function freezeDeclaration(
   state: PagePreparationState,
   element: Element,
-  declaration: CSSStyleDeclaration
+  declaration: CSSStyleDeclaration,
+  freezeRootPercentages = false
 ): number {
   if (!(element instanceof HTMLElement)) return 0;
   const computed = getComputedStyle(element);
   let frozen = 0;
   for (const property of VIEWPORT_LAYOUT_PROPERTIES) {
     const declared = declaration.getPropertyValue(property);
-    if (!declared || !valueReferencesViewportUnit(declared, element)) continue;
+    // Wikipedia uses html/body height:100%. Once metadata becomes their sibling,
+    // that height must not be resolved again against each PDF sheet's height.
+    const includePercentages = freezeRootPercentages &&
+      (element === document.documentElement || element === document.body) &&
+      /^(?:min-|max-)?(?:height|block-size)$/.test(property);
+    if (!declared || !valueReferencesViewportUnit(declared, element, new Set(), includePercentages)) continue;
     const resolved = computed.getPropertyValue(property).trim();
     if (!/^-?(?:\d*\.)?\d+px$/i.test(resolved)) continue;
     const numeric = Number.parseFloat(resolved);
@@ -235,7 +229,8 @@ function neutralizeForcedPageBreaks(
 async function freezeViewportDependentSizing(
   state: PagePreparationState,
   signal: AbortSignal,
-  startedAt: number
+  startedAt: number,
+  freezeRootPercentages: boolean
 ): Promise<FreezeResult> {
   let frozen = 0;
   let forcedPageBreaksNeutralized = 0;
@@ -259,7 +254,8 @@ async function freezeViewportDependentSizing(
       if (rule instanceof CSSStyleRule) {
         const hasViewportCandidate = inspectViewportRules && VIEWPORT_LAYOUT_PROPERTIES.some((property) => {
           const value = rule.style.getPropertyValue(property);
-          return value.includes("var(") || hasViewportUnitToken(value);
+          return value.includes("var(") || hasViewportUnitToken(value) ||
+            (freezeRootPercentages && /^(?:min-|max-)?(?:height|block-size)$/.test(property) && value.includes("%"));
         });
         const hasPageBreakCandidate = inspectPageBreakRules && FORCED_PAGE_BREAK_PROPERTIES.some((property) =>
           FORCED_PAGE_BREAK_VALUES.has(rule.style.getPropertyValue(property).trim().toLowerCase())
@@ -272,7 +268,7 @@ async function freezeViewportDependentSizing(
           continue;
         }
         for (const element of Array.from(matches)) {
-          if (hasViewportCandidate) frozen += freezeDeclaration(state, element, rule.style);
+          if (hasViewportCandidate) frozen += freezeDeclaration(state, element, rule.style, freezeRootPercentages);
           if (hasPageBreakCandidate) {
             forcedPageBreaksNeutralized += neutralizeForcedPageBreaks(state, element, rule.style);
           }
@@ -302,7 +298,7 @@ async function freezeViewportDependentSizing(
 
   for (const element of Array.from(document.querySelectorAll<HTMLElement>("[style]"))) {
     throwIfPreparationTimedOut(startedAt);
-    frozen += freezeDeclaration(state, element, element.style);
+    frozen += freezeDeclaration(state, element, element.style, freezeRootPercentages);
     forcedPageBreaksNeutralized += neutralizeForcedPageBreaks(state, element, element.style);
     if (performance.now() >= deadline) {
       await yieldToBrowser(signal);
@@ -547,7 +543,8 @@ export async function preparePage(signal: AbortSignal, decorations?: ExportDecor
     const resourceTimeout = Math.min(RESOURCE_WAIT_TIMEOUT_MS, remainingPreparationTime(startedAt));
     const resourceWaitTimedOut = await waitForResources(plan.resourceRoots, signal, resourceTimeout);
     throwIfPreparationTimedOut(startedAt);
-    const freeze = await freezeViewportDependentSizing(state, signal, startedAt);
+    const hasDecorations = !!decorations && (decorations.header !== "none" || decorations.footer !== "none");
+    const freeze = await freezeViewportDependentSizing(state, signal, startedAt, hasDecorations);
     await addDecorations(state, decorations, signal);
     window.scrollTo({ top: scrollY, left: scrollX, behavior: "instant" });
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
