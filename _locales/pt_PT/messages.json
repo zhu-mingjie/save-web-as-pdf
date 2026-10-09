@@ -22,10 +22,10 @@
     "message": "Automático"
   },
   "settingsHeader": {
-    "message": "Cabeçalho"
+    "message": "Cabeçalho:"
   },
   "settingsFooter": {
-    "message": "Rodapé"
+    "message": "Rodapé:"
   },
   "settingsNone": {
     "message": "Nenhum"

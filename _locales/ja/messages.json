@@ -22,10 +22,10 @@
     "message": "自動"
   },
   "settingsHeader": {
-    "message": "ヘッダー"
+    "message": "ヘッダー："
   },
   "settingsFooter": {
-    "message": "フッター"
+    "message": "フッター："
   },
   "settingsNone": {
     "message": "なし"

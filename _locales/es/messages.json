@@ -22,10 +22,10 @@
     "message": "Automático"
   },
   "settingsHeader": {
-    "message": "Encabezado"
+    "message": "Encabezado:"
   },
   "settingsFooter": {
-    "message": "Pie de página"
+    "message": "Pie de página:"
   },
   "settingsNone": {
     "message": "Ninguno"

@@ -1,8 +1,16 @@
-# Save Web as PDF 0.5.3 — Test Candidate Verification Record
+# Save Web as PDF 0.5.4 — Test Candidate Verification Record
 
 This file separates prior maintainer verification, automated checks for the current candidate, current manual browser checks, intentionally deferred coverage, and work reserved for the maintainer. Do not treat an item from one category as evidence for another.
 
-## Current 0.5.3 controlled verification — 2026-10-09
+## Current 0.5.4 UI-only verification — 2026-10-09
+
+- Existing `scripts/check.mjs` passes typecheck, focused filename/export/i18n/popup/settings checks and build. No business TypeScript, permissions or dependency changes; PDF integration and full export acceptance were not rerun for this presentation-only revision.
+- Actual Chrome 154 and Chrome 120 (old headless mode), local popup fixtures: all 11 translated layouts fit without label wrapping/overflow; all three labels have locale-appropriate colons. Chinese settings are 320×199 CSS px with 12 px label/control spacing and aligned 237 px dropdowns. Return and gear are both 18×18 px. The supplied SVG carets are 14×14 px and inset 10 px from the control edge.
+- Long synthetic labels/options independently expand the settings width to about 436/475 px. Back and Escape restore the unchanged 320 px home width. Dark theme and local icon resources were visually checked. Native selects, stored values and existing event handlers are retained.
+- Both uploaded icons match the copied repository files byte-for-byte. UI screenshots were inspected; no Windows/Linux acceptance or 11-language human translation acceptance is claimed.
+- Package/build and verify-release pass. 0.5.4 ZIP: 3,107,877 bytes, 222 runtime files, SHA-256 `7b36499a58003910830369b74a0ecbe0684282e9dcba0e21a4fe66023730b412`; archive-root manifest and both new SVGs verified. No public Release/tag/store operation is authorized.
+
+## Prior 0.5.3 controlled verification — 2026-10-09
 
 - [x] `scripts/check.mjs`: TypeScript; filename, print planning, i18n (11 catalogs/73 keys), popup, and new settings/compatibility tests; production build.
 - [x] Mocked Chrome debugger: three adaptive two-page attempts followed by a maximum-height one-page result carries `optimizeSinglePage=true`, with attempt diagnostics. Normal adaptive single-page output remains excluded.

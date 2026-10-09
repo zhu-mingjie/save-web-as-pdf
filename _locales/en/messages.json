@@ -72,10 +72,10 @@
     "message": "Automatic"
   },
   "settingsHeader": {
-    "message": "Header"
+    "message": "Header:"
   },
   "settingsFooter": {
-    "message": "Footer"
+    "message": "Footer:"
   },
   "settingsNone": {
     "message": "None"

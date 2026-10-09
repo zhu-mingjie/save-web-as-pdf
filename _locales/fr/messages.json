@@ -22,10 +22,10 @@
     "message": "Automatique"
   },
   "settingsHeader": {
-    "message": "En-tête"
+    "message": "En-tête :"
   },
   "settingsFooter": {
-    "message": "Pied de page"
+    "message": "Pied de page :"
   },
   "settingsNone": {
     "message": "Aucun"

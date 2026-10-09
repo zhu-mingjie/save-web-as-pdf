@@ -1,6 +1,6 @@
 {
   "name": "save-web-as-pdf",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "private": true,
   "license": "MIT",
   "description": "A local-first Chrome extension that saves the current webpage as a searchable PDF using the longest practical pages.",

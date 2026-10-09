@@ -22,10 +22,10 @@
     "message": "자동"
   },
   "settingsHeader": {
-    "message": "머리글"
+    "message": "머리글:"
   },
   "settingsFooter": {
-    "message": "바닥글"
+    "message": "바닥글:"
   },
   "settingsNone": {
     "message": "없음"

@@ -2,7 +2,7 @@
 
 > Primary source of truth for project context across AI tools and development sessions.
 >
-> Last reviewed: 2026-10-09. Current 0.5.3 implementation and controlled verification supersede the 0.5.2 compatibility/deadline findings below. Previous review: 2026-10-08. Evidence was taken from a fresh development clone of GitHub `main` at `0072dc8`, the surviving project mirror/test ZIP, and accessible prior chat records; see sections 12–14 and the newest handoff entry. Historical browser tests remain explicitly historical.
+> Last reviewed: 2026-10-09. Current 0.5.4 UI revision builds on the 0.5.3 implementation and controlled verification supersede the 0.5.2 compatibility/deadline findings below. Previous review: 2026-10-08. Evidence was taken from a fresh development clone of GitHub `main` at `0072dc8`, the surviving project mirror/test ZIP, and accessible prior chat records; see sections 12–14 and the newest handoff entry. Historical browser tests remain explicitly historical.
 
 ## 1. Project Overview
 
@@ -208,7 +208,7 @@ npm run verify:release  # Validate an existing release artifact
 
 ### Current local snapshot
 
-- The candidate version is `0.5.3` (test only). On 2026-10-09, GitHub `main` was fetched/confirmed at `a249118`; the actual local checkout had clean branch `docs/cloud-handoff-2026-10-08` at `7c2467c`, containing one unpushed documentation commit. That work was preserved by starting `fix/pdf-height-settings` from it. No reset/pull or overwrite was performed.
+- The candidate version is `0.5.4` (UI-only test revision of 0.5.3). On 2026-10-09, GitHub `main` was fetched/confirmed at `a249118`; the actual local checkout had clean branch `docs/cloud-handoff-2026-10-08` at `7c2467c`, containing one unpushed documentation commit. That work was preserved by starting `fix/pdf-height-settings` from it. No reset/pull or overwrite was performed.
 - The ChatGPT project root is a non-Git mirror still containing 0.5.0 source/context plus later delivery artifacts. Do not use its source or build output as the current development baseline. The development clone is now `repositories/save-web-as-pdf/` relative to that mirror. Work inside the clone and read its `AGENTS.md` and this file. Preserve synchronized mirror files.
 - Both earlier temporary development directories were found with incomplete `.git` remnants and no surviving source files. Their current uncommitted/unpushed state cannot be reconstructed or certified clean. The new clone started clean and aligned with `origin/main`; it does not prove that all historical local work was pushed. Surviving mirror source/script/locale differences match sampled historical commits; its globe SVG differs only in surrounding whitespace. No unique unbacked source change was found in that comparison.
 - The authoritative checkout now uses development branch `fix/pdf-height-settings`; remote remains `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
@@ -241,7 +241,7 @@ npm run verify:release  # Validate an existing release artifact
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The source beta version is `0.5.3`; the latest published GitHub tag remains `0.5.1`. Chrome Web Store publication has not been performed by the agent.
+- The source beta version is `0.5.4`; the latest published GitHub tag remains `0.5.1`. Chrome Web Store publication has not been performed by the agent.
 
 ## 14. Git Workflow
 
@@ -275,6 +275,15 @@ This section is the default authorization model for future AI-assisted work in t
 - At handoff, summarize changed files, validation, Git status, remaining risks, and the safest next action. Update the handoff log below when the information will help the next session.
 
 ## 16. Handoff Log
+
+### 2026-10-09 — Codex (0.5.4 settings UI refinement)
+
+- **Scope:** user-requested UI only. Kept all popup TypeScript, settings persistence, capture/edit/preview/download, PDF processing, permissions and dependency versions unchanged. Bumped package/manifest metadata to 0.5.4 to distinguish the test ZIP.
+- **Icons and labels:** copied the supplied return and caret SVGs unchanged. Return uses the same 18×18 image and button position as the gear. Three native selects retain labels and keyboard behavior; decorative 14×14 carets ignore pointer events, sit 10 px inside the right edge, and invert with the existing dark theme. Added localized colons to header/footer across all 11 catalogs, consistent with each locale's language label.
+- **Layout decision:** this request explicitly supersedes the earlier requirement that settings remain the same width as home. The home stays 320 px. Settings use shared intrinsic label/option columns, a 12 px gap, and content-driven width/height with single-line labels; long labels/options expand settings rather than forcing a wrap. Returning to home or pressing Escape restores 320 px. No JS sizing or replacement picker is introduced; CSS `:has` is supported in the declared Chrome 120 baseline.
+- **Actual verification:** existing check script passes. Controlled local popup checks on current Chrome 154 and actual Chrome 120 verify all 11 locales, Chinese colons/aligned 237 px controls in a 320×199 settings view, 12 px label gap, 10 px caret inset, matching return/gear dimensions, dark icons, and home/Escape width restoration. Existing translations currently fit 320 px; synthetic longer label/option probes expand to approximately 436/475 px without overflow or wrapping. This is UI evidence, not a rerun of PDF or platform acceptance.
+- **Package:** 0.5.4 ZIP: 3,107,877 bytes, 222 runtime files, SHA-256 `7b36499a58003910830369b74a0ecbe0684282e9dcba0e21a4fe66023730b412`; archive-root manifest and both new SVGs verified.
+- **Delivery:** 0.5.4 test ZIP only; scoped commit/push backup under the established workflow. No tag, GitHub Release or store operation. Preserve prior 0.5.3 validation and Windows/Linux acceptance limitations below.
 
 ### 2026-10-09 — Codex (0.5.3 height/compatibility/settings test candidate)
 

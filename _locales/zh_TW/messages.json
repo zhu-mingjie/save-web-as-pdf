@@ -72,10 +72,10 @@
     "message": "自動"
   },
   "settingsHeader": {
-    "message": "頁首"
+    "message": "頁首："
   },
   "settingsFooter": {
-    "message": "頁尾"
+    "message": "頁尾："
   },
   "settingsNone": {
     "message": "無"

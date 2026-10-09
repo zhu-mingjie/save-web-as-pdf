@@ -22,10 +22,10 @@
     "message": "Automatisch"
   },
   "settingsHeader": {
-    "message": "Kopfzeile"
+    "message": "Kopfzeile:"
   },
   "settingsFooter": {
-    "message": "Fußzeile"
+    "message": "Fußzeile:"
   },
   "settingsNone": {
     "message": "Keine"
