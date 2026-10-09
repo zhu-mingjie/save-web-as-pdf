@@ -13,12 +13,13 @@ const FORBIDDEN_NAMES = new Set([
 const FORBIDDEN_TEXT = [
   { label: "localhost", pattern: /localhost/i },
   { label: "127.0.0.1", pattern: /127\.0\.0\.1/ },
-  { label: "file URL", pattern: /file:\/\//i },
+  // Require a path/authority, not the upstream diagnostic "file:// URLs".
+  { label: "file URL", pattern: /file:\/\/(?:\/|[A-Za-z0-9])/i },
   { label: "macOS user path", pattern: /\/Users\// },
   { label: "Linux home path", pattern: /\/home\/(?!web_user(?:["'/:]|$))/ },
   { label: "Windows drive path", pattern: /[A-Za-z]:\\\\/ }
 ];
-const RUNTIME_EXTENSIONS = new Set([".css", ".html", ".js", ".json", ".png", ".svg", ".txt", ".webp"]);
+const RUNTIME_EXTENSIONS = new Set([".css", ".html", ".js", ".json", ".png", ".svg", ".txt", ".webp", ".ttf", ".pfb", ".bcmap"]);
 
 export async function walkFiles(directory) {
   const files = [];
@@ -64,6 +65,7 @@ export async function validateDist(distDirectory) {
       throw new Error(`Non-runtime file in dist: ${relative}`);
     }
     if (/\.(?:ts|map)$/i.test(relative)) throw new Error(`Development artifact in dist: ${relative}`);
+    if ([".png", ".webp", ".ttf", ".pfb", ".bcmap"].includes(path.extname(relative).toLowerCase())) continue;
     const text = await readFile(absolute, "utf8");
     for (const check of FORBIDDEN_TEXT) {
       if (check.pattern.test(text)) throw new Error(`Found ${check.label} in dist file: ${relative}`);

@@ -8,5 +8,44 @@
   "captureLoadedSnapshot":{"message":"Instantané du contenu chargé"},"captureFullPage":{"message":"Page entière"},"captureZhihuQuestionAnswer":{"message":"Question Zhihu et réponse sélectionnée"},
   "errorNoActiveTab":{"message":"Aucun onglet actif n’est disponible."},"errorRestrictedPage":{"message":"Cette page ne peut pas être enregistrée, car Chrome n’autorise pas les extensions à y accéder."},"errorDebuggerBusy":{"message":"Le débogueur Chrome est déjà utilisé pour cet onglet. Fermez les outils de développement ou l’autre débogueur, puis réessayez."},"errorPdfCouldNotBeGenerated":{"message":"Le PDF n’a pas pu être généré."},"errorDownloadFailed":{"message":"Le PDF n’a pas pu être téléchargé."},"errorExportAlreadyRunning":{"message":"Une exportation est déjà en cours pour cet onglet."},"errorExportRace":{"message":"Une autre exportation a démarré en premier pour cet onglet."},"errorExportCanceled":{"message":"Exportation annulée."},"errorMissingDimensions":{"message":"Les dimensions de la page n’ont pas pu être obtenues."},"errorCancelUnavailable":{"message":"L’exportation à annuler n’est plus disponible."},
   "errorPreparationTimeout":{"message":"La page n’a pas pu être préparée dans le délai de sécurité. Aucun PDF incomplet n’a été enregistré."},"errorZhihuQuestionMissing":{"message":"La zone de question Zhihu n’a pas pu être identifiée. Aucun PDF n’a été enregistré."},"errorZhihuQuestionMultiple":{"message":"Plusieurs zones de question Zhihu ont été trouvées. Aucun PDF n’a été enregistré."},"errorZhihuAnswerMissing":{"message":"La réponse Zhihu demandée n’a pas pu être identifiée. Ouvrez la réponse complète et réessayez."},"errorZhihuAnswerMultiple":{"message":"La réponse Zhihu demandée correspond à plusieurs zones de la page. Aucun PDF n’a été enregistré."},"errorZhihuAnswerCollapsed":{"message":"Cette réponse Zhihu est repliée. Développez la réponse complète avant de l’enregistrer."},"errorPageChanging":{"message":"La page a continué à changer pendant la préparation. Attendez la fin du chargement, puis réessayez."},"errorPageSizeLimit":{"message":"Cette page dépasse la taille de sécurité pour une seule page PDF continue."},"errorPreparationLimit":{"message":"La page n’a pas pu être préparée dans les limites d’exportation sûres. Aucun PDF incomplet n’a été enregistré."},"errorMeasureWebpage":{"message":"Chrome n’a pas pu mesurer cette page web."},
-  "errorWebpageTooLarge":{"message":"Cette page web est trop longue ou trop large pour être exportée en une seule page PDF continue ($WIDTH$ × $HEIGHT$ px CSS). La limite sûre de Chrome est de $LIMIT$ pouces par page.","placeholders":{"width":{"content":"$1","example":"1280"},"height":{"content":"$2","example":"18000"},"limit":{"content":"$3","example":"200"}}},"errorLayoutChanged":{"message":"La mise en page a de nouveau changé juste avant l’impression. Attendez la fin du chargement, puis réessayez."},"errorMissingPdfStream":{"message":"Chrome n’a renvoyé aucune donnée PDF."},"errorUnverifiedPageCount":{"message":"Le nombre de pages du PDF renvoyé par Chrome n’a pas pu être vérifié. Le fichier n’a pas été enregistré."},"errorPdfIdentifierMissing":{"message":"L’identifiant du PDF est manquant."},"errorPreviewExpired":{"message":"Cet aperçu PDF a expiré. Générez-le de nouveau depuis la page web."}
+  "errorWebpageTooLarge":{"message":"Cette page web est trop longue ou trop large pour être exportée en une seule page PDF continue ($WIDTH$ × $HEIGHT$ px CSS). La limite sûre de Chrome est de $LIMIT$ pouces par page.","placeholders":{"width":{"content":"$1","example":"1280"},"height":{"content":"$2","example":"18000"},"limit":{"content":"$3","example":"200"}}},"errorLayoutChanged":{"message":"La mise en page a de nouveau changé juste avant l’impression. Attendez la fin du chargement, puis réessayez."},"errorMissingPdfStream":{"message":"Chrome n’a renvoyé aucune donnée PDF."},"errorUnverifiedPageCount":{"message":"Le nombre de pages du PDF renvoyé par Chrome n’a pas pu être vérifié. Le fichier n’a pas été enregistré."},"errorPdfIdentifierMissing":{"message":"L’identifiant du PDF est manquant."},"errorPreviewExpired":{"message":"Cet aperçu PDF a expiré. Générez-le de nouveau depuis la page web."},
+  "settingsTitle": {
+    "message": "Paramètres"
+  },
+  "settingsBack": {
+    "message": "Retour"
+  },
+  "settingsLanguage": {
+    "message": "Langue :"
+  },
+  "settingsAutomatic": {
+    "message": "Automatique"
+  },
+  "settingsHeader": {
+    "message": "En-tête"
+  },
+  "settingsFooter": {
+    "message": "Pied de page"
+  },
+  "settingsNone": {
+    "message": "Aucun"
+  },
+  "settingsUrl": {
+    "message": "URL source"
+  },
+  "settingsTime": {
+    "message": "Heure"
+  },
+  "settingsUrlTime": {
+    "message": "URL source + heure"
+  },
+  "settingsSaveFailed": {
+    "message": "Impossible d’enregistrer les paramètres. Réessayez."
+  },
+  "optimizingPdf": {
+    "message": "Préparation de l’aperçu PDF…"
+  },
+  "optimizationUnchanged": {
+    "message": "La hauteur originale a été conservée pour protéger le contenu."
+  }
 }

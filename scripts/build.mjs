@@ -14,7 +14,8 @@ await build({
     "popup/popup": "src/popup/popup.ts",
     "page/page-agent": "src/page/page-agent.ts",
     "editor/editor": "src/editor/editor-controller.ts",
-    "preview/preview": "src/preview/preview.ts"
+    "preview/preview": "src/preview/preview.ts",
+    "preview/optimizer-worker": "src/preview/optimizer-worker.ts"
   },
   bundle: true,
   format: "esm",
@@ -28,7 +29,7 @@ await build({
 });
 
 await build({
-  entryPoints: ["node_modules/pdfjs-dist/build/pdf.worker.min.mjs"],
+  entryPoints: ["node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs"],
   bundle: true,
   format: "esm",
   target: "chrome120",
@@ -41,10 +42,24 @@ await build({
   logLevel: "info"
 });
 
+await mkdir(path.join(outdir, "licenses"), { recursive: true });
+await cp("node_modules/pdfjs-dist/cmaps", path.join(outdir, "vendor/cmaps"), { recursive: true });
+await cp("node_modules/pdfjs-dist/standard_fonts", path.join(outdir, "vendor/standard_fonts"), { recursive: true });
+for (const [source, destination] of [
+  ["vendor/cmaps/LICENSE", "licenses/cmaps.txt"],
+  ["vendor/standard_fonts/LICENSE_FOXIT", "licenses/foxit.txt"],
+  ["vendor/standard_fonts/LICENSE_LIBERATION", "licenses/liberation.txt"]
+]) {
+  await cp(path.join(outdir, source), path.join(outdir, destination));
+  await rm(path.join(outdir, source));
+}
+
 await Promise.all([
   cp("manifest.json", path.join(outdir, "manifest.json")),
   cp("_locales", path.join(outdir, "_locales"), { recursive: true }),
   cp("icons", path.join(outdir, "icons"), { recursive: true }),
+  cp("assets/fonts", path.join(outdir, "fonts"), { recursive: true }),
+  cp("assets/core-js-LICENSE.txt", path.join(outdir, "licenses/core-js-mit.txt")),
   cp("src/popup/popup.html", path.join(outdir, "popup/popup.html")),
   cp("src/popup/popup.css", path.join(outdir, "popup/popup.css")),
   cp("src/preview/preview.html", path.join(outdir, "preview/preview.html")),

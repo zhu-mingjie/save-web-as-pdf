@@ -10,6 +10,8 @@ export interface PdfRecord {
   blob: Blob;
   metadata: SourcePageMetadata;
   createdAt: number;
+  optimizeSinglePage?: boolean;
+  printDiagnostics?: Record<string, unknown>;
 }
 
 export interface ExportSession {

@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Save Web as PDF
 
-> Last Updated: 2026-10-02
+> Last Updated: 2026-10-09 (0.5.3 draft; no store submission)
 
 ## Store Listing
 
@@ -27,7 +27,8 @@ FEATURES
 • Undo, redo, or restore edits before export
 • Preview the generated PDF before downloading
 • Keep page processing and temporary PDF data on your device
-• Automatically match the interface to Chrome across 11 supported locales, with English fallback
+• Automatically match Chrome or choose one of 11 interface locales, with English fallback
+• Optionally add the source URL and export time once at the document start/end
 
 HOW TO USE
 1. Open the webpage you want to save.
@@ -41,7 +42,7 @@ The selected webpage and generated PDF are processed locally in Chrome and are n
 PERMISSIONS
 The extension accesses only the active page after you open it and choose an action. It temporarily uses Chrome's page-rendering capability to create the PDF and releases that access during cleanup.
 
-Version 0.5.2 — Safely shortens the final page of multi-page PDFs while preserving earlier pages, searchable text, images, and links.
+Version 0.5.3 test candidate — Fixes maximum-height single-page fallback and Chrome 120 runtime compatibility, terminates timed-out optimization, and adds local language/header/footer settings. Await maintainer installation acceptance before publication.
 
 **Category**
 
@@ -63,7 +64,7 @@ Save a webpage selected by the user as a searchable PDF with the fewest practica
 | `scripting` | Injects the locally bundled page-preparation and optional editing controls into the active webpage after the user requests them. |
 | `debugger` | Temporarily connects to the selected tab so Chrome can render that webpage as a searchable PDF. It is attached only during generation and detached during cleanup or cancellation. |
 | `downloads` | Opens Chrome's Save As flow when the user clicks Download PDF in the preview. |
-| `storage` | Stores only ephemeral per-tab export coordination state in browser session storage so duplicate exports can be prevented across service-worker restarts. The state clears at the end of the export or browser session. |
+| `storage` | Stores ephemeral per-tab export coordination in session storage and three persistent preferences (language, header, footer) in local storage. No website content is stored in these preferences. |
 
 No host permissions are requested. The extension does not request the `tabs` permission; `activeTab` provides the narrower, user-initiated access needed for the current page.
 
@@ -76,6 +77,7 @@ No host permissions are requested. The extension does not request the `tabs` per
 - Source URL with query parameters and fragments removed
 - Generated PDF
 - Ephemeral tab-specific export state without page content
+- Persistent language/header/footer choices and optional export timestamp
 
 **Transmission and sharing**
 
@@ -83,7 +85,7 @@ No webpage content or generated PDF data is transmitted to the developer or thir
 
 **Retention**
 
-The temporary PDF database record is deleted when the preview reads it. Interrupted records are eligible for cleanup after 24 hours. Export coordination state is removed after completion or cancellation and otherwise expires with the browser session.
+The temporary PDF database record is deleted when the preview reads it. Interrupted records are eligible for cleanup after 24 hours. Export coordination state is removed after completion or cancellation and otherwise expires with the browser session. Preferences remain locally until changed or the extension is removed.
 
 **Limited Use certification**
 
@@ -94,6 +96,8 @@ The use of information received from Google APIs will adhere to the Chrome Web S
 [https://miengieh.com/save-web-as-pdf/privacy/](https://miengieh.com/save-web-as-pdf/privacy/)
 
 This is the selected public policy URL. On 2026-10-01 it returned HTTP 200 without sign-in and disclosed local page/PDF processing, current permissions, IndexedDB/session retention, external links, support email handling, and no developer-operated processing backend or analytics. Entering it in the Chrome Web Store Developer Dashboard remains the maintainer's responsibility. Support contact: [support@miengieh.com](mailto:support@miengieh.com).
+
+The repository privacy policy now includes persistent preferences. The public website policy and store assets have not been updated in this task; synchronize them before an approved publication.
 
 ## Graphic Assets
 

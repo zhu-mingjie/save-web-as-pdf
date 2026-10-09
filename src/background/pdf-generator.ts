@@ -186,7 +186,7 @@ function validatePreparedMetrics(measured: PageMetrics, prepared: PrepareResult)
 export async function generatePdf(
   tabId: number,
   prepared: PrepareResult
-): Promise<{ pdf: Uint8Array; metrics: PageMetrics }> {
+): Promise<{ pdf: Uint8Array; metrics: PageMetrics; optimizeSinglePage: boolean; diagnostics: Record<string, unknown> }> {
   const session = new DebuggerSession(tabId);
   const attempts: Array<{
     phase: "initial" | "maximum-height-fallback";
@@ -250,7 +250,10 @@ export async function generatePdf(
     };
 
     const initialPdf = await printWithPlan(initialPlan, "initial");
-    if (initialPdf) return { pdf: initialPdf, metrics };
+    if (initialPdf) return {
+      pdf: initialPdf, metrics, optimizeSinglePage: initialPlan.mode === "paginated",
+      diagnostics: { initialPlan, metrics, attempts, fallback: false }
+    };
 
     const refreshedMetrics = normalizeMetrics(await session.send<LayoutMetricsResponse>("Page.getLayoutMetrics"));
     validatePreparedMetrics(refreshedMetrics, prepared);
@@ -274,7 +277,8 @@ export async function generatePdf(
         refreshedMeasured: refreshedMetrics,
         attempts
       });
-      return { pdf: fallbackPdf, metrics: refreshedMetrics };
+      return { pdf: fallbackPdf, metrics: refreshedMetrics, optimizeSinglePage: true,
+        diagnostics: { initialPlan, finalPlan: fallbackPlan, refreshedMetrics, attempts, fallback: true } };
     }
 
     console.info("Save Web as PDF print attempts", {

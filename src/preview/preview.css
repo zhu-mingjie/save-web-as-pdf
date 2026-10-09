@@ -4,6 +4,8 @@ html, body { height: 100%; margin: 0; background: #eef1f5; color: #202124; }
 body { display: grid; grid-template-rows: auto 1fr; }
 header { display: grid; grid-template-columns: minmax(210px, 1fr) minmax(260px, 420px) auto; gap: 20px; align-items: end; padding: 14px 22px; border-bottom: 1px solid #d7dbe0; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
 header > * { min-width: 0; }
+.preview-actions { display: flex; gap: 8px; }
+[hidden] { display: none !important; }
 h1 { margin: 0; font-size: 20px; }
 #source { max-width: 48vw; margin: 3px 0 0; overflow: hidden; color: #5f6368; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 label { display: grid; gap: 4px; color: #5f6368; font-size: 11px; font-weight: 650; }

@@ -1,6 +1,7 @@
 import type { MessageResponse, RuntimeRequest } from "../shared/messages";
 import { createSourcePageMetadata } from "../shared/filename";
-import { localizeDocument, t, userError, UserFacingError, visibleError } from "../shared/i18n";
+import { initializeI18n, onLanguageChange, localizeDocument, t, userError, UserFacingError, visibleError } from "../shared/i18n";
+import { LOCALES, readSettings, writeSettings, type Settings } from "../shared/settings";
 import {
   CHROME_WEB_STORE_REVIEW_URL,
   GITHUB_URL,
@@ -9,6 +10,7 @@ import {
   WEBSITE_URL
 } from "./links";
 
+await initializeI18n().catch(() => undefined);
 localizeDocument();
 
 const saveButton = document.querySelector<HTMLButtonElement>("#save")!;
@@ -25,6 +27,50 @@ let exporting = false;
 let completed = false;
 let keepalivePort: chrome.runtime.Port | null = null;
 let keepaliveTimer: number | null = null;
+const settingsOpen = document.querySelector<HTMLButtonElement>("#settings-open")!;
+const settingsBack = document.querySelector<HTMLButtonElement>("#settings-back")!;
+const settingsView = document.querySelector<HTMLElement>("#settings-view")!;
+const homeView = document.querySelector<HTMLElement>("#home-view")!;
+const settingsStatus = document.querySelector<HTMLElement>("#settings-status")!;
+const selects = ["language", "header", "footer"].map(id => document.querySelector<HTMLSelectElement>(`#${id}`)!);
+for (const [locale, label] of Object.entries(LOCALES)) selects[0]!.add(new Option(label, locale));
+for (const select of selects.slice(1)) {
+  for (const [value, key] of [["none", "settingsNone"], ["url", "settingsUrl"], ["time", "settingsTime"], ["url-time", "settingsUrlTime"]]) {
+    const option = new Option(t(key!), value);
+    option.dataset.i18n = key;
+    select.add(option);
+  }
+}
+function displaySettings(settings: Settings): void {
+  for (const select of selects) select.value = settings[select.id as keyof Settings];
+}
+function showSettings(show: boolean): void {
+  homeView.hidden = show; settingsView.hidden = !show; footer.hidden = show;
+  settingsOpen.hidden = show; settingsBack.hidden = !show;
+  (show ? settingsBack : settingsOpen).focus();
+}
+settingsOpen.addEventListener("click", () => showSettings(true));
+settingsBack.addEventListener("click", () => showSettings(false));
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !settingsView.hidden) { event.preventDefault(); showSettings(false); }
+});
+displaySettings(await readSettings().catch(error => {
+  settingsStatus.textContent = visibleError(error, "settingsSaveFailed"); settingsStatus.hidden = false;
+  return { language: "auto", header: "none", footer: "none" } as Settings;
+}));
+for (const select of selects) {
+  select.disabled = false;
+  select.addEventListener("change", async () => {
+    for (const control of selects) control.disabled = true;
+    settingsStatus.hidden = true;
+    try { displaySettings(await writeSettings({ [select.id]: select.value })); }
+    catch (error) {
+      displaySettings(await readSettings().catch(() => ({ language: "auto", header: "none", footer: "none" })));
+      settingsStatus.textContent = visibleError(error, "settingsSaveFailed"); settingsStatus.hidden = false;
+    } finally { for (const control of selects) control.disabled = false; }
+  });
+}
+onLanguageChange(() => { localizeDocument(); });
 
 function enableExternalLink(link: HTMLAnchorElement, url: string): void {
   const href = safeExternalUrl(url);
@@ -106,6 +152,7 @@ function stopKeepalive(): void {
 
 function setBusy(busy: boolean, busyText = ""): void {
   exporting = busy;
+  settingsOpen.disabled = busy;
   setFooterLinksBusy(busy);
   saveButton.disabled = busy;
   editButton.disabled = busy;

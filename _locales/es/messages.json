@@ -8,5 +8,44 @@
   "captureLoadedSnapshot":{"message":"Captura del contenido cargado"},"captureFullPage":{"message":"Página completa"},"captureZhihuQuestionAnswer":{"message":"Pregunta de Zhihu y respuesta seleccionada"},
   "errorNoActiveTab":{"message":"No hay ninguna pestaña activa disponible."},"errorRestrictedPage":{"message":"Esta página no se puede guardar porque Chrome no permite que las extensiones accedan a ella."},"errorDebuggerBusy":{"message":"El depurador de Chrome ya se está usando en esta pestaña. Cierra DevTools o el otro depurador e inténtalo de nuevo."},"errorPdfCouldNotBeGenerated":{"message":"No se pudo generar el PDF."},"errorDownloadFailed":{"message":"No se pudo descargar el PDF."},"errorExportAlreadyRunning":{"message":"Ya hay una exportación en curso para esta pestaña."},"errorExportRace":{"message":"Otra exportación se inició antes para esta pestaña."},"errorExportCanceled":{"message":"Exportación cancelada."},"errorMissingDimensions":{"message":"No se pudieron obtener las dimensiones de la página."},"errorCancelUnavailable":{"message":"La exportación que se iba a cancelar ya no está disponible."},
   "errorPreparationTimeout":{"message":"No se pudo preparar la página dentro del límite de tiempo seguro. No se guardó ningún PDF incompleto."},"errorZhihuQuestionMissing":{"message":"No se pudo identificar el área de la pregunta de Zhihu. No se guardó el PDF."},"errorZhihuQuestionMultiple":{"message":"Se encontraron varias áreas de pregunta de Zhihu. No se guardó el PDF."},"errorZhihuAnswerMissing":{"message":"No se pudo identificar la respuesta de Zhihu solicitada. Abre la respuesta completa e inténtalo de nuevo."},"errorZhihuAnswerMultiple":{"message":"La respuesta de Zhihu solicitada coincide con varias áreas de la página. No se guardó el PDF."},"errorZhihuAnswerCollapsed":{"message":"Esta respuesta de Zhihu está contraída. Expande la respuesta completa antes de guardarla."},"errorPageChanging":{"message":"La página siguió cambiando durante la preparación. Espera a que termine de cargarse e inténtalo de nuevo."},"errorPageSizeLimit":{"message":"Esta página supera el límite de tamaño seguro para una única página PDF continua."},"errorPreparationLimit":{"message":"No se pudo preparar la página dentro de los límites seguros de exportación. No se guardó ningún PDF incompleto."},"errorMeasureWebpage":{"message":"Chrome no pudo medir esta página web."},
-  "errorWebpageTooLarge":{"message":"Esta página web es demasiado larga o ancha para exportarla como una única página PDF continua ($WIDTH$ × $HEIGHT$ px CSS). El límite seguro de Chrome es de $LIMIT$ pulgadas por página.","placeholders":{"width":{"content":"$1","example":"1280"},"height":{"content":"$2","example":"18000"},"limit":{"content":"$3","example":"200"}}},"errorLayoutChanged":{"message":"El diseño de la página volvió a cambiar justo antes de imprimir. Espera a que termine de cargarse e inténtalo de nuevo."},"errorMissingPdfStream":{"message":"Chrome no devolvió datos PDF."},"errorUnverifiedPageCount":{"message":"No se pudo verificar el número de páginas del PDF devuelto por Chrome. El archivo no se guardó."},"errorPdfIdentifierMissing":{"message":"Falta el identificador del PDF."},"errorPreviewExpired":{"message":"Esta vista previa del PDF ha caducado. Genérala de nuevo desde la página web."}
+  "errorWebpageTooLarge":{"message":"Esta página web es demasiado larga o ancha para exportarla como una única página PDF continua ($WIDTH$ × $HEIGHT$ px CSS). El límite seguro de Chrome es de $LIMIT$ pulgadas por página.","placeholders":{"width":{"content":"$1","example":"1280"},"height":{"content":"$2","example":"18000"},"limit":{"content":"$3","example":"200"}}},"errorLayoutChanged":{"message":"El diseño de la página volvió a cambiar justo antes de imprimir. Espera a que termine de cargarse e inténtalo de nuevo."},"errorMissingPdfStream":{"message":"Chrome no devolvió datos PDF."},"errorUnverifiedPageCount":{"message":"No se pudo verificar el número de páginas del PDF devuelto por Chrome. El archivo no se guardó."},"errorPdfIdentifierMissing":{"message":"Falta el identificador del PDF."},"errorPreviewExpired":{"message":"Esta vista previa del PDF ha caducado. Genérala de nuevo desde la página web."},
+  "settingsTitle": {
+    "message": "Configuración"
+  },
+  "settingsBack": {
+    "message": "Volver"
+  },
+  "settingsLanguage": {
+    "message": "Idioma:"
+  },
+  "settingsAutomatic": {
+    "message": "Automático"
+  },
+  "settingsHeader": {
+    "message": "Encabezado"
+  },
+  "settingsFooter": {
+    "message": "Pie de página"
+  },
+  "settingsNone": {
+    "message": "Ninguno"
+  },
+  "settingsUrl": {
+    "message": "URL de origen"
+  },
+  "settingsTime": {
+    "message": "Hora"
+  },
+  "settingsUrlTime": {
+    "message": "URL de origen + hora"
+  },
+  "settingsSaveFailed": {
+    "message": "No se pudo guardar la configuración. Inténtalo de nuevo."
+  },
+  "optimizingPdf": {
+    "message": "Preparando la vista previa del PDF…"
+  },
+  "optimizationUnchanged": {
+    "message": "Se conservó la altura original para proteger el contenido."
+  }
 }

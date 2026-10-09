@@ -58,5 +58,44 @@
   "errorMissingPdfStream":{"message":"Chrome 未傳回 PDF 資料串流。"},
   "errorUnverifiedPageCount":{"message":"無法驗證 Chrome 傳回之 PDF 的頁數，因此未儲存該檔案。"},
   "errorPdfIdentifierMissing":{"message":"缺少 PDF 識別碼。"},
-  "errorPreviewExpired":{"message":"此 PDF 預覽已過期，請從網頁重新產生。"}
+  "errorPreviewExpired":{"message":"此 PDF 預覽已過期，請從網頁重新產生。"},
+  "settingsTitle": {
+    "message": "設定"
+  },
+  "settingsBack": {
+    "message": "返回"
+  },
+  "settingsLanguage": {
+    "message": "語言："
+  },
+  "settingsAutomatic": {
+    "message": "自動"
+  },
+  "settingsHeader": {
+    "message": "頁首"
+  },
+  "settingsFooter": {
+    "message": "頁尾"
+  },
+  "settingsNone": {
+    "message": "無"
+  },
+  "settingsUrl": {
+    "message": "來源網址"
+  },
+  "settingsTime": {
+    "message": "時間"
+  },
+  "settingsUrlTime": {
+    "message": "來源網址+時間"
+  },
+  "settingsSaveFailed": {
+    "message": "無法儲存設定，請重試。"
+  },
+  "optimizingPdf": {
+    "message": "正在準備 PDF 預覽…"
+  },
+  "optimizationUnchanged": {
+    "message": "為保護內容，保留原始頁面高度。"
+  }
 }

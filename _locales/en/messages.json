@@ -58,5 +58,44 @@
   "errorMissingPdfStream": { "message": "Chrome did not return a PDF stream." },
   "errorUnverifiedPageCount": { "message": "Chrome returned a PDF whose page count could not be verified. No unverified file was saved." },
   "errorPdfIdentifierMissing": { "message": "The PDF identifier is missing." },
-  "errorPreviewExpired": { "message": "This PDF preview has expired. Generate it again from the webpage." }
+  "errorPreviewExpired": { "message": "This PDF preview has expired. Generate it again from the webpage." },
+  "settingsTitle": {
+    "message": "Settings"
+  },
+  "settingsBack": {
+    "message": "Back"
+  },
+  "settingsLanguage": {
+    "message": "Language:"
+  },
+  "settingsAutomatic": {
+    "message": "Automatic"
+  },
+  "settingsHeader": {
+    "message": "Header"
+  },
+  "settingsFooter": {
+    "message": "Footer"
+  },
+  "settingsNone": {
+    "message": "None"
+  },
+  "settingsUrl": {
+    "message": "Source URL"
+  },
+  "settingsTime": {
+    "message": "Time"
+  },
+  "settingsUrlTime": {
+    "message": "Source URL + time"
+  },
+  "settingsSaveFailed": {
+    "message": "Settings could not be saved. Please try again."
+  },
+  "optimizingPdf": {
+    "message": "Preparing PDF preview…"
+  },
+  "optimizationUnchanged": {
+    "message": "Page height was kept unchanged for safety."
+  }
 }

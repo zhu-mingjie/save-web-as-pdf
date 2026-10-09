@@ -1,6 +1,6 @@
 # Privacy Policy for Save Web as PDF
 
-Last updated: October 1, 2026
+Last updated: October 9, 2026
 
 Canonical public URL: [https://miengieh.com/save-web-as-pdf/privacy/](https://miengieh.com/save-web-as-pdf/privacy/)
 
@@ -13,7 +13,8 @@ When the user explicitly starts an export, the extension handles:
 - the visible content and layout of the active webpage, including content that Chrome renders into the PDF;
 - the webpage title and a source URL with query parameters and fragments removed;
 - the generated PDF file; and
-- an ephemeral export status associated with the active browser tab.
+- an ephemeral export status associated with the active browser tab; and
+- locally selected interface language, header/footer preferences, and an export-start timestamp when metadata is enabled.
 
 The generated PDF may contain personal or sensitive information if that information is visible on the webpage selected by the user. The extension does not intentionally inspect passwords, authentication cookies, browser history, or webpages that the user has not selected for export.
 
@@ -28,6 +29,7 @@ All processing and temporary storage occur locally in the user's Chrome profile.
 - The generated PDF and its sanitized source metadata are placed temporarily in the extension's local IndexedDB database. The record is deleted as soon as the preview reads it.
 - If Chrome closes or an operation is interrupted before the preview opens, abandoned PDF records are eligible for deletion after 24 hours and are removed during a later cleanup opportunity.
 - Export coordination state is kept in Chrome session storage and is cleared when the browser session ends. It does not contain webpage content or the generated PDF.
+- Language and header/footer choices are stored in extension-local storage across browser restarts until changed or the extension is removed. Optional metadata is part of the locally generated PDF; it uses the sanitized source URL and one export-start timestamp.
 - Downloaded PDF files remain wherever the user chooses to save them and are controlled by the user.
 
 Removing the extension deletes its extension-owned browser storage. Users can also remove locally downloaded PDFs through their operating system.

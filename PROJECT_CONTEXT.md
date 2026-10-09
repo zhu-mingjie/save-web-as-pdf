@@ -2,7 +2,7 @@
 
 > Primary source of truth for project context across AI tools and development sessions.
 >
-> Last reviewed: 2026-10-08. Evidence was taken from a fresh development clone of GitHub `main` at `0072dc8`, the surviving project mirror/test ZIP, and accessible prior chat records; see sections 12–14 and the newest handoff entry. Historical browser tests remain explicitly historical.
+> Last reviewed: 2026-10-09. Current 0.5.3 implementation and controlled verification supersede the 0.5.2 compatibility/deadline findings below. Previous review: 2026-10-08. Evidence was taken from a fresh development clone of GitHub `main` at `0072dc8`, the surviving project mirror/test ZIP, and accessible prior chat records; see sections 12–14 and the newest handoff entry. Historical browser tests remain explicitly historical.
 
 ## 1. Project Overview
 
@@ -18,13 +18,13 @@ Save Web as PDF is a local-first Chrome extension for saving the current webpage
 
 | Area | Technology |
 | --- | --- |
-| Extension platform | Chrome Extension Manifest V3, declared minimum Chrome 120 (0.5.2 compatibility gap: section 13) |
+| Extension platform | Chrome Extension Manifest V3, minimum Chrome 120; 0.5.3 legacy/API adapter tested in actual Chrome 120 on macOS |
 | Runtime language | TypeScript compiled to browser-native ES modules (ES2022) |
 | Browser APIs | Chrome extensions APIs, Chrome DevTools Protocol, DOM/Web APIs, IndexedDB |
 | UI | Plain HTML and CSS; no UI framework |
 | Build tooling | Node.js 22.13+, npm, TypeScript, esbuild |
 | Tests/checks | TypeScript typecheck plus Node-based filename, export, localization, popup UI/link, build, and release-package checks |
-| Backend/database/auth | None. PDF data is temporarily stored in local IndexedDB; operation state uses `chrome.storage.session` |
+| Backend/database/auth | None. PDF data is temporarily stored in local IndexedDB; operation state uses `chrome.storage.session`; language/header/footer preferences use `chrome.storage.local` |
 | Runtime third-party dependencies | Locally bundled `pdfjs-dist` 6.3.289 (Apache-2.0) and `pdf-lib` 1.17.1 (MIT); development dependencies are `@types/chrome`, `esbuild`, and `typescript` |
 
 Node.js, npm, TypeScript, and esbuild are development/build tools only. A built `dist/` directory or release ZIP must install and run directly in Chrome on a clean Windows or macOS computer without those tools.
@@ -100,7 +100,8 @@ The popup can enter an injected editor mode. The user selects page elements to r
 - **One-time local PDF handoff.** IndexedDB bridges background generation and preview without network transfer or long-lived file retention.
 - **Unicode-safe filenames.** Titles and the current preview input are decoded, common mojibake is repaired, normalized to NFC, stripped of Windows-forbidden characters/reserved names, capped at 180 UTF-8 bytes, and given exactly one `.pdf` suffix before the download request.
 - **No runtime UI framework; two scoped PDF dependencies.** Plain DOM/CSS and bundled TypeScript remain in use. PDF.js is bundled only for local PDF parsing/rendering and pdf-lib only for last-page box updates. Their license texts ship in `dist/licenses/`; no remote code, Node runtime, optional native canvas package, or additional Chrome permission is included.
-- **Conservative final-page shortening.** Single-page PDFs are excluded. Multi-page inputs are limited to 64 MiB, four million render pixels, a 12-second render timeout, and a cooperatively checked 20-second deadline (not a hard timeout covering every asynchronous stage). Full-page non-white/gradient backgrounds, rotations, nonmatching MediaBox/CropBox values, small savings, and all failed validations preserve the original page.
+- **Conservative final-page shortening.** Normal adaptive single-page PDFs are unchanged; oversized single pages produced by maximum-height fallback now opt in. All eligible inputs are limited to 64 MiB, four million render pixels, a 12-second render timeout within one hard 20-second total budget. The outer worker is terminated on every result/error/timeout/cancel, including synchronous parsing/rewrite work. Full-page non-white/gradient backgrounds, rotations, nonmatching MediaBox/CropBox values, small savings, and all failed validations preserve the original page.
+- **Persistent settings and document metadata.** The supplied gear opens a three-row native-select view, with automatic/manual language and independently optional header/footer. Both default to none. Storage change events update runtime popup/editor/preview localization; native manifest localization still follows Chrome. Export snapshots choices and one local timestamp with UTC offset. Isolated metadata hosts occupy normal document flow before/after the prepared body and enter the common measurement/pagination and final-boundary pipeline. Canonical URL encoding preserves Unicode paths without requiring metadata CJK fonts, strips only query/fragment, and remains clickable. Noto Sans and PDF resources are local and licensed.
 - **Popup resource links are explicit and local-first.** Website, support, and GitHub destinations are configured in `src/popup/links.ts` and open only after a user click. `CHROME_WEB_STORE_REVIEW_URL` is intentionally empty until a stable store review URL exists; the visible rating entry remains disabled without navigation or export side effects.
 
 ## 6. Coding Conventions
@@ -207,30 +208,30 @@ npm run verify:release  # Validate an existing release artifact
 
 ### Current local snapshot
 
-- The candidate version is `0.5.2`; GitHub `main` was confirmed at `0072dc840c2970b2a9cf82427554166a3ace5219` on 2026-10-08 before the documentation-only handoff commit.
+- The candidate version is `0.5.3` (test only). On 2026-10-09, GitHub `main` was fetched/confirmed at `a249118`; the actual local checkout had clean branch `docs/cloud-handoff-2026-10-08` at `7c2467c`, containing one unpushed documentation commit. That work was preserved by starting `fix/pdf-height-settings` from it. No reset/pull or overwrite was performed.
 - The ChatGPT project root is a non-Git mirror still containing 0.5.0 source/context plus later delivery artifacts. Do not use its source or build output as the current development baseline. The development clone is now `repositories/save-web-as-pdf/` relative to that mirror. Work inside the clone and read its `AGENTS.md` and this file. Preserve synchronized mirror files.
 - Both earlier temporary development directories were found with incomplete `.git` remnants and no surviving source files. Their current uncommitted/unpushed state cannot be reconstructed or certified clean. The new clone started clean and aligned with `origin/main`; it does not prove that all historical local work was pushed. Surviving mirror source/script/locale differences match sampled historical commits; its globe SVG differs only in surrounding whitespace. No unique unbacked source change was found in that comparison.
-- The authoritative checkout uses `main` and tracks `origin/main` at `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
-- The 0.5.2 beta keeps the approved popup, capture, pagination, naming, and editor behavior. Its scoped change is conservative preview-side shortening of only the last page of a multi-page PDF after content-boundary detection and post-write verification.
+- The authoritative checkout now uses development branch `fix/pdf-height-settings`; remote remains `https://github.com/zhu-mingjie/save-web-as-pdf.git`.
+- The 0.5.3 candidate fixes fallback-single-page eligibility and minimum-browser initialization, moves optional PDF processing into one terminable worker, and adds the requested local language/header/footer settings while retaining the common capture, filename, preview/download and editor pipeline. Earlier 0.5.2 behavior and historical tests follow for provenance.
 - Controlled real-PDF tests on 2026-10-02 covered two and three pages; text, image, table, SVG, link, shallow-color, and shadow endings; full-page gradient fallback; a nearly full last page; and a single-page no-op. The representative last page changed from 14,400 pt to 203.677 pt with about 15 pt measured bottom whitespace, while page count, page 1, extracted text, annotations, and visual top content remained unchanged.
-- `pdfjs-dist` 6.3.289 and `pdf-lib` 1.17.1 are exact runtime dependencies. The production `dist/` is approximately 2.2 MiB, includes the local PDF.js worker and both license texts, and contains no detected Node-only runtime imports or calls.
+- `pdfjs-dist` 6.3.289 and `pdf-lib` 1.17.1 are exact runtime dependencies. The former 0.5.2 `dist/` was approximately 2.2 MiB. The 0.5.3 build includes legacy parser/display code, local CMaps/standard fonts, Noto Sans, and their license texts, and contains no detected Node-only runtime imports or calls.
 - The popup website, support, and GitHub destinations are active. The rating text is present but intentionally disabled because `CHROME_WEB_STORE_REVIEW_URL` remains empty.
 - The approved AI handoff files and minimal secret/local-file ignore patterns are included with this beta source sync.
 - Local prompt and analysis Markdown files were intentionally excluded from the public repository.
 
 ### Next recommended steps
 
-1. Resolve the declared Chrome 120 versus modern PDF.js compatibility gap in a separately scoped development task before claiming minimum-version support. Preserve the original-PDF fallback even if optimizer setup fails. See the known issue and handoff evidence below.
-2. Have the maintainer install and exercise the 0.5.2 test ZIP in ordinary Chrome, especially full-save and edit-save preview/download behavior on a representative long page. The automated test used real Chrome PDFs and the production optimizer but did not repeat the installed-extension edit-flow acceptance test.
-3. Preserve the completed 0.5.1 pagination/filename evidence and the 0.5.2 final-page-height matrix; do not repeat the maintainer-owned real-site list or full clean-device matrix without a separate need.
-4. Keep Chrome Web Store dashboard work, tag, GitHub Release, and submission with the maintainer; do not publish without a new explicit request.
+1. Have the maintainer install the 0.5.3 test ZIP on the reported Windows computer and compare short pages and long final-page remainders, including full-save/edit-save preview and download. Do not repeat the maintainer-owned Wikipedia/site list on their behalf.
+2. Keep the prior 0.5.1/0.5.2 evidence and the new controlled Mac/Chrome 120/current matrix distinct from Windows/Linux installed acceptance. Recheck actual minimum-browser behavior whenever the PDF dependency changes; upstream's general legacy baseline remains newer than Chrome 120.
+3. Before any approved public publication, synchronize the website privacy policy and refresh the store screenshot/settings disclosures. No tag, GitHub Release or store operation is authorized for this task.
 
 ## 13. Known Issues and Technical Debt
 
-- **Minimum-browser compatibility gap (identified 2026-10-08):** manifest/build still declare Chrome 120, but the locally bundled modern PDF.js uses unpolyfilled `Promise.withResolvers`, `Promise.try`, and worker APIs. Its [upstream support policy](https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions#which-browsersenvironments-are-supported) targets current browsers for the modern build; even its listed legacy baseline is Chrome 125+. An isolated VM probe of the existing optimizer bundle with the newer Promise APIs removed rejected with `TypeError: Promise.withResolvers is not a function`. `openPdf(pdf)` executes before the optimizer's `try`, so this setup failure rejects preview loading rather than selecting the original PDF. This is code-level/missing-API evidence, not an installed Chrome 120 test. No compatibility policy, dependency, or source implementation was changed during handoff.
-- **Deadline wording:** the 12-second page-render timer cancels the rendering task, while the 20-second budget is checked at page-loop boundaries. PDF parsing, content scanning, rewriting, and some validation awaits are not all wrapped in a hard total timeout. Prior documents' “20-second total deadline” wording should not be read as a proven maximum preview wait. No slow/hanging-PDF experiment was performed in this handoff.
-
-- There is no automated real-Chrome end-to-end suite; critical behavior still depends on manual website and clean-device testing.
+- **0.5.2 compatibility/deadline findings resolved in the 0.5.3 candidate:** the prior modern PDF.js build failed a missing-`Promise.withResolvers` probe and initialized outside the fallback `try`. Legacy initializes bundled core-js before PDF API use; actual Chrome 120 additionally reproduced `TypeError: ... is not async iterable`, resolved by a local feature-detected ReadableStream iterator in the optimization context. Actual Chrome 120 controlled PDF tests establish a narrower project baseline than upstream's advertised Chrome 125+ legacy support; they do not establish every site or OS. Dependency versions and manifest minimum are unchanged.
+- **Height regression evidence:** old preview logic unconditionally skipped single-page PDFs, including a maximum-height fallback whose final page count became one. The new print result explicitly carries fallback eligibility. A mock debugger reproduces three rejected adaptive two-page attempts followed by a valid maximum-height one-page result, and actual browser PDFs verify it shortens without losing text/links. This does not prove it is the sole cause on the user's Windows machine.
+- **Deadline scope:** the prior 20-second loop-boundary budget was cooperative only. The new client deadline starts before worker construction and terminates its complete parser/render/scan/rewrite/validation context; no nested parsing worker is created. Timeout keeps the original PDF with a visible notice; user cancellation creates no object URL. The budget is for optional optimization, not Chrome printing or webpage preparation.
+- **Conservative limitations:** gradients/full-page backgrounds, unusual boxes/rotation, unsupported nonidentity transfer filters, resource limits and failed validation keep the complete original with diagnostics. Worker raster detection does not rewrite body text/images. Full image extents and annotations are included even for soft masks.
+- There is now a controlled real-Chrome PDF/settings/lifecycle suite, but it does not replace installed full-flow, manual website and OS acceptance.
 - There is no CI workflow enforcing typecheck, focused tests, packaging validation, or secret scanning on pushes.
 - The public privacy-policy URL is selected and verified; Developer Dashboard entry remains maintainer-owned.
 - The 640×400 store screenshot is a real capture from the installed 0.5.1 build. Future UI changes must refresh it before store submission.
@@ -240,7 +241,7 @@ npm run verify:release  # Validate an existing release artifact
 - The editor's pointer-driven selection needs continued keyboard/accessibility review.
 - The local mirror is not a Git checkout. Treat content comparisons as an audit aid, not a substitute for `git status` in the actual working clone.
 - Local-only prompt/analysis Markdown files must be reviewed intentionally before any future commit; do not assume they belong in the public repository.
-- The source beta version is `0.5.2`; the latest published GitHub tag remains `0.5.1`. Chrome Web Store publication has not been performed by the agent.
+- The source beta version is `0.5.3`; the latest published GitHub tag remains `0.5.1`. Chrome Web Store publication has not been performed by the agent.
 
 ## 14. Git Workflow
 
@@ -274,6 +275,16 @@ This section is the default authorization model for future AI-assisted work in t
 - At handoff, summarize changed files, validation, Git status, remaining risks, and the safest next action. Update the handoff log below when the information will help the next session.
 
 ## 16. Handoff Log
+
+### 2026-10-09 — Codex (0.5.3 height/compatibility/settings test candidate)
+
+- **Authorization and baseline:** the user requested implementation of height regression, Chrome 120/deadline handling, and settings/header/footer, followed by a test ZIP only. Repository workflow authorizes scoped source commit/push backup; public tags, Release and store operations remain excluded. Preserved `7c2467c` (previous cloud-handoff documentation) and based `fix/pdf-height-settings` on it rather than discarding the local commit.
+- **Changes:** preserved normal adaptive single pages; passed explicit optimization eligibility for maximum-height fallback, including one page. PDF parsing/rendering/scanning/rewriting/validation now share one dedicated terminable worker; legacy core-js and a feature-detected stream iterator initialize in the actual dependency context. Bundled CMaps, standard fonts and licenses; no native tools, remotely loaded code, extra permission, WASM or OS-name gating. Setup errors select a visible original-PDF fallback.
+- **Settings/metadata:** copied the supplied `gear.svg` unchanged to the top-right brand bar. Popup stays 320 px; three native-select rows have content-driven height, immediate local persistence, safe defaults/invalid fallback and failed-write feedback. Eleven actual catalogs support auto/manual language through a common runtime reader and storage events (closed editor shadow root reference retained). Default metadata creates no nodes/space. Header/footer are isolated normal-flow content only at the document start/end, with wrapped sanitized real source URLs, canonical Unicode encoding, bundled Noto Sans, and one export-start timestamp/UTC offset. Added dimensions are measured before common pagination, including near-capacity repagination; final footer/link bounds participate in trim validation.
+- **Evidence:** `scripts/check.mjs` passes typecheck, filename/export/catalog/popup and new settings/compatibility checks (including stale read protection, missing stream API, maximum-height single-page branch, and late-worker isolation). `scripts/test-last-page-integration.mjs` exercises actual Chrome PDF output, all 16 metadata combinations on short/long fixtures, long Unicode URLs, capacity boundary, popup storage/auto/manual/error/back behavior, and a deliberately infinite worker. The actual 20-second termination and cancel/recovery experiment tests computation stopping, not merely a resolved timeout promise. Current Chrome 154 additionally loads the unpacked extension under its actual CSP and exercises full-save/edit-save, Chinese naming, closed-shadow editor language updates and resource cleanup. That test exposed a background-tab animation-frame wait; cleanup now cancels a deferred frame after a bounded timer so editor/session cleanup cannot stall when preview becomes active. Full matrices and package details are in `PRE_RELEASE_TEST_PLAN.md`.
+- **Validation boundary:** no requested real website was retested. Prior 0.5.1 installed full-save/edit-save/file-dialog results remain historical. Windows regression acceptance and Linux installation remain untested in this session; no complete clean-device matrix or manual 11-language acceptance is claimed. The repository privacy/store drafts include preferences, but no public website policy or store assets were published.
+- **Package:** validated 0.5.3 archive: 220 runtime files, 3,106,982 bytes; SHA-256 `7800ceb6aedf888069c54c9e711d9bfbc335a8c0d40fd1b48febd8bfe6b45f4f`. Minimum Chrome remains 120. Package growth and third-party licenses are recorded in the verification record/notices. Package scanning continues to reject real local/file URLs; its generic protocol-diagnostic and binary-resource handling is now tested.
+- **Next:** deliver the 0.5.3 test ZIP and wait for maintainer feedback from the reported Windows environment. Keep conservative original-PDF behavior for genuinely unsafe boundaries, and preserve diagnostic browser/dependency versions rather than attributing failures to an OS without evidence.
 
 ### 2026-10-08 — Codex (cloud readiness preflight; cloud execution blocked)
 

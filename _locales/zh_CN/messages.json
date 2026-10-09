@@ -58,5 +58,44 @@
   "errorMissingPdfStream":{"message":"Chrome 未返回 PDF 数据流。"},
   "errorUnverifiedPageCount":{"message":"Chrome 返回的 PDF 无法验证页数，因此未保存该文件。"},
   "errorPdfIdentifierMissing":{"message":"缺少 PDF 标识。"},
-  "errorPreviewExpired":{"message":"此 PDF 预览已过期，请从网页重新生成。"}
+  "errorPreviewExpired":{"message":"此 PDF 预览已过期，请从网页重新生成。"},
+  "settingsTitle": {
+    "message": "设置"
+  },
+  "settingsBack": {
+    "message": "返回"
+  },
+  "settingsLanguage": {
+    "message": "语言："
+  },
+  "settingsAutomatic": {
+    "message": "自动"
+  },
+  "settingsHeader": {
+    "message": "页眉"
+  },
+  "settingsFooter": {
+    "message": "页脚"
+  },
+  "settingsNone": {
+    "message": "无"
+  },
+  "settingsUrl": {
+    "message": "来源网址"
+  },
+  "settingsTime": {
+    "message": "时间"
+  },
+  "settingsUrlTime": {
+    "message": "来源网址+时间"
+  },
+  "settingsSaveFailed": {
+    "message": "设置未能保存，请重试。"
+  },
+  "optimizingPdf": {
+    "message": "正在准备 PDF 预览…"
+  },
+  "optimizationUnchanged": {
+    "message": "为保护内容，保留了原始页面高度。"
+  }
 }

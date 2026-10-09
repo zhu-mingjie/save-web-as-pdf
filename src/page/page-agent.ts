@@ -1,5 +1,5 @@
 import type { RuntimeRequest } from "../shared/messages";
-import { visibleError } from "../shared/i18n";
+import { initializeI18n, visibleError } from "../shared/i18n";
 import { cleanupPage, preparePage } from "./page-preparer";
 
 declare global {
@@ -16,7 +16,8 @@ if (!window.__swpPageAgentInstalled) {
     if (message.type === "PREPARE_PAGE") {
       preparationController?.abort();
       preparationController = new AbortController();
-      preparePage(preparationController.signal)
+      const signal = preparationController.signal;
+      initializeI18n().then(() => preparePage(signal, message.decorations))
         .then((data) => sendResponse({ ok: true, data }))
         .catch((error: unknown) =>
           sendResponse({ ok: false, error: visibleError(error) })

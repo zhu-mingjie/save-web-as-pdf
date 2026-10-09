@@ -20,6 +20,8 @@ export interface PagePreparationState {
   styleElement: HTMLStyleElement;
   styleChanges: TemporaryStyleChange[];
   attributeChanges: TemporaryAttributeChange[];
+  nodes: HTMLElement[];
+  fonts: FontFace[];
 }
 
 let activeState: PagePreparationState | null = null;

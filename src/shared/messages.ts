@@ -1,11 +1,12 @@
 import type { PrepareResult, SourcePageMetadata } from "./types";
+import type { ExportDecorations } from "./settings";
 
 export type RuntimeRequest =
   | { type: "START_EXPORT"; tabId: number; metadata: SourcePageMetadata }
   | { type: "START_EDITOR"; tabId: number; metadata: SourcePageMetadata }
   | { type: "EDIT_SAVE_REQUEST"; metadata: SourcePageMetadata }
   | { type: "CANCEL_EXPORT"; tabId?: number }
-  | { type: "PREPARE_PAGE" }
+  | { type: "PREPARE_PAGE"; decorations?: ExportDecorations }
   | { type: "CANCEL_PAGE_PREPARATION" }
   | { type: "CLEANUP_PAGE" }
   | { type: "EDITOR_START"; metadata: SourcePageMetadata }

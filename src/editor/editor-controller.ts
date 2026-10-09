@@ -1,6 +1,6 @@
 import type { MessageResponse, RuntimeRequest } from "../shared/messages";
 import { createSourcePageMetadata } from "../shared/filename";
-import { localizeDocument, t, UserFacingError, visibleError } from "../shared/i18n";
+import { initializeI18n, onLanguageChange, localizeDocument, t, UserFacingError, visibleError } from "../shared/i18n";
 import type { SourcePageMetadata } from "../shared/types";
 import { ElementSelector } from "./element-selector";
 import { RemovalHistory } from "./removal-history";
@@ -17,6 +17,7 @@ const REMOVAL_STYLE_ID = "__swp_removal_style__";
 
 class EditorController {
   private host: HTMLDivElement | null = null;
+  private shadow: ShadowRoot | null = null;
   private selector: ElementSelector | null = null;
   private history = new RemovalHistory(REMOVED_CLASS);
   private undoButton: HTMLButtonElement | null = null;
@@ -88,6 +89,7 @@ class EditorController {
     localizeDocument(shadow);
     (document.documentElement ?? document.body).append(host);
     this.host = host;
+    this.shadow = shadow;
     this.undoButton = shadow.querySelector("#undo");
     this.redoButton = shadow.querySelector("#redo");
     this.restoreButton = shadow.querySelector("#restore");
@@ -135,6 +137,12 @@ class EditorController {
       if (this.saving) void this.cancelSave();
       else void this.save();
     });
+    this.updateControls();
+  }
+
+  relocalize(): void {
+    if (!this.shadow) return;
+    localizeDocument(this.shadow);
     this.updateControls();
   }
 
@@ -215,6 +223,8 @@ class EditorController {
     document.getElementById(REMOVAL_STYLE_ID)?.remove();
     this.host?.remove();
     this.host = null;
+    this.shadow = null;
+    document.removeEventListener("keydown", this.onKeyDown, true);
     this.metadata = null;
     this.saving = false;
     this.instructionsOpen = false;
@@ -224,14 +234,17 @@ class EditorController {
 if (!window.__swpEditorInstalled) {
   window.__swpEditorInstalled = true;
   const controller = new EditorController();
+  onLanguageChange(() => controller.relocalize());
   chrome.runtime.onMessage.addListener((message: RuntimeRequest, _sender, sendResponse) => {
     if (message.type === "EDITOR_START") {
-      try {
-        controller.start(message.metadata);
-        sendResponse({ ok: true });
-      } catch (error) {
-        sendResponse({ ok: false, error: visibleError(error) });
-      }
+      void (async () => {
+        try {
+          await initializeI18n();
+          controller.start(message.metadata);
+          sendResponse({ ok: true });
+        } catch (error) { sendResponse({ ok: false, error: visibleError(error) }); }
+      })();
+      return true;
     } else if (message.type === "EDITOR_FINISH") {
       controller.finish();
       sendResponse({ ok: true });

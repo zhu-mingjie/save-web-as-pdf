@@ -1,7 +1,8 @@
 import type { MessageResponse, PrepareResponse, RuntimeRequest } from "../shared/messages";
 import { createLiveSourcePageMetadata } from "../shared/filename";
-import { t, userError, UserFacingError, visibleError } from "../shared/i18n";
-import { deleteExpiredPdfs, putPdf } from "../shared/pdf-store";
+import { initializeI18n, t, userError, UserFacingError, visibleError } from "../shared/i18n";
+import { readSettings, exportTimestamp, type ExportDecorations } from "../shared/settings";
+import { deleteExpiredPdfs, deletePdf, putPdf } from "../shared/pdf-store";
 import type { ExportMode, ExportSession, PrepareResult, SourcePageMetadata } from "../shared/types";
 import { generatePdf } from "./pdf-generator";
 
@@ -73,9 +74,9 @@ async function sendToTab<T>(tabId: number, message: RuntimeRequest): Promise<T> 
   return (await chrome.tabs.sendMessage(tabId, message)) as T;
 }
 
-async function prepareTab(tabId: number): Promise<PrepareResult> {
+async function prepareTab(tabId: number, decorations: ExportDecorations): Promise<PrepareResult> {
   await injectFile(tabId, "page/page-agent.js");
-  const response = await sendToTab<PrepareResponse>(tabId, { type: "PREPARE_PAGE" });
+  const response = await sendToTab<PrepareResponse>(tabId, { type: "PREPARE_PAGE", decorations });
   if (!response.ok || !response.data) {
     throw response.ok ? userError("errorMissingDimensions") : new UserFacingError(response.error);
   }
@@ -117,18 +118,33 @@ async function cancelExport(tabId: number): Promise<boolean> {
 }
 
 async function exportTab(tabId: number, mode: ExportMode, capturedMetadata: SourcePageMetadata): Promise<void> {
+  const startedAt = Date.now();
   const operationId = await beginExportSession(tabId);
   let prepared = false;
+  let pendingPdfId: string | undefined;
+  let previewTabId: number | undefined;
   try {
     await assertExportActive(tabId, operationId);
-    const page = await prepareTab(tabId);
+    const settings = await readSettings();
+    const decorations: ExportDecorations = { header: settings.header, footer: settings.footer, timestamp: exportTimestamp(startedAt) };
+    if (settings.header !== "none" || settings.footer !== "none") {
+      const response = await fetch(chrome.runtime.getURL("fonts/NotoSans-Regular.ttf"));
+      if (!response.ok) throw new Error("metadata-font-resource");
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      let binary = "";
+      for (let offset = 0; offset < bytes.length; offset += 8192) binary += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
+      decorations.fontBase64 = btoa(binary);
+    }
+    await assertExportActive(tabId, operationId);
+    const page = await prepareTab(tabId, decorations);
     prepared = true;
     await assertExportActive(tabId, operationId);
     const metadata = createLiveSourcePageMetadata(capturedMetadata, page.title, page.url);
     if (mode === "edit") await hideEditorForExport(tabId);
-    const { pdf } = await generatePdf(tabId, page);
+    const { pdf, optimizeSinglePage, diagnostics } = await generatePdf(tabId, page);
     await assertExportActive(tabId, operationId);
     const id = crypto.randomUUID();
+    pendingPdfId = id;
     await putPdf({
       id,
       blob: new Blob(
@@ -136,17 +152,33 @@ async function exportTab(tabId: number, mode: ExportMode, capturedMetadata: Sour
         { type: "application/pdf" }
       ),
       metadata,
+      optimizeSinglePage,
+      printDiagnostics: diagnostics,
       createdAt: Date.now()
     });
-    await chrome.tabs.create({ url: chrome.runtime.getURL(`preview/preview.html?id=${encodeURIComponent(id)}`) });
+    await assertExportActive(tabId, operationId);
+    const previewTab = await chrome.tabs.create({ url: chrome.runtime.getURL(`preview/preview.html?id=${encodeURIComponent(id)}`) });
+    previewTabId = previewTab.id;
+    if (await exportWasCanceled(tabId, operationId)) {
+      if (previewTab.id !== undefined) await chrome.tabs.remove(previewTab.id).catch(() => undefined);
+      throw userError("errorExportCanceled");
+    }
+    pendingPdfId = undefined;
     void deleteExpiredPdfs().catch(() => undefined);
   } catch (error) {
     if (await exportWasCanceled(tabId, operationId)) throw userError("errorExportCanceled");
     throw error;
   } finally {
     try {
+      if (pendingPdfId) await deletePdf(pendingPdfId).catch(() => undefined);
       if (prepared) await cleanupTab(tabId);
       if (mode === "edit") await finishEditor(tabId);
+      // A cancel arriving during source cleanup must also stop a preview that
+      // was just opened; closing its document aborts its worker and revokes URLs.
+      if (previewTabId !== undefined && await exportWasCanceled(tabId, operationId)) {
+        await chrome.tabs.remove(previewTabId).catch(() => undefined);
+        throw userError("errorExportCanceled");
+      }
     } finally {
       await endExportSession(tabId, operationId);
     }
@@ -182,6 +214,7 @@ chrome.runtime.onConnect.addListener((port) => {
 chrome.runtime.onMessage.addListener((message: unknown, sender, sendResponse) => {
   const run = async (): Promise<MessageResponse> => {
     try {
+      await initializeI18n();
       if (!isRuntimeRequest(message)) throw new Error("Invalid request.");
       if (message.type === "START_EXPORT") {
         if (!isPopupSender(sender)) throw new Error("Export requests must come from the extension popup.");

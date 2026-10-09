@@ -21,6 +21,8 @@ import type { PagePreparationState } from "./page-state";
 import { t, userError } from "../shared/i18n";
 import { hasPageState, setPageState, takePageState } from "./page-state";
 import { defaultCaptureMode, extractZhihuAnswerId, hasViewportUnitToken } from "./capture-rules";
+import { addDecorations } from "./decorations";
+import type { ExportDecorations } from "../shared/settings";
 
 const VIEWPORT_LAYOUT_PROPERTIES = [
   "height",
@@ -507,7 +509,7 @@ async function waitForStableLayout(signal: AbortSignal, timeoutMs: number): Prom
   return { stable: false, stableSamples, metrics: pageMetrics() };
 }
 
-export async function preparePage(signal: AbortSignal): Promise<PrepareResult> {
+export async function preparePage(signal: AbortSignal, decorations?: ExportDecorations): Promise<PrepareResult> {
   if (hasPageState()) await cleanupPage();
 
   const startedAt = performance.now();
@@ -533,7 +535,7 @@ export async function preparePage(signal: AbortSignal): Promise<PrepareResult> {
     scrollY,
     styleElement,
     styleChanges: [],
-    attributeChanges: []
+    attributeChanges: [], nodes: [], fonts: []
   };
   setPageState(state);
 
@@ -546,6 +548,7 @@ export async function preparePage(signal: AbortSignal): Promise<PrepareResult> {
     const resourceWaitTimedOut = await waitForResources(plan.resourceRoots, signal, resourceTimeout);
     throwIfPreparationTimedOut(startedAt);
     const freeze = await freezeViewportDependentSizing(state, signal, startedAt);
+    await addDecorations(state, decorations, signal);
     window.scrollTo({ top: scrollY, left: scrollX, behavior: "instant" });
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     throwIfPreparationTimedOut(startedAt);
@@ -599,6 +602,8 @@ export async function preparePage(signal: AbortSignal): Promise<PrepareResult> {
 export async function cleanupPage(): Promise<void> {
   const state = takePageState();
   if (!state) return;
+  for (const node of state.nodes) node.remove();
+  for (const font of state.fonts) document.fonts.delete(font);
 
   for (const change of [...state.styleChanges].reverse()) {
     const currentValue = change.element.style.getPropertyValue(change.property);
@@ -617,5 +622,11 @@ export async function cleanupPage(): Promise<void> {
   }
   state.styleElement.remove();
   window.scrollTo({ top: state.scrollY, left: state.scrollX, behavior: "instant" });
-  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  // Opening preview backgrounds the source tab, where animation frames may
+  // pause indefinitely. Restoration is already applied; don't stall editor or
+  // session cleanup on the next paint. Cancel the deferred callback on timeout.
+  await new Promise<void>((resolve) => {
+    const timer = setTimeout(() => { cancelAnimationFrame(frame); resolve(); }, 100);
+    const frame = requestAnimationFrame(() => { clearTimeout(timer); resolve(); });
+  });
 }

@@ -102,8 +102,54 @@ const harnessBuild = await build({
     loader: "ts",
     resolveDir: root,
     contents: `
-      import { AnnotationMode, getDocument } from "pdfjs-dist";
+      import "./src/shared/browser-compat.ts";
+      import { AnnotationMode, GlobalWorkerOptions, getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+      GlobalWorkerOptions.workerSrc = chrome.runtime.getURL("vendor/pdf.worker.min.js");
       import { optimizeLastPageHeight } from "./src/preview/last-page-optimizer.ts";
+      import { addDecorations } from "./src/page/decorations.ts";
+      import { createPrintPlan } from "./src/background/pdf-generator.ts";
+      globalThis.prepareMetadataTest = async (header, footer) => {
+        const font = new Uint8Array(await (await fetch('/fonts/NotoSans-Regular.ttf')).arrayBuffer());
+        const state = { nodes: [], fonts: [] };
+        await addDecorations(state, { header, footer, timestamp: '2026-10-09 12:34:56 UTC+05:45', fontBase64: encode(font) }, new AbortController().signal);
+        await document.fonts.ready;
+        const metrics = { width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight };
+        const plan = createPrintPlan(metrics);
+        return { metrics, plan, nodes: state.nodes.length, url: location.origin + location.pathname };
+      };
+      globalThis.runLifecycleTest = async (base64) => {
+        const pdf = decode(base64), NativeWorker = globalThis.Worker;
+        let count = 0, terminated = 0;
+        globalThis.Worker = class extends NativeWorker {
+          constructor() { super('/busy-worker.js'); this.addEventListener('message', () => count++); }
+          terminate() { terminated++; super.terminate(); }
+        };
+        try {
+          const start = performance.now();
+          const timeout = await optimizeLastPageHeight(pdf);
+          const elapsed = performance.now() - start, stoppedAt = count;
+          await new Promise(resolve => setTimeout(resolve, 150));
+          if (timeout.reason !== 'optimization-deadline' || terminated !== 1 || count !== stoppedAt || elapsed < 19900 || elapsed > 21500) throw new Error('Hard deadline did not terminate busy worker');
+          const abort = new AbortController();
+          const canceled = optimizeLastPageHeight(pdf, { signal: abort.signal });
+          setTimeout(() => abort.abort(), 250);
+          let canceledName = '';
+          try { await canceled; } catch (error) { canceledName = error.name; }
+          const stoppedAfterCancel = count;
+          await new Promise(resolve => setTimeout(resolve, 150));
+          if (canceledName !== 'AbortError' || terminated !== 2 || count !== stoppedAfterCancel) throw new Error('Cancellation did not stop worker');
+          globalThis.Worker = class { constructor() { throw new Error('simulated missing worker'); } };
+          const failed = await optimizeLastPageHeight(pdf);
+          if (failed.reason !== 'worker-initialization-failed') throw new Error('Missing worker fallback');
+          globalThis.Worker = class extends NativeWorker { constructor() { super('/missing-worker.js', { type: 'module' }); } };
+          const missingResource = await optimizeLastPageHeight(pdf);
+          if (missingResource.reason !== 'worker-initialization-failed') throw new Error('Missing resource fallback');
+          globalThis.Worker = NativeWorker;
+          const recovery = await optimizeLastPageHeight(pdf, { allowSinglePage: true });
+          if (recovery.status !== 'optimized') throw new Error('Retry after cancellation failed');
+          return { elapsedMs: Math.round(elapsed), terminated, canceledName, recovery: recovery.status };
+        } finally { globalThis.Worker = NativeWorker; }
+      };
 
       function decode(value: string): Uint8Array {
         const binary = atob(value);
@@ -199,10 +245,10 @@ const harnessBuild = await build({
           await task.destroy();
         }
       }
-      globalThis.runPdfTest = async (base64: string) => {
+      globalThis.runPdfTest = async (base64: string, allowSinglePage = false) => {
         const original = decode(base64);
         const before = await inspect(original);
-        const result = await optimizeLastPageHeight(original);
+        const result = await optimizeLastPageHeight(original, { allowSinglePage });
         const after = await inspect(result.pdf);
         return {
           result: {
@@ -234,16 +280,37 @@ const harness = harnessBuild.outputFiles[0].contents;
 const harnessHtml = Buffer.from(
   '<!doctype html><meta charset="utf-8"><script>globalThis.chrome={runtime:{getURL:path=>location.origin+"/"+path}}</script><script type="module" src="/harness.js"></script>'
 );
-const server = createServer((request, response) => {
+const english = JSON.parse(await readFile(path.join(root, '_locales/en/messages.json'), 'utf8'));
+const popupMock = `let saved=JSON.parse(localStorage.getItem('settings')||'null'), listeners=[];
+  globalThis.testStorage={fail:false};
+  globalThis.chrome={i18n:{getMessage:key=>(${JSON.stringify(english)})[key]?.message||'',getUILanguage:()=> 'en-US'},
+  storage:{onChanged:{addListener:fn=>listeners.push(fn)},local:{get:async()=>({'settings-v1':saved}),set:async data=>{
+    if(testStorage.fail)throw new Error('simulated storage failure');
+    saved=data['settings-v1'];localStorage.setItem('settings',JSON.stringify(saved));listeners.forEach(fn=>fn({'settings-v1':{newValue:saved}},'local'));
+  }}}};`;
+const fontResource = await readFile(path.join(root, "assets/fonts/NotoSans-Regular.ttf"));
+const popupResource = Buffer.from((await readFile(path.join(root,'dist/popup/popup.html'),'utf8')).replace('<head>', '<head><base href="/popup/"><script>'+popupMock+'</script>'));
+const server = createServer(async (request, response) => {
   const pathname = new URL(request.url, "http://localhost").pathname;
   const resources = {
     "/export-regression.html": ["text/html; charset=utf-8", fixture],
     "/forced-break.css": ["text/css; charset=utf-8", forcedBreak],
     "/harness.html": ["text/html; charset=utf-8", harnessHtml],
     "/harness.js": ["text/javascript; charset=utf-8", harness],
-    "/vendor/pdf.worker.min.js": ["text/javascript; charset=utf-8", worker]
+    "/vendor/pdf.worker.min.js": ["text/javascript; charset=utf-8", worker],
+    "/fonts/NotoSans-Regular.ttf": ["font/ttf", fontResource],
+    "/busy-worker.js": ["text/javascript", Buffer.from("onmessage=()=>{let n=0;while(true){if(++n%10000000===0)postMessage({tick:n});}}")],
+    "/metadata-fixture.html": ["text/html", Buffer.from('<!doctype html><meta charset="utf-8"><style>html,body{margin:0;width:960px}body{font:16px sans-serif}.body{height:'+new URL(request.url,"http://localhost").searchParams.get("height")+'px;display:flex;flex-direction:column;justify-content:space-between}</style><div class="body"><p>BODY_START 中文 العربية</p><a href="https://example.com/body">BODY_END 最后一行</a></div><script>globalThis.chrome={runtime:{getURL:path=>location.origin+"/"+path}}</script><script type="module" src="/harness.js"></script>')],
+    "/popup-test.html": ["text/html", popupResource]
+
   };
-  const resource = resources[pathname];
+  let resource = resources[pathname];
+  if (!resource && (pathname.startsWith("/preview/") || pathname.startsWith("/vendor/") || pathname.startsWith("/popup/") || pathname.startsWith("/icons/"))) {
+    try {
+      const data = await readFile(path.join(root, "dist", pathname.slice(1)));
+      resource = [pathname.endsWith(".js") ? "text/javascript" : pathname.endsWith(".css") ? "text/css" : pathname.endsWith(".svg") ? "image/svg+xml" : "application/octet-stream", data];
+    } catch {}
+  }
   if (!resource) {
     response.writeHead(404).end("Not found");
     return;
@@ -258,10 +325,12 @@ const profile = await mkdtemp(path.join(os.tmpdir(), "save-web-as-pdf-chrome-"))
 if (artifactDirectory) await mkdir(artifactDirectory, { recursive: true });
 const chrome = spawn(
   chromeExecutable(),
-  ["--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--remote-debugging-port=0", `--user-data-dir=${profile}`, "about:blank"],
-  { stdio: ["ignore", "ignore", "ignore"] }
+  [`--headless=${process.env.CHROME_HEADLESS_MODE ?? "new"}`, "--disable-gpu", "--no-first-run", "--no-default-browser-check", "--remote-debugging-port=0", `--user-data-dir=${profile}`, "about:blank"],
+  { stdio: ["ignore", "ignore", "pipe"] }
 );
 
+let chromeDiagnostics = "";
+chrome.stderr.on("data", chunk => { chromeDiagnostics = (chromeDiagnostics + chunk.toString()).slice(-5000); });
 let client;
 try {
   const activePort = (await waitForFile(path.join(profile, "DevToolsActivePort"))).trim().split(/\s+/);
@@ -291,7 +360,8 @@ try {
     { name: "two-page-shadow", height: 19_500, ending: "shadow", expected: "optimized" },
     { name: "two-page-background", height: 19_500, ending: "text", background: "page", expected: "unchanged" },
     { name: "two-page-nearly-full", height: 38_390, ending: "text", expected: "unchanged" },
-    { name: "single-page", height: 12_000, ending: "text", expected: "unchanged" }
+    { name: "single-page", height: 12_000, ending: "text", paperHeight: 125.01, expected: "unchanged" },
+    { name: "fallback-single-page", height: 12_000, ending: "link", allowSinglePage: true, expected: "optimized" }
   ];
   const summaries = [];
   for (const testCase of cases) {
@@ -301,7 +371,7 @@ try {
     const printed = await client.send("Page.printToPDF", {
       printBackground: true,
       paperWidth: 10.01,
-      paperHeight: 200,
+      paperHeight: testCase.paperHeight ?? 200,
       marginTop: 0,
       marginBottom: 0,
       marginLeft: 0,
@@ -312,13 +382,13 @@ try {
     });
     await navigate(client, `${origin}/harness.html`);
     const evaluation = await client.send("Runtime.evaluate", {
-      expression: `runPdfTest(${JSON.stringify(printed.data)})`,
+      expression: `runPdfTest(${JSON.stringify(printed.data)}, ${testCase.allowSinglePage === true})`,
       awaitPromise: true,
       returnByValue: true
     });
     if (evaluation.exceptionDetails) throw new Error(evaluation.exceptionDetails.text);
     const value = evaluation.result.value;
-    if (value.result.status !== testCase.expected) console.error("Unexpected result:", JSON.stringify(value, null, 2).slice(0, 8000));
+    if (value.result.status !== testCase.expected) console.error("Unexpected result:", JSON.stringify({ ...value, optimizedPdf: "omitted" }, null, 2).slice(0, 8000));
     assert.equal(value.result.status, testCase.expected, `${testCase.name}: ${value.result.reason}`);
     assert.equal(value.before.pages.length, value.after.pages.length, testCase.name);
     assert.deepEqual(
@@ -348,7 +418,88 @@ try {
     });
   }
   console.log(JSON.stringify(summaries, null, 2));
+  const evaluate = async expression => {
+    const response = await client.send('Runtime.evaluate', { expression, awaitPromise:true, returnByValue:true });
+    if(response.exceptionDetails)throw new Error(response.exceptionDetails.exception?.description??response.exceptionDetails.text);
+    return response.result.value;
+  };
+  const choices = ['none','url','time','url-time'];
+  const metadataSummaries=[];
+  for(const height of [1200,19500])for(const header of choices)for(const footer of choices){
+    await navigate(client, `${origin}/metadata-fixture.html?height=${height}&private=secret#private`);
+    const prepared=await evaluate(`prepareMetadataTest('${header}','${footer}')`);
+    assert.equal(prepared.nodes,Number(header!=='none')+Number(footer!=='none'));
+    const printed=await client.send('Page.printToPDF',{printBackground:true,paperWidth:prepared.plan.paperWidth,paperHeight:prepared.plan.paperHeights.at(-1),scale:prepared.plan.scale,marginTop:0,marginBottom:0,marginLeft:0,marginRight:0,preferCSSPageSize:false});
+    await navigate(client,`${origin}/harness.html`);
+    const value=await evaluate(`runPdfTest(${JSON.stringify(printed.data)})`);
+    const pages=value.after.pages;
+    const urlCount=Number(header.includes('url'))+Number(footer.includes('url'));
+    assert.equal(pages.flatMap(p=>p.annotations).filter(a=>a.url===prepared.url).length,urlCount,'URL annotations');
+    const timeCount=Number(header.includes('time'))+Number(footer.includes('time'));
+    const text=pages.map(p=>p.text.replaceAll('\\u0000','').replaceAll(String.fromCharCode(0),'')).join(' ');
+    assert.equal(text.split('2026-10-09 12:34:56 UTC+05:45').length-1,timeCount,'timestamp occurrences');
+    assert.ok(!text.includes('private=secret'));
+    if(artifactDirectory&&height===19500&&header==='url-time'&&footer==='url-time')await writeFile(path.join(artifactDirectory,'metadata-after.pdf'),base64ToBytes(value.optimizedPdf));
+    assert.ok(pages[0].text.includes('BODY_START')&&pages.at(-1).text.includes('BODY_END'));
+    if(header.includes('time'))assert.ok(pages[0].text.includes('UTC+05:45'));
+    if(footer.includes('time'))assert.ok(pages.at(-1).text.includes('UTC+05:45'));
+    if(pages.length>1){
+      if(header.includes('url'))assert.equal(pages[0].annotations.filter(a=>a.url===prepared.url).length,1);
+      if(footer.includes('url'))assert.equal(pages.at(-1).annotations.filter(a=>a.url===prepared.url).length,1);
+      assert.ok(value.after.blankBottomPoints<=16,'metadata counted in tail bound');
+    }
+    metadataSummaries.push({height,header,footer,pages:pages.length});
+  }
+  for(const test of [{height:19185,long:false,pages:2},{height:1200,long:true},{height:40000,long:false,pages:3}]){
+    await navigate(client,`${origin}/metadata-fixture.html?height=${test.height}`);
+    if(test.long)await evaluate(`history.replaceState(null,'','/中文/العربية/'+ 'long-path-'.repeat(40)+'?secret=value#secret')`);
+    const prepared=await evaluate("prepareMetadataTest('url-time','url-time')");
+    const printed=await client.send('Page.printToPDF',{printBackground:true,paperWidth:prepared.plan.paperWidth,paperHeight:prepared.plan.paperHeights.at(-1),scale:prepared.plan.scale,marginTop:0,marginBottom:0,marginLeft:0,marginRight:0,preferCSSPageSize:false});
+    await navigate(client,`${origin}/harness.html`);
+    const value=await evaluate(`runPdfTest(${JSON.stringify(printed.data)})`);
+    if(!test.long)assert.equal(value.after.pages.length,test.pages,'metadata must use common safe pagination');
+    for(const middle of value.after.pages.slice(1,-1)){assert.ok(!middle.text.includes('UTC+05:45'));assert.ok(!middle.annotations.some(a=>a.url===prepared.url));}
+    assert.ok(value.after.pages.every(p=>p.view[3]-p.view[1]<=14400));
+    assert.equal(value.after.pages.flatMap(p=>p.annotations).filter(a=>a.url.includes('secret')).length,0);
+    assert.ok(value.after.pages.at(-1).text.includes('UTC+05:45'));
+    assert.equal(value.before.pages.at(-1).text,value.after.pages.at(-1).text);
+  }
+  console.log('Metadata: all 16 combinations on single/multiple pages, Unicode long URL and capacity boundary OK');
+  await navigate(client,`${origin}/popup-test.html`);
+  await wait(100);
+  assert.deepEqual(await evaluate("['language','header','footer'].map(id=>document.getElementById(id).value)"),['auto','none','none']);
+  await evaluate("document.getElementById('settings-open').click()");
+  assert.equal(await evaluate("document.getElementById('settings-view').hidden"),false);
+  assert.equal(await evaluate("document.body.scrollWidth"),320);
+  assert.ok(await evaluate("document.body.scrollHeight < 300"));
+  await evaluate("document.getElementById('language').value='zh_CN';document.getElementById('language').dispatchEvent(new Event('change'));new Promise(r=>setTimeout(r,60))");
+  assert.equal(await evaluate("document.getElementById('settings-open').getAttribute('aria-label')"),'设置');
+  if(artifactDirectory){
+    const height=await evaluate('document.body.scrollHeight');
+    const screenshot=await client.send('Page.captureScreenshot',{clip:{x:0,y:0,width:320,height,scale:2}});
+    await writeFile(path.join(artifactDirectory,'settings.png'),Buffer.from(screenshot.data,'base64'));
+  }
+  await navigate(client,`${origin}/popup-test.html`);await wait(100);
+  assert.equal(await evaluate("document.getElementById('language').value"),'zh_CN');
+  await evaluate("document.getElementById('settings-open').click();testStorage.fail=true;document.getElementById('header').value='time';document.getElementById('header').dispatchEvent(new Event('change'));new Promise(r=>setTimeout(r,60))");
+  assert.equal(await evaluate("document.getElementById('header').value"),'none');
+  assert.equal(await evaluate("document.getElementById('settings-status').hidden"),false);
+  await evaluate("testStorage.fail=false;document.getElementById('language').value='auto';document.getElementById('language').dispatchEvent(new Event('change'));new Promise(r=>setTimeout(r,60))");
+  assert.equal(await evaluate("document.getElementById('settings-open').getAttribute('aria-label')"),'Settings');
+  await evaluate("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}))");
+  assert.equal(await evaluate("document.getElementById('home-view').hidden"),false);
+  await evaluate("localStorage.setItem('settings',JSON.stringify({language:'invalid',header:'old',footer:'obsolete'}))");
+  await navigate(client,`${origin}/popup-test.html`);await wait(100);
+  assert.deepEqual(await evaluate("['language','header','footer'].map(id=>document.getElementById(id).value)"),['auto','none','none']);
+  console.log('Popup: defaults, native selects, 320px/content height, manual/auto language, persistence, failed write rollback, Escape/back and invalid values OK');
+  await navigate(client,`${origin}/export-regression.html?height=1200&ending=link`);
+  const lifecyclePdf=await client.send('Page.printToPDF',{paperWidth:10.01,paperHeight:200,marginTop:0,marginBottom:0,marginLeft:0,marginRight:0,printBackground:true});
+  await navigate(client,`${origin}/harness.html`);
+  console.log('Worker lifecycle:',await evaluate(`runLifecycleTest(${JSON.stringify(lifecyclePdf.data)})`));
   console.log("Last-page browser integration tests: OK");
+} catch (error) {
+  console.error("Chrome diagnostics:", chromeDiagnostics);
+  throw error;
 } finally {
   client?.close();
   const exited = new Promise((resolve) => chrome.once("exit", resolve));

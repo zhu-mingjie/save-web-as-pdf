@@ -42,6 +42,18 @@ export async function putPdf(record: PdfRecord): Promise<void> {
   }
 }
 
+export async function deletePdf(id: string): Promise<void> {
+  const db = await openDb();
+  try {
+    const transaction = db.transaction(PDF_STORE_NAME, "readwrite");
+    transaction.objectStore(PDF_STORE_NAME).delete(id);
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = transaction.onabort = () => reject(transaction.error ?? new Error("PDF cleanup failed."));
+    });
+  } finally { db.close(); }
+}
+
 export async function getPdf(id: string): Promise<PdfRecord | undefined> {
   const db = await openDb();
   try {
