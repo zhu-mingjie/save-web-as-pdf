@@ -15,6 +15,30 @@ Create a Git tag, GitHub Release, and public release package only after the main
 
 The attached ZIP is the same cross-platform package for Windows, macOS, and Linux. End users do not need Node.js, npm, TypeScript, esbuild, or any other development tool: they extract the ZIP and load the folder containing `manifest.json` from Chrome's Extensions page.
 
+## Packaging and verification
+
+Development setup is described in [DEVELOPMENT.md](DEVELOPMENT.md). Before packaging, run `npm run check`; packaging's focused checks do not replace the explicit typecheck or required browser acceptance.
+
+```bash
+npm run package
+```
+
+This cleans previous `dist/` and `release/` output, runs filename, export-logic and locale tests, creates a fresh production build, validates `dist/`, creates the ZIP using the version in `manifest.json`, and validates its contents. Output:
+
+```text
+release/save-web-as-pdf-vX.X.X.zip
+```
+
+Validate an existing build and ZIP without rebuilding with:
+
+```bash
+npm run verify:release
+```
+
+The archive must contain only browser runtime files, with `manifest.json` at its root; exclude source maps, TypeScript, dependency directories, personal/local paths, credentials and development debris. Archive-root layout is suitable for Chrome Web Store upload, but does not establish store approval or authorize submission. Use this same ZIP on Windows, macOS and Linux; no platform-specific builds are needed. Follow the [packaged-extension acceptance procedure](PRE_RELEASE_TEST_PLAN.md#packaged-extension-acceptance-procedure), including clean Windows/macOS checks without development tools.
+
+A maintainer-requested test ZIP may be built and delivered for acceptance without a public tag or Release. Keep public release packaging/publication subject to the explicit approval above. Use single-digit semantic-version components as required by `PROJECT_CONTEXT.md` (for example, `0.4.9` advances to `0.5.0`). GitHub installation links should use `releases/latest` and direct users to the `save-web-as-pdf-v*.zip` asset, not GitHub's source archives.
+
 ## Release descriptions and maintainer publication
 
 Write GitHub Release descriptions in English. For any release that includes bug fixes, end the entire description with this exact sentence:

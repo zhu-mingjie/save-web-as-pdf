@@ -45,10 +45,11 @@ Node.js, npm, TypeScript, and esbuild are development/build tools only. A built 
 ├── icons/                        # Extension icon sizes referenced by the manifest
 ├── scripts/                      # Build, test, package, and release verification scripts
 ├── assets/ and store-assets/     # Project and Chrome Web Store assets
-├── README.md                     # User/developer overview
+├── README.md                     # Concise user overview
+├── DEVELOPMENT.md                # Development installation, build and targeted checks
 ├── CHROMEWEBSTORE.md             # Store listing, permissions, privacy, and readiness notes
 ├── PRE_RELEASE_TEST_PLAN.md      # Manual cross-platform and website acceptance plan
-├── RELEASING.md                  # Existing release procedure; see known policy conflict below
+├── RELEASING.md                  # Packaging, source backup and publication rules
 ├── LICENSE                       # MIT license
 ├── PROJECT_CONTEXT.md            # Primary cross-AI project context
 ├── AGENTS.md                     # Repository-wide agent instructions
@@ -103,6 +104,14 @@ The popup can enter an injected editor mode. The user selects page elements to r
 - **Conservative final-page shortening.** Normal adaptive single-page PDFs are unchanged; oversized single pages produced by maximum-height fallback now opt in. All eligible inputs are limited to 64 MiB, four million render pixels, a 12-second render timeout within one hard 20-second total budget. The outer worker is terminated on every result/error/timeout/cancel, including synchronous parsing/rewrite work. Full-page non-white/gradient backgrounds, rotations, nonmatching MediaBox/CropBox values, small savings, and all failed validations preserve the original page.
 - **Persistent settings and document metadata.** The supplied gear opens a three-row native-select view, with automatic/manual language and independently optional header/footer. Both default to none. Storage change events update runtime popup/editor/preview localization; native manifest localization still follows Chrome. Export snapshots choices and one local timestamp with UTC offset. Isolated metadata hosts occupy normal document flow before/after the prepared body and enter the common measurement/pagination and final-boundary pipeline. Canonical URL encoding preserves Unicode paths without requiring metadata CJK fonts, strips only query/fragment, and remains clickable. Noto Sans and PDF resources are local and licensed.
 - **Popup resource links are explicit and local-first.** Website, support, and GitHub destinations are configured in `src/popup/links.ts` and open only after a user click. `CHROME_WEB_STORE_REVIEW_URL` is intentionally empty until a stable store review URL exists; the visible rating entry remains disabled without navigation or export side effects.
+
+### Compatibility and settings reference retained from the former README
+
+Automatic language follows Chrome's display language (including the OS language when Chrome follows it), with Chrome's regional matching and English fallback. There is no webpage-language detection, location lookup or network translation. All 11 locale catalogs remain available: English, Simplified/Traditional Chinese, German, Italian, Spanish, Brazilian/European Portuguese, French, Japanese and Korean. Preferences save immediately; the settings view may widen for long labels/options and returning home restores the compact 320 px view.
+
+Disabled header/footer reserve no document space; long canonical URLs wrap. The detailed metadata/worker decisions above and dated [verification records](PRE_RELEASE_TEST_PLAN.md) retain the former README's technical claims and their evidence boundaries.
+
+Chrome internal/store/protected pages cannot be accessed. Another debugger or DevTools owning the source tab may conflict with export. Extremely wide pages can exceed Chrome/PDF-viewer limits even at the minimum print scale. Infinite-scroll preparation is bounded by time, iterations and height. Viewport stabilization depends on inspectable styles; cross-origin or script-generated styles can cause differences, missing content or failure. Canvas, WebGL, video, cross-origin frames and site-specific CSS are not guaranteed selectable/vector output. Zhihu feeds capture already-loaded content; supported direct answers retain the main question and target answer, and unsafe identification stops instead of selecting different content. These limits do not imply universal website support.
 
 ## 6. Coding Conventions
 
@@ -176,7 +185,7 @@ npm run test:filename   # Filename encoding and cross-platform safety
 npm run test:export     # Print planning and export behavior
 npm run test:i18n       # Catalog shape, fallback, and localization integrity
 npm run test:popup      # Popup resources, links, review configuration, and layout contracts
-npm run build           # Bundle five browser entry points and copy runtime assets
+npm run build           # Bundle browser entry points and copy runtime assets
 npm run check           # Typecheck + focused tests + build validation
 npm run package         # Clean, test, build, validate, and create the release ZIP
 npm run verify:release  # Validate an existing release artifact
@@ -275,6 +284,13 @@ This section is the default authorization model for future AI-assisted work in t
 - At handoff, summarize changed files, validation, Git status, remaining risks, and the safest next action. Update the handoff log below when the information will help the next session.
 
 ## 16. Handoff Log
+
+### 2026-10-10 — Codex (concise README and development-document migration)
+
+- **Scope/baseline:** documentation only, based on the maintainer's supplied English draft; no runtime, dependency, version, tag, Release or store change. Actual clone `repositories/save-web-as-pdf/` was clean on `fix/pdf-height-settings` at `a30151a`; after fetch, HEAD, origin/main and the remote development branch matched. The synchronized project mirror remains untouched.
+- **Fact check:** manifest/package are 0.5.5, minimum Chrome 120; English control labels and 11 catalogs match the draft. Live GitHub latest-release API confirms public v0.5.5 and its packaged ZIP/checksum. Store records still report no submission and the rating URL remains empty; no authenticated Developer Dashboard evidence is available. The public privacy URL returns HTTP 200; its previously recorded persistent-preferences update remains pending. No new store acceptance is claimed. Contributor wording credits the PR #1 suggestion, not a merge.
+- **Migration:** README follows the supplied structure and uses `releases/latest` with explicit packaged-ZIP installation. `DEVELOPMENT.md` contains development setup/build/checks and runtime constraints; this context retains technical/settings/compatibility details; `PRE_RELEASE_TEST_PLAN.md` retains historical evidence and gains the package acceptance procedure; `RELEASING.md` gains exact packaging commands and artifact requirements while preserving approval, source-backup and English release-note rules. No duplicate uploaded draft or collapsed long development section is added to the homepage.
+- **Validation:** documentation structure, relative links, external destinations, code/manifest/script consistency and documentation-only diff are checked for this task. No build, PDF, installed-browser or OS matrix is rerun; pending manual acceptance remains unchanged. Commit/push these scoped documents to the development branch and main by normal fast-forward to update the GitHub homepage, with no force push.
 
 ### 2026-10-10 — Codex (0.5.5 published with explicit authorization)
 

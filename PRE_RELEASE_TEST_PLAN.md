@@ -136,3 +136,17 @@ Static source or accessibility-tree inspection may support these items but does 
 - Upload the approved ZIP to the draft store item and perform the final store submission.
 
 The repository work may verify that the public policy URL is reachable and that a real current screenshot exists, but it must not mark the Developer Dashboard or store submission complete without maintainer action.
+
+## Packaged-extension acceptance procedure
+
+This procedure was moved from the former README. It records required steps, not a new test result.
+
+1. Build the candidate with `npm run package` under the authorization rules in [RELEASING.md](RELEASING.md), or obtain the identified, already validated test ZIP. Record its version, source commit and checksum.
+2. Copy the same `save-web-as-pdf-vX.X.X.zip` to the target Windows, macOS or Linux computer. Use a clean Windows/macOS system without Node.js or other development tools for the required release-candidate checks; record Linux coverage separately.
+3. Extract the ZIP into an empty folder. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the extracted folder directly containing `manifest.json`.
+4. Exercise full-save and edit-save, Undo/Redo/Restore, cancellation and retry, searchable/selectable text and links, preview, automatic/manual filenames and the actual download dialog. Check short/long PDFs, final-page shortening or safe original fallback, and optional header/footer placement and settings persistence.
+5. Record OS, Chrome version, extension version, observed results and deferred cases. Use the existing scoped test records above; do not repeat already accepted maintainer site lists without a new reason. A successful build or ZIP validation does not count as browser, minimum-version or cross-platform acceptance.
+
+## Documentation audit — 2026-10-10
+
+The README's existing controlled Chrome 120/154, settings, metadata and worker-lifecycle claims are preserved in the dated records above; no new runtime tests were performed for the documentation-only homepage rewrite. GitHub's live latest-release API confirmed published v0.5.5 with `save-web-as-pdf-v0.5.5.zip` (3,108,175 bytes; SHA-256 `04a3bc4235bda48252a184c7d4a3e16527e6a3ca9d6ef5cdab1f969827cfd7e1`). Earlier “test ZIP only/no Release” statements describe their original sessions; later authorized publication is recorded in `PROJECT_CONTEXT.md`. Outstanding original-Wikipedia, Windows/Linux, installed Chrome 120 and manual accessibility acceptance remains outstanding.
