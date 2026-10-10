@@ -285,6 +285,11 @@ This section is the default authorization model for future AI-assisted work in t
 
 ## 16. Handoff Log
 
+### 2026-10-10 — Codex (GitHub automation and safety rules)
+
+- Added the maintainer-supplied GitHub operation/safety section to repository-root `AGENTS.md`, preserving existing instructions and consolidating the overlapping destructive-operation rule. Prefer local Git evidence; avoid redundant polling and unrelated bulk operations; serialize large API mutation batches with at least one second between consecutive requests, honor confirmed rate-limit responses, and never evade limits. Repository deletion, remote branch deletion, force push/history rewriting and permissions/security changes require explicit authorization.
+- Normal editing, tests, task-related commits/pushes/PRs remain available without additional approval or artificial waits. Existing tag/Release/store authorization rules remain in force. Documentation-only change; formatting, supplied-section completeness and scope checked, with no runtime tests required. The synchronized project mirror and references are untouched.
+
 ### 2026-10-10 — Codex (concise README and development-document migration)
 
 - **Scope/baseline:** documentation only, based on the maintainer's supplied English draft; no runtime, dependency, version, tag, Release or store change. Actual clone `repositories/save-web-as-pdf/` was clean on `fix/pdf-height-settings` at `a30151a`; after fetch, HEAD, origin/main and the remote development branch matched. The synchronized project mirror remains untouched.
